@@ -2,16 +2,16 @@
 ## Grupo 6
 
 ## Integrantes
-- Monica Cholango
+- Jose Eduardo Arevalo Sarango
+- Monica Katherine Cholango Collaguazo
+- Byron Fabricio Torres Apolo
 
 ## Descripción
 Análisis de sentiment y patrones en 568k reseñas de alimentos de Amazon
 usando técnicas de NLP y machine learning.
 
 ## Instalación
-```bash
 pip install -r requirements.txt
-```
 
 ## Descarga de datos
 Ver 00_datos_crudos/README.md
