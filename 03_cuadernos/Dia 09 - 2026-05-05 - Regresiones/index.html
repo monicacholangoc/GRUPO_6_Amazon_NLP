@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Día 09 · Regresiones (lineal, polinomial y VIF) — Seminario EDA 2026</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --sidebar-w: 270px; --topbar-h: 50px;
+      --blue: #2980b9; --blue-dark: #2472a4; --blue-light: #e7f2fa;
+      --navy: #232936; --text: #404040; --text-muted: #888;
+      --border: #ddd; --sidebar-bg: #f8f8f8; --bg: #ffffff; --code-bg: #f8f8f8;
+      --font: 'Lato','Helvetica Neue',Arial,sans-serif;
+      --mono: 'SFMono-Regular',Consolas,'Liberation Mono',Menlo,monospace;
+      --radius: 4px;
+      --green: #2f855a; --green-light: #f0fff4;
+      --orange: #c05621; --orange-light: #fffaf0;
+      --purple: #6b46c1; --purple-light: #faf5ff;
+    }
+    html { font-size: 15px; scroll-behavior: smooth; }
+    body { font-family: var(--font); background: var(--bg); color: var(--text); line-height: 1.75; }
+
+    #topbar { position: fixed; top:0; left:0; right:0; height: var(--topbar-h); background: var(--navy); color: #fcfcfc; display:flex; align-items:center; justify-content:space-between; padding: 0 1rem; z-index: 200; }
+    .brand { color: #fff; text-decoration: none; font-size: .95rem; font-weight: 700; display:flex; align-items:center; gap:.4rem; }
+    .brand .sep { opacity: .3; font-weight: 300; }
+    .brand .sub { font-weight: 400; font-size: .8rem; opacity: .75; }
+    .week-chip { font-size: .7rem; font-weight: 700; letter-spacing:.05em; text-transform: uppercase; padding: .18rem .55rem; background: rgba(255,255,255,.15); border-radius: 3px; }
+
+    #layout { display:flex; margin-top: var(--topbar-h); }
+    #sidebar { width: var(--sidebar-w); flex-shrink: 0; background: var(--sidebar-bg); border-right: 1px solid var(--border); position: fixed; top: var(--topbar-h); bottom: 0; overflow-y: auto; padding-bottom: 2rem; font-size: .875rem; }
+    #sidebar::-webkit-scrollbar { width: 4px; }
+    #sidebar::-webkit-scrollbar-thumb { background: #ccc; border-radius: 4px; }
+    .sb-header { padding: .9rem 1rem .4rem; font-size: .7rem; font-weight: 700; letter-spacing: .09em; text-transform: uppercase; color: #aaa; border-bottom: 1px solid var(--border); margin-bottom: .25rem; }
+    .sb-index-link { display:flex; align-items: center; gap:.5rem; padding: .45rem 1rem; color: var(--text); text-decoration: none; }
+    .sb-index-link:hover { background: var(--blue-light); color: var(--blue-dark); }
+    .sb-week { margin-top: .35rem; }
+    .sb-week-hdr { display:flex; align-items: baseline; justify-content: space-between; padding: .5rem 1rem .25rem; }
+    .sb-week-label { font-size: .7rem; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; }
+    .sb-week-sub { font-size: .68rem; color: var(--text-muted); }
+    .sb-week ul { list-style: none; }
+    .sb-item a { display:flex; align-items: baseline; gap: .45rem; padding: .38rem 1rem .38rem 1.35rem; color: #555; text-decoration: none; border-left: 3px solid transparent; line-height: 1.4; }
+    .sb-item a:hover { background: var(--blue-light); color: var(--blue-dark); }
+    .sb-item.active a { border-left-color: var(--blue); background: var(--blue-light); color: var(--blue-dark); font-weight: 700; }
+    .sb-item .dnum { font-size: .7rem; font-weight: 600; min-width: 2.2rem; color: #aaa; flex-shrink: 0; }
+    .sb-item.active .dnum { color: var(--blue); }
+    .sb-item .dtitle { font-size: .83rem; line-height: 1.35; }
+    .sb-badge { margin-left: auto; font-size: .62rem; font-weight: 700; padding: .08rem .3rem; border-radius: 2px; background: #fef9c3; color: #854d0e; flex-shrink: 0; }
+
+    #main { flex: 1; margin-left: var(--sidebar-w); min-width: 0; }
+    .content-wrap { max-width: 920px; margin: 0 auto; padding: 2rem 2.5rem 4rem; }
+
+    .breadcrumb { font-size: .8rem; color: var(--text-muted); margin-bottom: 1.25rem; padding-bottom: .75rem; border-bottom: 1px solid var(--border); }
+    .breadcrumb a { color: var(--blue); text-decoration: none; }
+    .breadcrumb .sep { color: #ccc; margin: 0 .3rem; }
+
+    h1 { font-size: 2rem; font-weight: 700; color: var(--navy); border-bottom: 2px solid var(--navy); padding-bottom: .6rem; margin-bottom: .5rem; line-height: 1.2; letter-spacing: -.02em; }
+    h2 { font-size: 1.35rem; color: var(--navy); border-bottom: 1px solid var(--border); margin: 2.2rem 0 .6rem; padding-bottom: .35rem; }
+    h3 { font-size: 1.1rem; font-weight: 700; margin: 1.5rem 0 .4rem; color: var(--navy); }
+    h4 { font-size: .95rem; font-weight: 700; margin: 1.2rem 0 .3rem; }
+    p, li { margin-bottom: .75rem; }
+    ul, ol { padding-left: 1.5rem; margin-bottom: .75rem; }
+    a { color: var(--blue); }
+    code { background: var(--code-bg); color: #c0392b; padding: .12em .35em; font-family: var(--mono); font-size: .88em; border-radius: 3px; }
+    pre { background: #f6f8fa; border: 1px solid #e1e4e8; border-radius: var(--radius); padding: 1rem; overflow-x: auto; font-family: var(--mono); font-size: .85rem; line-height: 1.55; margin-bottom: 1rem; }
+    pre code { background: none; color: inherit; padding: 0; font-size: inherit; }
+
+    blockquote { border-left: 4px solid var(--blue); background: var(--blue-light); padding: .8rem 1.1rem; margin: 1rem 0; border-radius: 0 var(--radius) var(--radius) 0; }
+    blockquote p:last-child { margin-bottom: 0; }
+
+    .callout { border-radius: var(--radius); padding: 1rem 1.2rem; margin: 1.1rem 0; border-left: 4px solid; }
+    .callout h4 { margin-top: 0; font-size: .95rem; }
+    .callout p:last-child, .callout ul:last-child { margin-bottom: 0; }
+    .callout.tip { background: var(--green-light); border-left-color: var(--green); }
+    .callout.tip h4 { color: var(--green); }
+    .callout.warn { background: var(--orange-light); border-left-color: var(--orange); }
+    .callout.warn h4 { color: var(--orange); }
+    .callout.concept { background: var(--purple-light); border-left-color: var(--purple); }
+    .callout.concept h4 { color: var(--purple); }
+
+    table { width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: .9rem; }
+    th, td { padding: .55rem .8rem; border: 1px solid var(--border); text-align: left; }
+    th { background: #f8f8f8; font-weight: 700; }
+    tr:nth-child(even) td { background: #fafafa; }
+
+    .action-bar { display:flex; align-items:center; gap:.75rem; flex-wrap: wrap; padding: .65rem .9rem; background: #f0f8ff; border: 1px solid #bee3f8; border-radius: var(--radius); margin-bottom: 1.5rem; font-size: .8rem; color: #2c5282; }
+    .action-label { font-weight: 600; }
+    .action-bar img { height: 18px; vertical-align: middle; }
+
+    .formula { background: #fafbfc; border: 1px solid #e1e4e8; border-radius: var(--radius); padding: 1rem 1.2rem; text-align: center; font-family: 'Cambria Math','Latin Modern Math', Georgia, serif; font-size: 1.05rem; margin: 1rem 0; line-height: 1.8; }
+    .formula sub, .formula sup { font-size: .75em; }
+
+    .sim-embed { margin: 1.5rem 0; border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,.05); }
+    .sim-embed-hdr { background: var(--navy); color: #fff; padding: .55rem .9rem; font-size: .85rem; font-weight: 600; display:flex; align-items:center; justify-content: space-between; gap: .5rem; }
+    .sim-embed-hdr a { color: #c2e1f5; font-size: .75rem; }
+    .sim-embed iframe { display: block; width: 100%; border: none; background: #fff; }
+
+    .step-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin: 1.2rem 0; }
+    .step-card { background: #fafbfc; border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem; }
+    .step-card .step-num { display: inline-block; background: var(--blue); color: #fff; width: 1.6rem; height: 1.6rem; line-height: 1.6rem; text-align: center; border-radius: 50%; font-weight: 700; font-size: .85rem; margin-bottom: .4rem; }
+    .step-card h4 { margin: .2rem 0 .35rem; font-size: .92rem; }
+    .step-card p { font-size: .85rem; margin-bottom: 0; line-height: 1.55; }
+
+    .pill { display:inline-block; padding: .15rem .55rem; border-radius: 12px; font-size: .72rem; font-weight: 700; background: #e7f2fa; color: var(--blue-dark); }
+    .pill.green { background: var(--green-light); color: var(--green); }
+    .pill.orange { background: var(--orange-light); color: var(--orange); }
+
+    .toc { background: #fafbfc; border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem 1.2rem; margin: 1.25rem 0; }
+    .toc h4 { margin: 0 0 .4rem; font-size: .85rem; text-transform: uppercase; letter-spacing: .05em; color: var(--text-muted); }
+    .toc ol { margin: 0; padding-left: 1.3rem; font-size: .9rem; }
+    .toc ol li { margin-bottom: .25rem; }
+
+    @media (max-width: 880px) {
+      #sidebar { transform: translateX(-100%); transition: transform .2s; }
+      #sidebar.open { transform: none; }
+      #main { margin-left: 0; }
+    }
+  </style>
+</head>
+<body>
+
+<header id="topbar">
+  <a href="../index.html" class="brand">🐍 Seminario EDA <span class="sep">·</span> <span class="sub">2026</span></a>
+  <span class="week-chip">Semana 3 · Día 09</span>
+</header>
+
+<div id="layout">
+  <nav id="sidebar">
+    <div class="sb-header">Curso</div>
+    <a class="sb-index-link" href="../index.html">📋 Presentación del curso</a>
+
+    <div class="sb-week"><div class="sb-week-hdr"><span class="sb-week-label">Semana 1</span><span class="sb-week-sub">21–24 abr</span></div><ul>
+      <li class="sb-item"><a href="../Dia%2001%20-%202026-04-21%20-%20Kick-off%20del%20seminario/index.html"><span class="dnum">Día 01</span><span class="dtitle">Kick-off</span></a></li>
+      <li class="sb-item"><a href="../Dia%2002%20-%202026-04-22%20-%20Fundamentos%20de%20Python%20I/index.html"><span class="dnum">Día 02</span><span class="dtitle">Python I</span></a></li>
+      <li class="sb-item"><a href="../Dia%2003%20-%202026-04-23%20-%20Fundamentos%20de%20Python%20II/index.html"><span class="dnum">Día 03</span><span class="dtitle">Python II</span></a></li>
+      <li class="sb-item"><a href="../Dia%2004%20-%202026-04-24%20-%20Planteamiento%20del%20proyecto/index.html"><span class="dnum">Día 04</span><span class="dtitle">Proyecto</span><span class="sb-badge">S1</span></a></li>
+    </ul></div>
+    <div class="sb-week"><div class="sb-week-hdr"><span class="sb-week-label">Semana 2</span><span class="sb-week-sub">27–29 abr</span></div><ul>
+      <li class="sb-item"><a href="../Dia%2005%20-%202026-04-27%20-%20OOP/index.html"><span class="dnum">Día 05</span><span class="dtitle">OOP</span></a></li>
+      <li class="sb-item"><a href="../Dia%2006%20-%202026-04-28%20-%20Pandas%20I/index.html"><span class="dnum">Día 06</span><span class="dtitle">Pandas I</span></a></li>
+      <li class="sb-item"><a href="../Dia%2007%20-%202026-04-29%20-%20Pandas%20II/index.html"><span class="dnum">Día 07</span><span class="dtitle">Pandas II</span><span class="sb-badge">S2</span></a></li>
+    </ul></div>
+    <div class="sb-week"><div class="sb-week-hdr"><span class="sb-week-label">Semana 3</span><span class="sb-week-sub">4–8 may</span></div><ul>
+      <li class="sb-item"><a href="../Dia%2008%20-%202026-05-04%20-%20Visualizaciones/index.html"><span class="dnum">Día 08</span><span class="dtitle">Visualizaciones</span></a></li>
+      <li class="sb-item active"><a href="./index.html"><span class="dnum">Día 09</span><span class="dtitle">Regresiones</span></a></li>
+      <li class="sb-item"><a href="../Dia%2010%20-%202026-05-06%20-%20Regresi%C3%B3n%20Log%C3%ADstica/index.html"><span class="dnum">Día 10</span><span class="dtitle">Reg. logística</span></a></li>
+      <li class="sb-item"><a href="../Dia%2011%20-%202026-05-07%20-%20%C3%81rbol%20de%20Decisi%C3%B3n/index.html"><span class="dnum">Día 11</span><span class="dtitle">Árbol decisión</span></a></li>
+      <li class="sb-item"><a href="../Dia%2012%20-%202026-05-08%20-%20M%C3%A9tricas%20-%20ENTREGA%20SEMANA%203/index.html"><span class="dnum">Día 12</span><span class="dtitle">Métricas</span><span class="sb-badge">S3</span></a></li>
+    </ul></div>
+    <div class="sb-week"><div class="sb-week-hdr"><span class="sb-week-label">Semana 4</span><span class="sb-week-sub">11–15 may</span></div><ul>
+      <li class="sb-item"><a href="../Dia%2013%20-%202026-05-11%20-%20Ensembles%20y%20Random%20Forest/index.html"><span class="dnum">Día 13</span><span class="dtitle">Ensembles / RF</span></a></li>
+      <li class="sb-item"><a href="../Dia%2014%20-%202026-05-12%20-%20Hip%C3%B3tesis%20y%20pruebas%20estad%C3%ADsticas/index.html"><span class="dnum">Día 14</span><span class="dtitle">Hipótesis</span></a></li>
+      <li class="sb-item"><a href="../Dia%2015%20-%202026-05-13%20-%20Dashboards%20con%20Streamlit/index.html"><span class="dnum">Día 15</span><span class="dtitle">Streamlit</span></a></li>
+      <li class="sb-item"><a href="../Dia%2016%20-%202026-05-14%20-%20APIs%20con%20FastAPI%20y%20buenas%20pr%C3%A1cticas/index.html"><span class="dnum">Día 16</span><span class="dtitle">FastAPI</span></a></li>
+      <li class="sb-item"><a href="../Dia%2017%20-%202026-05-15%20-%20Presentaciones%20finales/index.html"><span class="dnum">Día 17</span><span class="dtitle">Defensa</span><span class="sb-badge">FINAL</span></a></li>
+    </ul></div>
+  </nav>
+
+  <main id="main">
+    <div class="content-wrap">
+
+      <div class="breadcrumb">
+        <a href="../index.html">Seminario EDA 2026</a><span class="sep">›</span>
+        <a href="../index.html#sesiones">Semana 3</a><span class="sep">›</span>
+        <span>Día 09 · Regresiones</span>
+      </div>
+
+      <h1>Día 09 · Regresión lineal, polinomial y multicolinealidad (VIF)</h1>
+      <p style="color:#666; margin-top:.4rem">
+        <strong>Fecha:</strong> Martes 5 de mayo de 2026 &nbsp;·&nbsp;
+        <strong>Duración:</strong> 2 h sincrónicas + 1 h trabajo guiado &nbsp;·&nbsp;
+        <span class="pill">Módulo 3</span>
+      </p>
+
+      <div class="action-bar">
+        <span class="action-label">📓 Notebook:</span>
+        <a href="./clase_09.ipynb">clase_09.ipynb</a>
+        <span style="color:#94a3b8">·</span>
+        <a href="https://colab.research.google.com/github/we-human-centric/CursoPythonDatos_2026/blob/main/Dia%2009%20-%202026-05-05%20-%20Regresiones/clase_09.ipynb"><img alt="Colab" src="https://colab.research.google.com/assets/colab-badge.svg" /></a>
+        <span style="color:#94a3b8">·</span>
+        <span class="action-label">🎮 Simuladores:</span>
+        <a href="../simuladores/simulador-regresion-lineal.html">Lineal simple</a>
+        <span style="color:#94a3b8">·</span>
+        <a href="../simuladores/simulador-regresion-3D-advertising.html">Múltiple 3D</a>
+        <span style="color:#94a3b8">·</span>
+        <a href="../simuladores/simulador-vif.html">VIF</a>
+      </div>
+
+      <div class="toc">
+        <h4>En esta clase</h4>
+        <ol>
+          <li>¿Por qué regresión? — del EDA al primer modelo predictivo.</li>
+          <li>Regresión lineal simple: intuición geométrica y mínimos cuadrados (OLS).</li>
+          <li>Ejercicio guiado: predecir ventas a partir de inversión en TV.</li>
+          <li>Regresión lineal múltiple — dataset Advertising (TV + Radio + Newspaper → Sales).</li>
+          <li>Ajuste polinomial: cuándo es útil y cuándo es trampa (overfitting).</li>
+          <li>Multicolinealidad y el factor VIF.</li>
+          <li>Diagnóstico de residuales y supuestos del OLS.</li>
+          <li>Cierre, ejercicios y entregable parcial para Semana 3.</li>
+        </ol>
+      </div>
+
+      <h2>1. ¿Por qué regresión? Del EDA al primer modelo</h2>
+      <p>
+        Hasta el día anterior, el equipo describía datos: medias, distribuciones, correlaciones, gráficos. Eso responde
+        <em>«¿qué hay en los datos?»</em>. Hoy damos el siguiente salto: <strong>predecir un valor numérico</strong> a partir de
+        otras variables. Ese es el problema que resuelve la <strong>regresión</strong>.
+      </p>
+
+      <p>
+        Una regresión es, en una sola idea, una <strong>función matemática que aprende de los datos</strong>: a partir de pares
+        <em>(entrada, salida observada)</em> el modelo ajusta parámetros para producir una salida estimada lo más parecida posible
+        a la observada. Cuando esa función es una recta (o un plano, o un hiperplano), hablamos de
+        <strong>regresión lineal</strong>; el caso más simple, más interpretable y casi siempre el primer modelo que se prueba en
+        un problema con variable objetivo continua.
+      </p>
+
+      <div class="callout concept">
+        <h4>📌 Idea central</h4>
+        <p>
+          Una regresión <strong>no «explica»</strong> el fenómeno por sí sola: <em>aprende relaciones</em>. La interpretación
+          (causa, dirección, mecanismo) la pone el analista — apoyado en el EDA, el contexto y, si toca, en pruebas estadísticas.
+          Una buena regresión sin contexto es un buen oráculo del que nadie debería fiarse demasiado.
+        </p>
+      </div>
+
+      <h2>2. Regresión lineal simple — la geometría detrás</h2>
+
+      <p>Cuando solo hay una variable predictora <em>x</em> y una respuesta <em>y</em>, el modelo es una recta:</p>
+
+      <div class="formula">ŷ = β<sub>0</sub> + β<sub>1</sub>·x</div>
+
+      <p>
+        <strong>β<sub>0</sub></strong> es la intersección con el eje vertical (<em>intercept</em>): cuánto vale ŷ cuando x = 0.
+        <strong>β<sub>1</sub></strong> es la pendiente: cuánto cambia ŷ cuando x sube en 1 unidad. <em>ŷ</em> (con sombrero) es la
+        predicción del modelo; el valor real <em>y</em> casi nunca coincide exactamente con ŷ — la diferencia se llama
+        <strong>residuo</strong>:
+      </p>
+
+      <div class="formula">e<sub>i</sub> = y<sub>i</sub> − ŷ<sub>i</sub></div>
+
+      <h3>2.1 Mínimos cuadrados (OLS): qué optimizamos exactamente</h3>
+      <p>
+        Hay infinitas rectas que se pueden trazar entre los puntos. ¿Cómo elegir la «mejor»? El método clásico es
+        <strong>mínimos cuadrados ordinarios</strong> (OLS, <em>Ordinary Least Squares</em>): se eligen β<sub>0</sub> y β<sub>1</sub>
+        que minimizan la <strong>suma de residuos al cuadrado</strong>:
+      </p>
+
+      <div class="formula">SSR = Σ (y<sub>i</sub> − ŷ<sub>i</sub>)<sup>2</sup> &nbsp;⟶&nbsp; mín</div>
+
+      <p>
+        ¿Por qué al cuadrado? Tres razones prácticas: (1) elimina el signo (errores positivos y negativos no se cancelan),
+        (2) penaliza más fuerte los errores grandes, (3) tiene una solución cerrada en álgebra lineal — el modelo se calcula
+        con una fórmula directa, sin iterar.
+      </p>
+
+      <div class="callout tip">
+        <h4>💡 Intuición visual</h4>
+        <p>
+          Imagina que cada punto del scatter «tira» de la recta hacia sí mismo con un resorte vertical. La recta de OLS es la
+          que llega al equilibrio: la suma de la <em>energía</em> (longitud<sup>2</sup>) de todos los resortes es mínima. Esa es la
+          razón por la que un solo punto muy alejado (outlier) puede mover bastante la recta — su «resorte» es muy largo.
+        </p>
+      </div>
+
+      <h3>2.2 Simulador interactivo — Lineal simple</h3>
+      <p>
+        Antes de programar, juguemos con la geometría. En el simulador puedes mover la pendiente y la intersección y ver
+        cómo cambia la suma de errores cuadrados. Tu objetivo: encontrar a mano la recta de OLS y comparar tu intuición con
+        el resultado matemático.
+      </p>
+
+      <div class="sim-embed">
+        <div class="sim-embed-hdr">
+          <span>🎮 Simulador · Regresión lineal simple — ajuste interactivo de OLS</span>
+          <a href="../simuladores/simulador-regresion-lineal.html" target="_blank">Abrir en pestaña ↗</a>
+        </div>
+        <iframe src="../simuladores/simulador-regresion-lineal.html" height="640" loading="lazy" title="Simulador Regresión Lineal Simple"></iframe>
+      </div>
+
+      <h2>3. Ejercicio guiado — predecir Sales a partir de TV</h2>
+
+      <p>
+        Trabajaremos con el clásico dataset <strong>Advertising</strong> (Hastie, Tibshirani &amp; James). Tiene 200 filas y 4 columnas:
+        inversión publicitaria semanal en TV, Radio y Newspaper (en miles de USD) y las ventas resultantes (en miles de unidades).
+      </p>
+
+      <table>
+        <thead><tr><th>TV</th><th>Radio</th><th>Newspaper</th><th>Sales</th></tr></thead>
+        <tbody>
+          <tr><td>230.1</td><td>37.8</td><td>69.2</td><td>22.1</td></tr>
+          <tr><td>44.5</td><td>39.3</td><td>45.1</td><td>10.4</td></tr>
+          <tr><td>17.2</td><td>45.9</td><td>69.3</td><td>9.3</td></tr>
+          <tr><td>151.5</td><td>41.3</td><td>58.5</td><td>18.5</td></tr>
+        </tbody>
+      </table>
+
+      <p>Empezamos con un solo predictor — <code>TV</code> — y graficamos:</p>
+
+<pre><code>import pandas as pd
+import matplotlib.pyplot as plt
+from sklearn.linear_model import LinearRegression
+import numpy as np
+
+# Carga el dataset (en el notebook viene la URL exacta)
+df = pd.read_csv("https://raw.githubusercontent.com/justmarkham/scikit-learn-videos/master/data/Advertising.csv", index_col=0)
+
+X = df[["TV"]].values            # ⚠️ scikit-learn pide 2D
+y = df["Sales"].values
+
+modelo = LinearRegression().fit(X, y)
+print(f"β0 (intercept) = {modelo.intercept_:.3f}")
+print(f"β1 (pendiente) = {modelo.coef_[0]:.3f}")
+print(f"R² = {modelo.score(X, y):.3f}")
+
+# Recta ajustada
+xs = np.linspace(X.min(), X.max(), 100).reshape(-1, 1)
+ys = modelo.predict(xs)
+
+plt.scatter(X, y, alpha=.6, label="Datos reales")
+plt.plot(xs, ys, color="crimson", lw=2,
+         label=f"OLS: y = {modelo.intercept_:.2f} + {modelo.coef_[0]:.3f}·TV")
+plt.xlabel("Inversión en TV (miles USD)")
+plt.ylabel("Sales (miles unidades)")
+plt.legend(); plt.title("Regresión lineal simple — Advertising"); plt.show()</code></pre>
+
+      <div class="callout tip">
+        <h4>🎯 Lectura de los coeficientes</h4>
+        <p>
+          β<sub>0</sub> ≈ 7.03 significa que con cero inversión en TV se esperan ~7,030 unidades vendidas (línea base de
+          ventas orgánicas). β<sub>1</sub> ≈ 0.0475 dice que <strong>cada $1,000 USD adicional invertidos en TV se asocia
+          con +47.5 unidades vendidas</strong>. R² ≈ 0.61 indica que TV por sí sola explica el 61% de la varianza en Sales —
+          razonable para un solo predictor, pero hay 39% sin explicar. ¿Vamos a por más variables?
+        </p>
+      </div>
+
+      <h3>3.1 Reto en clase (15 min)</h3>
+      <ol>
+        <li>Replica el código y verifica las cifras.</li>
+        <li>Ahora con <code>X = df[["Radio"]]</code> — ¿qué β<sub>1</sub> y R² obtienes?</li>
+        <li>Dibuja ambos modelos (TV y Radio) en un mismo grid de 2 columnas.</li>
+        <li>Pregunta de discusión: si pudieras invertir 1,000 USD adicionales en un solo canal, ¿en cuál?
+            <span class="pill orange">⚠️ ojo: 1 var no basta para decidir — esto motiva el siguiente paso</span></li>
+      </ol>
+
+      <h2>4. Regresión lineal múltiple — varios predictores a la vez</h2>
+
+      <p>Cuando tenemos <em>p</em> predictores, el modelo se generaliza naturalmente:</p>
+
+      <div class="formula">
+        ŷ = β<sub>0</sub> + β<sub>1</sub>·x<sub>1</sub> + β<sub>2</sub>·x<sub>2</sub> + … + β<sub>p</sub>·x<sub>p</sub>
+      </div>
+
+      <p>
+        Cada coeficiente β<sub>j</sub> se lee como <em>«el efecto de un cambio unitario en x<sub>j</sub> sobre ŷ, manteniendo
+        constantes el resto de las variables»</em>. Esa cláusula <em>«manteniendo constantes»</em> es enorme: introduce el
+        problema que veremos en la sección 6 (multicolinealidad).
+      </p>
+
+      <h3>4.1 Simulador 3D — viendo el plano de regresión</h3>
+      <p>
+        Con 2 predictores (TV y Radio) la solución de OLS deja de ser una recta y pasa a ser un <strong>plano</strong> en 3D.
+        El simulador siguiente lo muestra en vivo sobre el dataset Advertising: arrastra la escena con el mouse, activa
+        residuos, mueve los sliders.
+      </p>
+
+      <div class="sim-embed">
+        <div class="sim-embed-hdr">
+          <span>🎮 Simulador 3D · Regresión múltiple sobre Advertising — TV + Radio → Sales</span>
+          <a href="../simuladores/simulador-regresion-3D-advertising.html" target="_blank">Abrir en pestaña ↗</a>
+        </div>
+        <iframe src="../simuladores/simulador-regresion-3D-advertising.html" height="700" loading="lazy" title="Simulador Regresión Múltiple 3D"></iframe>
+      </div>
+
+      <h3>4.2 Ajuste con scikit-learn (3 predictores)</h3>
+
+<pre><code>X = df[["TV", "Radio", "Newspaper"]].values
+y = df["Sales"].values
+
+modelo = LinearRegression().fit(X, y)
+for nombre, beta in zip(["TV","Radio","Newspaper"], modelo.coef_):
+    print(f"β_{nombre:&lt;10s} = {beta:+.4f}")
+print(f"\nIntercept β0 = {modelo.intercept_:.3f}")
+print(f"R² = {modelo.score(X, y):.3f}")</code></pre>
+
+      <p>
+        Resultado típico: <code>β_TV ≈ +0.046</code>, <code>β_Radio ≈ +0.189</code>, <code>β_Newspaper ≈ −0.001</code>,
+        R² ≈ 0.897. La sorpresa: <strong>el coeficiente de Newspaper es prácticamente cero</strong> — y eso ya empieza a
+        contradecir lo que veíamos cuando solo mirábamos Newspaper. Volveremos sobre esto en la sección 6.
+      </p>
+
+      <div class="callout warn">
+        <h4>⚠️ R² siempre sube cuando añades variables</h4>
+        <p>
+          Aunque añadas una columna de ruido aleatorio, R² nunca baja. Por eso reportamos también R² ajustado
+          (<code>statsmodels.OLS</code> lo da automático) y, sobre todo, R² medido en datos que el modelo no vio
+          — el famoso <em>train/test split</em> que ya practicaste.
+        </p>
+      </div>
+
+      <h2>5. Ajuste polinomial — cuando la línea recta no alcanza</h2>
+
+      <p>
+        A veces la relación entre <em>x</em> e <em>y</em> es claramente curva. Forzar una recta deja un patrón sistemático
+        en los residuos (señal de que se está perdiendo información). La solución más simple: añadir potencias de la variable.
+        Eso sigue siendo una <strong>regresión lineal</strong> en los coeficientes — solo que sobre features transformadas:
+      </p>
+
+      <div class="formula">
+        ŷ = β<sub>0</sub> + β<sub>1</sub>·x + β<sub>2</sub>·x<sup>2</sup> + … + β<sub>d</sub>·x<sup>d</sup>
+      </div>
+
+      <h3>5.1 Cuándo es razonable y cuándo es trampa</h3>
+
+      <div class="step-grid">
+        <div class="step-card">
+          <span class="step-num">1</span>
+          <h4>Razonable</h4>
+          <p>Hay teoría/dominio que justifica curvatura: rendimientos decrecientes (log o √), crecimiento exponencial
+            saturado, U-shape (curva de Phillips, Laffer, etc.). El grado se elige bajo (2 o 3).</p>
+        </div>
+        <div class="step-card">
+          <span class="step-num">2</span>
+          <h4>Sospechoso</h4>
+          <p>Subes el grado «hasta que mejore el R²». Cada grado nuevo añade flexibilidad sin justificación. Empiezas
+            a memorizar el ruido.</p>
+        </div>
+        <div class="step-card">
+          <span class="step-num">3</span>
+          <h4>Trampa pura</h4>
+          <p>Polinomio de grado ≥ 5 sin validación cruzada y con pocos puntos. Métricas en train espectaculares,
+            métricas en test desastrosas. Esto es overfitting.</p>
+        </div>
+      </div>
+
+      <h3>5.2 Ejemplo guiado — relación TV → Sales con curvatura</h3>
+      <p>
+        Si miras con cuidado el scatter TV vs Sales del dataset Advertising, hay un leve aplanamiento en valores altos de TV
+        (rendimientos decrecientes — saturación del canal). Probemos un grado 2:
+      </p>
+
+<pre><code>from sklearn.preprocessing import PolynomialFeatures
+from sklearn.pipeline import make_pipeline
+from sklearn.model_selection import cross_val_score
+
+X = df[["TV"]].values
+y = df["Sales"].values
+
+# Pipeline: features polinómicas + regresión lineal
+modelos = {
+    "Lineal (d=1)":    make_pipeline(PolynomialFeatures(1, include_bias=False), LinearRegression()),
+    "Cuadrático (d=2)":make_pipeline(PolynomialFeatures(2, include_bias=False), LinearRegression()),
+    "Cúbico (d=3)":    make_pipeline(PolynomialFeatures(3, include_bias=False), LinearRegression()),
+    "Grado 10 (¡ojo!)":make_pipeline(PolynomialFeatures(10, include_bias=False), LinearRegression()),
+}
+
+print(f"{'Modelo':&lt;22s} {'R² train':&gt;10s}  {'R² CV (5-fold)':&gt;15s}")
+print("-" * 55)
+for nombre, m in modelos.items():
+    m.fit(X, y)
+    r2_train = m.score(X, y)
+    r2_cv = cross_val_score(m, X, y, cv=5, scoring="r2").mean()
+    print(f"{nombre:&lt;22s} {r2_train:&gt;10.4f}  {r2_cv:&gt;15.4f}")</code></pre>
+
+      <p>El patrón típico que verás:</p>
+
+      <table>
+        <thead><tr><th>Modelo</th><th>R² train</th><th>R² CV (test)</th><th>Interpretación</th></tr></thead>
+        <tbody>
+          <tr><td>Lineal (d=1)</td><td>0.612</td><td>0.594</td><td>Subajuste leve, robusto</td></tr>
+          <tr><td>Cuadrático (d=2)</td><td>0.625</td><td>0.604</td><td><span class="pill green">Mejor balance</span></td></tr>
+          <tr><td>Cúbico (d=3)</td><td>0.626</td><td>0.598</td><td>Mejora marginal en train</td></tr>
+          <tr><td>Grado 10</td><td>0.643</td><td><strong>−0.12</strong></td><td><span class="pill orange">Overfit puro</span></td></tr>
+        </tbody>
+      </table>
+
+      <div class="callout warn">
+        <h4>📉 Overfitting en una imagen</h4>
+        <p>
+          Cuando R² en train sube y R² en validación cruzada baja al mismo tiempo, la complejidad ya no aporta señal: solo memoriza ruido.
+          El simulador <a href="../simuladores/simulador-overfitting.html">simulador-overfitting</a> visualiza este fenómeno con un slider de grado polinomial.
+        </p>
+      </div>
+
+      <h2>6. Multicolinealidad y el factor VIF</h2>
+
+      <p>
+        Volvamos al modelo múltiple <code>Sales ~ TV + Radio + Newspaper</code>. Vimos que el coeficiente de
+        <code>Newspaper</code> en ese modelo es ≈ 0, pero si entrenamos un modelo con <strong>solo</strong> Newspaper,
+        el coeficiente sale positivo y «significativo» (p &lt; 0.001). ¿Cómo es posible?
+      </p>
+
+      <p>
+        La respuesta es <strong>multicolinealidad</strong>: dos o más predictores comparten información (están correlacionados
+        entre sí). Cuando agregamos Radio al modelo, Radio «explica» casi todo lo que Newspaper aportaba — porque las
+        empresas que invierten en Radio también suelen invertir en periódicos. Newspaper deja de aportar valor único.
+      </p>
+
+      <h3>6.1 Síntomas que delatan multicolinealidad</h3>
+      <ul>
+        <li>Coeficientes que <strong>cambian de magnitud o signo</strong> al añadir/quitar variables.</li>
+        <li>Coeficientes con <strong>errores estándar muy grandes</strong> (intervalos de confianza enormes).</li>
+        <li>R² del modelo es alto pero <strong>casi ningún coeficiente es significativo</strong> individualmente.</li>
+        <li>Predictores con <strong>correlaciones altas</strong> en la matriz <code>df.corr()</code> (|r| &gt; 0.7 ya es alerta).</li>
+      </ul>
+
+      <h3>6.2 El VIF — Factor de Inflación de la Varianza</h3>
+
+      <p>La métrica formal para detectar multicolinealidad es el <strong>VIF</strong>. Para el predictor <em>j</em>:</p>
+
+      <div class="formula">VIF<sub>j</sub> = 1 / (1 − R<sub>j</sub><sup>2</sup>)</div>
+
+      <p>
+        Donde R<sub>j</sub><sup>2</sup> es el coeficiente de determinación de regresar <em>x<sub>j</sub></em> contra el resto
+        de los predictores. Lectura:
+      </p>
+
+      <table>
+        <thead><tr><th>VIF</th><th>Interpretación</th><th>Acción</th></tr></thead>
+        <tbody>
+          <tr><td>≈ 1</td><td>No hay correlación con el resto</td><td>OK, conservar</td></tr>
+          <tr><td>1 – 5</td><td>Correlación moderada</td><td>Vigilar; en general aceptable</td></tr>
+          <tr><td>5 – 10</td><td>Correlación alta</td><td>Investigar — el coeficiente puede ser inestable</td></tr>
+          <tr><td>&gt; 10</td><td>Multicolinealidad severa</td><td>Eliminar la variable, combinarla, o usar Ridge/Lasso</td></tr>
+        </tbody>
+      </table>
+
+      <h3>6.3 Cálculo en Python</h3>
+
+<pre><code>from statsmodels.stats.outliers_influence import variance_inflation_factor
+from statsmodels.tools.tools import add_constant
+
+X = df[["TV", "Radio", "Newspaper"]]
+X_const = add_constant(X)   # statsmodels exige columna de unos
+
+vif = pd.DataFrame({
+    "variable": X_const.columns,
+    "VIF": [variance_inflation_factor(X_const.values, i) for i in range(X_const.shape[1])]
+})
+print(vif)</code></pre>
+
+      <p>
+        En Advertising los VIF son bajos (≈ 1.0–1.2), así que el problema con Newspaper no es VIF — es que
+        <strong>realmente</strong> aporta poco al modelo. La lección importante es <em>el procedimiento</em>: en datasets reales,
+        revisar VIF antes de fiarse de los coeficientes es obligatorio.
+      </p>
+
+      <h3>6.4 Simulador VIF — manipula la correlación y observa el VIF</h3>
+
+      <div class="sim-embed">
+        <div class="sim-embed-hdr">
+          <span>🎮 Simulador · VIF y multicolinealidad — explora cómo aumenta el VIF con la correlación</span>
+          <a href="../simuladores/simulador-vif.html" target="_blank">Abrir en pestaña ↗</a>
+        </div>
+        <iframe src="../simuladores/simulador-vif.html" height="640" loading="lazy" title="Simulador VIF"></iframe>
+      </div>
+
+      <h2>7. Diagnóstico — los 4 supuestos del OLS</h2>
+
+      <p>Que el modelo <em>compile</em> no significa que sea válido. OLS asume:</p>
+
+      <div class="step-grid">
+        <div class="step-card">
+          <span class="step-num">L</span>
+          <h4>Linealidad</h4>
+          <p>La relación entre cada x y la y es lineal. Diagnóstico: gráfico de residuos vs ajustados — si hay forma
+            curva, te falta un término polinomial o una transformación log.</p>
+        </div>
+        <div class="step-card">
+          <span class="step-num">I</span>
+          <h4>Independencia</h4>
+          <p>Los residuos no están correlacionados entre sí. Importante en series de tiempo (Durbin-Watson lo mide).</p>
+        </div>
+        <div class="step-card">
+          <span class="step-num">N</span>
+          <h4>Normalidad de residuos</h4>
+          <p>Los residuos son aprox. normales. Diagnóstico: Q-Q plot. No afecta la predicción puntual, sí los intervalos
+            de confianza.</p>
+        </div>
+        <div class="step-card">
+          <span class="step-num">E</span>
+          <h4>Homocedasticidad</h4>
+          <p>La varianza de los residuos es constante. Si crece con ŷ (forma de embudo en residuos vs ajustados), hay
+            heterocedasticidad — los errores estándar están mal calculados.</p>
+        </div>
+      </div>
+
+      <p>
+        En el notebook ejecutamos los 4 diagnósticos sobre el modelo de Advertising. Spoiler: el supuesto de linealidad es el
+        que más cojea — exactamente la justificación pedagógica del término polinomial.
+      </p>
+
+      <h2>8. Cierre y entregable parcial</h2>
+
+      <h3>8.1 Lo que llevamos a la siguiente clase</h3>
+      <ul>
+        <li>La regresión lineal es la <strong>línea base</strong> obligatoria de cualquier problema con variable objetivo continua.</li>
+        <li>R² alto en train no es el éxito: lo es R² estable en validación cruzada.</li>
+        <li>Los coeficientes individuales solo son interpretables si la multicolinealidad está controlada (VIF).</li>
+        <li>Las relaciones no lineales se pueden capturar con polinomios — pero el grado se elige por validación cruzada,
+            no por ojo.</li>
+      </ul>
+
+      <h3>8.2 Entregable parcial Semana 3 (avance — completo cae el viernes)</h3>
+      <ol>
+        <li>En el notebook del proyecto, ajusta <strong>una regresión lineal simple</strong> sobre tu dataset usando un
+            predictor numérico relevante. Reporta β<sub>0</sub>, β<sub>1</sub>, R² y un scatter con la recta.</li>
+        <li>Ajusta una <strong>regresión múltiple</strong> con al menos 3 predictores. Calcula <strong>VIF</strong> de cada
+            uno e interpreta.</li>
+        <li>Si tu dataset tiene una relación claramente curva entre algún predictor y la objetivo, ajusta también una
+            polinomial de grado 2 o 3 y compara R² en CV.</li>
+        <li>Escribe 4–5 líneas de interpretación de negocio para los coeficientes. <em>«Si subo X en una unidad, esperaría
+            que Y…»</em>.</li>
+      </ol>
+
+      <h3>8.3 Lecturas de cierre</h3>
+      <ul>
+        <li><a href="./lecturas/tecnico-1-guía-para-principiantes-regresión-lineal-en-python-con-scikit-learn.md">Guía técnica · regresión lineal en scikit-learn</a></li>
+        <li><a href="./lecturas/tecnico-2-regularización-ridge-lasso-y-elastic-net-con-python.md">Regularización: Ridge, Lasso y Elastic Net</a></li>
+        <li><a href="./lecturas/negocios-1-análisis-de-datos-correlación-vs-causalidad.md">Negocio · correlación vs causalidad</a></li>
+        <li><a href="./lecturas/negocios-2-los-peligros-de-confundir-correlación-con-causalidad.md">Negocio · confundir correlación con causalidad</a></li>
+      </ul>
+
+      <blockquote>
+        <p>
+          <em>«Todos los modelos están equivocados. Algunos son útiles.»</em> — George E. P. Box.<br>
+          La regresión lineal es <em>el</em> ejemplo canónico: nunca describe perfectamente el mundo, pero casi siempre
+          rinde más de lo que sugiere su simpleza. Hoy plantamos esa primera bandera.
+        </p>
+      </blockquote>
+
+    </div>
+  </main>
+</div>
+</body>
+</html>

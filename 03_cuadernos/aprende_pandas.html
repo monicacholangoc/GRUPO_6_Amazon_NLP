@@ -1,0 +1,1722 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aprende Pandas · Simulador Interactivo</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,600;1,400&family=Lora:wght@600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/python/python.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/closebrackets.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.js"></script>
+
+<style>
+:root {
+  --bg: #F8F8F3;
+  --surface: #FFFFFF;
+  --surface-2: #F1F1EB;
+  --border: #E2E2DA;
+  --text: #1A2332;
+  --soft: #5A6678;
+  --softer: #9BA8B8;
+  --accent: #1B4FD8;
+  --accent-bg: #EEF2FF;
+  --green: #0A7C4A;
+  --green-bg: #ECFDF5;
+  --red: #B91C1C;
+  --red-bg: #FEF2F2;
+  --amber: #92400E;
+  --amber-bg: #FFFBEB;
+  --amber-border: #F59E0B;
+  --mono: 'IBM Plex Mono', monospace;
+  --sans: 'DM Sans', sans-serif;
+  --serif: 'Lora', serif;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; font-family: var(--sans); background: var(--bg); color: var(--text); font-size: 14px; line-height: 1.6; }
+
+/* ─── LOADING ─── */
+#loading-screen {
+  position: fixed; inset: 0; background: #0F1B2D;
+  display: flex; align-items: center; justify-content: center;
+  z-index: 1000; flex-direction: column;
+}
+.loading-inner { text-align: center; color: white; max-width: 400px; padding: 2rem; }
+.load-panda { font-size: 4rem; margin-bottom: 1rem; animation: bob 2s ease-in-out infinite; }
+@keyframes bob { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-12px)} }
+.loading-inner h1 { font-family: var(--serif); font-size: 2rem; margin-bottom: 0.4rem; }
+#load-status { font-family: var(--mono); font-size: 0.75rem; color: rgba(255,255,255,0.6); margin-bottom: 1rem; min-height: 1.2em; }
+.load-bar-outer { width: 100%; height: 4px; background: rgba(255,255,255,0.12); border-radius: 2px; overflow: hidden; margin-bottom: 1rem; }
+.load-bar-inner { height: 100%; background: #4F83F8; border-radius: 2px; transition: width 0.6s ease; width: 0%; }
+.load-note { font-size: 0.78rem; color: rgba(255,255,255,0.35); line-height: 1.6; }
+
+/* ─── APP ─── */
+#app { display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+
+/* ─── NAV ─── */
+#top-nav {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 1.25rem; height: 50px;
+  background: var(--surface); border-bottom: 1px solid var(--border);
+  flex-shrink: 0; gap: 1rem;
+}
+.nav-logo { font-family: var(--serif); font-size: 1rem; font-weight: 700; white-space: nowrap; flex-shrink: 0; }
+.nav-logo em { color: var(--accent); font-style: normal; }
+.nav-pills { display: flex; gap: 5px; flex: 1; justify-content: center; flex-wrap: wrap; }
+.nav-pill {
+  height: 6px; width: 26px; border-radius: 3px;
+  background: var(--border); cursor: pointer;
+  transition: background 0.2s, transform 0.15s;
+  border: none; padding: 0;
+}
+.nav-pill:hover { transform: scaleY(1.6); }
+.nav-pill.active { background: var(--accent); }
+.nav-pill.done { background: var(--green); }
+.nav-meta { font-size: 0.72rem; color: var(--softer); white-space: nowrap; flex-shrink: 0; font-family: var(--mono); }
+
+/* ─── MAIN LAYOUT ─── */
+.main-layout { display: flex; flex: 1; overflow: hidden; }
+
+/* ─── LESSON PANEL ─── */
+.lesson-panel {
+  width: 38%; min-width: 280px; max-width: 460px;
+  background: var(--surface); border-right: 1px solid var(--border);
+  display: flex; flex-direction: column; overflow: hidden;
+}
+.lesson-top { padding: 1rem 1.25rem 0; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
+.mod-label {
+  font-family: var(--mono); font-size: 0.65rem; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 0.08em;
+  color: var(--accent); background: var(--accent-bg);
+  padding: 3px 8px; border-radius: 4px;
+}
+.act-dots { display: flex; gap: 5px; align-items: center; }
+.act-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--border); transition: background 0.2s; }
+.act-dot.active { background: var(--accent); }
+.act-dot.done { background: var(--green); }
+
+.lesson-body { flex: 1; overflow-y: auto; padding: 0.9rem 1.25rem 1rem; }
+.type-badge {
+  display: inline-block; font-family: var(--mono); font-size: 0.62rem;
+  font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em;
+  padding: 2px 8px; border-radius: 3px; margin-bottom: 0.5rem;
+}
+.badge-guided { background: #FEF3C7; color: #92400E; }
+.badge-fill   { background: #DBEAFE; color: #1E40AF; }
+.badge-challenge { background: #FCE7F3; color: #9D174D; }
+.act-title { font-family: var(--serif); font-size: 1.25rem; font-weight: 700; line-height: 1.3; margin-bottom: 0.7rem; }
+.concept-box {
+  background: var(--accent-bg); border-left: 3px solid var(--accent);
+  padding: 0.65rem 0.9rem; border-radius: 0 6px 6px 0;
+  font-size: 0.83rem; margin-bottom: 0.85rem; color: var(--text);
+}
+.expl { font-size: 0.845rem; color: var(--soft); line-height: 1.75; margin-bottom: 0.85rem; }
+.expl p { margin-bottom: 0.45rem; }
+.expl ul, .expl ol { padding-left: 1.2rem; margin-bottom: 0.45rem; }
+.expl li { margin-bottom: 0.2rem; }
+.expl code { font-family: var(--mono); font-size: 0.78rem; background: var(--surface-2); padding: 1px 5px; border-radius: 3px; color: var(--text); }
+.expl strong { color: var(--text); font-weight: 600; }
+.expl pre { background: var(--surface-2); padding: 0.6rem; border-radius: 6px; font-family: var(--mono); font-size: 0.75rem; overflow-x: auto; margin-bottom: 0.45rem; }
+
+.ds-ref { background: var(--surface-2); border: 1px solid var(--border); border-radius: 7px; overflow: hidden; margin-bottom: 0.85rem; }
+.ds-ref-head { padding: 0.4rem 0.75rem; font-family: var(--mono); font-size: 0.65rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--softer); border-bottom: 1px solid var(--border); }
+.ds-ref-body { padding: 0.5rem 0.75rem; font-family: var(--mono); font-size: 0.72rem; color: var(--soft); white-space: pre; line-height: 1.6; }
+
+.hints-wrap { margin-bottom: 0.85rem; }
+.hint-btn {
+  background: none; border: 1px solid var(--border); padding: 5px 12px;
+  border-radius: 6px; font-size: 0.78rem; cursor: pointer;
+  color: var(--soft); font-family: var(--sans); transition: all 0.15s;
+}
+.hint-btn:hover { border-color: var(--amber-border); color: var(--amber); background: var(--amber-bg); }
+.hint-item {
+  margin-top: 0.5rem; padding: 0.5rem 0.75rem;
+  background: var(--amber-bg); border-left: 3px solid var(--amber-border);
+  border-radius: 0 4px 4px 0; font-size: 0.8rem; color: var(--text); display: none;
+}
+.hint-item code { font-family: var(--mono); font-size: 0.76rem; background: rgba(245,158,11,0.12); padding: 1px 4px; border-radius: 3px; }
+
+.lesson-footer { padding: 0.75rem 1.25rem; border-top: 1px solid var(--border); display: flex; gap: 0.5rem; flex-shrink: 0; }
+.btn-nav {
+  flex: 1; padding: 7px 14px; border-radius: 7px; font-size: 0.83rem;
+  font-weight: 500; cursor: pointer; font-family: var(--sans);
+  transition: all 0.15s; border: 1px solid var(--border);
+  background: var(--surface); color: var(--soft);
+}
+.btn-nav:hover:not(:disabled) { background: var(--surface-2); color: var(--text); }
+.btn-nav:disabled { opacity: 0.3; cursor: default; }
+.btn-next { background: var(--accent); color: white; border-color: var(--accent); }
+.btn-next:hover:not(:disabled) { background: #1640B0; border-color: #1640B0; color: white; }
+
+/* ─── EDITOR PANEL ─── */
+.editor-panel { flex: 1; display: flex; flex-direction: column; overflow: hidden; background: var(--bg); min-width: 0; }
+
+.editor-toolbar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0.4rem 0.9rem; background: var(--surface); border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.tab-btns { display: flex; gap: 2px; }
+.tab-btn {
+  padding: 4px 12px; font-size: 0.78rem; border: none; background: none;
+  cursor: pointer; font-family: var(--sans); color: var(--softer);
+  border-radius: 5px; font-weight: 500; transition: all 0.15s;
+}
+.tab-btn.active { background: var(--surface-2); color: var(--text); }
+.tab-btn:hover:not(.active) { color: var(--text); }
+.ed-actions { display: flex; gap: 0.4rem; align-items: center; }
+.btn-reset {
+  padding: 4px 10px; font-size: 0.78rem; border: 1px solid var(--border);
+  background: var(--surface); border-radius: 5px; cursor: pointer;
+  font-family: var(--sans); color: var(--soft); transition: all 0.15s;
+}
+.btn-reset:hover { background: var(--surface-2); color: var(--text); }
+.btn-run {
+  padding: 5px 14px; font-size: 0.82rem; font-weight: 600;
+  border: none; background: var(--green); color: white;
+  border-radius: 6px; cursor: pointer; font-family: var(--sans);
+  transition: background 0.15s; display: flex; align-items: center; gap: 5px;
+}
+.btn-run:hover:not(:disabled) { background: #075F38; }
+.btn-run:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* CodeMirror overrides */
+.CodeMirror { font-family: var(--mono) !important; font-size: 12.5px !important; height: auto !important; background: var(--bg) !important; color: var(--text) !important; padding: 0 !important; }
+.CodeMirror-scroll { min-height: 180px; }
+.cm-s-default .cm-keyword  { color: #1B4FD8; font-weight: 600; }
+.cm-s-default .cm-string   { color: #0A7C4A; }
+.cm-s-default .cm-number   { color: #C2440F; }
+.cm-s-default .cm-comment  { color: #9BA8B8; font-style: italic; }
+.cm-s-default .cm-def      { color: #7C3AED; }
+.cm-s-default .cm-builtin  { color: #7C3AED; }
+.cm-s-default .cm-operator { color: #C2440F; }
+.cm-s-default .cm-variable { color: var(--text); }
+.CodeMirror-cursor { border-left-color: var(--text) !important; }
+.CodeMirror-selected { background: #DBEAFE !important; }
+.CodeMirror-gutters { background: var(--surface-2) !important; border-right: 1px solid var(--border) !important; }
+.CodeMirror-linenumber { color: var(--softer) !important; font-size: 11px !important; }
+
+#pane-editor { flex: 1; overflow-y: auto; border-bottom: 1px solid var(--border); }
+#pane-ref { flex: 1; overflow-y: auto; border-bottom: 1px solid var(--border); padding: 0.9rem; display: none; }
+
+.ref-section { margin-bottom: 1.3rem; }
+.ref-section h3 { font-family: var(--mono); font-size: 0.65rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--softer); margin-bottom: 0.45rem; padding-bottom: 0.3rem; border-bottom: 1px solid var(--border); }
+.ref-table { width: 100%; border-collapse: collapse; font-size: 0.76rem; }
+.ref-table td { padding: 3px 5px; vertical-align: top; }
+.ref-table td:first-child { font-family: var(--mono); font-size: 0.73rem; color: var(--accent); white-space: nowrap; width: 52%; }
+.ref-table td:last-child { color: var(--soft); }
+.ref-table tr:hover td { background: var(--surface-2); }
+
+/* Output */
+.output-section { height: 210px; display: flex; flex-direction: column; flex-shrink: 0; background: var(--surface); }
+.output-hdr {
+  padding: 0.35rem 0.9rem; font-family: var(--mono); font-size: 0.65rem;
+  font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em;
+  color: var(--softer); border-bottom: 1px solid var(--border);
+  flex-shrink: 0; display: flex; align-items: center; justify-content: space-between;
+}
+.output-running { font-size: 0.7rem; color: var(--amber); display: none; animation: blink 1s infinite; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.4} }
+.output-body {
+  flex: 1; overflow: auto; padding: 0.65rem 0.9rem;
+  font-family: var(--mono); font-size: 0.77rem; line-height: 1.7;
+  white-space: pre-wrap; word-break: break-word; color: var(--text);
+}
+.out-placeholder { color: var(--softer); font-style: italic; }
+.out-error { color: var(--red); }
+.out-img { max-width: 100%; display: block; margin-top: 0.5rem; border-radius: 5px; border: 1px solid var(--border); }
+
+.val-bar {
+  padding: 0.45rem 0.9rem; font-size: 0.81rem; font-weight: 500;
+  align-items: center; gap: 0.5rem; flex-shrink: 0; display: none;
+}
+.val-bar.success { background: var(--green-bg); color: var(--green); display: flex; }
+.val-bar.error   { background: var(--red-bg);   color: var(--red);   display: flex; }
+.val-bar.warn    { background: var(--amber-bg);  color: var(--amber); display: flex; }
+
+/* Completion */
+#completion { display: none; flex-direction: column; align-items: center; justify-content: center; flex: 1; text-align: center; padding: 2rem; }
+.comp-emoji { font-size: 5rem; margin-bottom: 1rem; }
+.comp-title { font-family: var(--serif); font-size: 2rem; margin-bottom: 0.5rem; }
+.comp-sub { color: var(--soft); max-width: 420px; margin-bottom: 2rem; line-height: 1.7; }
+.btn-restart { padding: 10px 28px; background: var(--accent); color: white; border: none; border-radius: 8px; font-size: 1rem; cursor: pointer; font-family: var(--sans); font-weight: 600; }
+.btn-restart:hover { background: #1640B0; }
+
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--softer); }
+</style>
+</head>
+<body>
+
+<!-- Loading -->
+<div id="loading-screen">
+  <div class="loading-inner">
+    <div class="load-panda">🐼</div>
+    <h1>Aprende Pandas</h1>
+    <p id="load-status">Iniciando...</p>
+    <div class="load-bar-outer"><div class="load-bar-inner" id="load-bar"></div></div>
+    <p class="load-note">Cargando Python + Pandas directamente en tu navegador.<br>Solo ocurre una vez. Espera unos segundos.</p>
+  </div>
+</div>
+
+<!-- App -->
+<div id="app" style="display:none">
+  <nav id="top-nav">
+    <div class="nav-logo">🐼 <em>Aprende</em> Pandas</div>
+    <div class="nav-pills" id="nav-pills"></div>
+    <div class="nav-meta" id="nav-meta">M1 · A1</div>
+  </nav>
+
+  <div class="main-layout" id="main-layout">
+    <aside class="lesson-panel">
+      <div class="lesson-top">
+        <div class="mod-label" id="mod-label">Módulo 1</div>
+        <div class="act-dots" id="act-dots"></div>
+      </div>
+      <div class="lesson-body" id="lesson-body">
+        <div class="type-badge badge-guided" id="type-badge">Guiada</div>
+        <h2 class="act-title" id="act-title">Cargando...</h2>
+        <div class="concept-box" id="concept-box"></div>
+        <div class="expl" id="expl"></div>
+        <div class="ds-ref" id="ds-ref" style="display:none">
+          <div class="ds-ref-head">📊 Datasets disponibles en este entorno</div>
+          <div class="ds-ref-body" id="ds-ref-body"></div>
+        </div>
+        <div class="hints-wrap" id="hints-wrap" style="display:none">
+          <button class="hint-btn" onclick="showNextHint()">💡 Ver pista</button>
+          <div id="hints-list"></div>
+        </div>
+      </div>
+      <div class="lesson-footer">
+        <button class="btn-nav" id="btn-prev" onclick="navigate(-1)">← Anterior</button>
+        <button class="btn-nav btn-next" id="btn-next" onclick="navigate(1)">Siguiente →</button>
+      </div>
+    </aside>
+
+    <main class="editor-panel">
+      <div class="editor-toolbar">
+        <div class="tab-btns">
+          <button class="tab-btn active" id="tbtn-ed" onclick="switchTab('ed')">Editor</button>
+          <button class="tab-btn" id="tbtn-ref" onclick="switchTab('ref')">Referencia rápida</button>
+        </div>
+        <div class="ed-actions">
+          <button class="btn-reset" onclick="resetCode()">↺ Reiniciar</button>
+          <button class="btn-run" id="btn-run" onclick="runCode()">▶ Ejecutar</button>
+        </div>
+      </div>
+
+      <div id="pane-editor">
+        <textarea id="code-area"></textarea>
+      </div>
+
+      <div id="pane-ref"></div>
+
+      <div class="output-section">
+        <div class="output-hdr">
+          <span>Salida</span>
+          <span class="output-running" id="out-running">⏳ ejecutando...</span>
+        </div>
+        <div class="output-body" id="out-body">
+          <span class="out-placeholder">El resultado aparecerá aquí cuando presiones ▶ Ejecutar</span>
+        </div>
+      </div>
+      <div class="val-bar" id="val-bar"></div>
+    </main>
+  </div>
+
+  <div id="completion">
+    <div class="comp-emoji">🎉</div>
+    <h2 class="comp-title">¡Curso completado!</h2>
+    <p class="comp-sub">Recorriste los 8 módulos fundamentales de Pandas: Series, DataFrames, exploración, selección, filtrado, limpieza de datos, agrupación y visualización. Ya tienes la base para analizar datos reales en Python.</p>
+    <button class="btn-restart" onclick="restart()">↺ Volver al inicio</button>
+  </div>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════════════════
+   MÓDULOS Y ACTIVIDADES
+═══════════════════════════════════════════════════════════ */
+const MODULES = [
+// ──────────────────────────────────────────────────────────
+// MÓDULO 0: ¿Qué es Pandas?
+{
+  title: "¿Qué es Pandas?",
+  emoji: "📦",
+  activities: [
+    {
+      type: "guided",
+      title: "Tu primer DataFrame",
+      concept: "Un DataFrame es una tabla de datos en Python: filas, columnas, y un índice. Como Excel, pero programable.",
+      expl: `<p>Pandas ofrece dos estructuras principales:</p>
+<ul>
+  <li><code>pd.Series</code> — una columna de datos con etiquetas</li>
+  <li><code>pd.DataFrame</code> — una tabla completa con múltiples columnas</li>
+</ul>
+<p>El código ya está escrito. Presiona <strong>▶ Ejecutar</strong> y observa la salida.</p>`,
+      code: `import pandas as pd
+
+# Un DataFrame se crea desde un diccionario
+# Cada clave se convierte en el nombre de una columna
+islas = pd.DataFrame({
+    'isla':      ['Santa Cruz', 'San Cristóbal', 'Isabela'],
+    'area_km2':  [986, 558, 4588],
+    'poblacion': [15393, 7475, 2200]
+})
+
+print("Nuestro primer DataFrame:")
+print(islas)
+print()
+print(f"Tipo de objeto : {type(islas).__name__}")
+print(f"Forma (filas, columnas): {islas.shape}")`,
+      hints: [],
+      validation: null,
+    },
+    {
+      type: "fill",
+      title: "Crear una Serie",
+      concept: "pd.Series(valores, index=etiquetas) crea una columna de datos con etiquetas personalizadas.",
+      expl: `<p>Una <strong>Serie</strong> funciona como una lista con índice personalizado.</p>
+<p>Sintaxis: <code>pd.Series([val1, val2, ...], index=[etiq1, etiq2, ...])</code></p>
+<p>Reemplaza <code>___</code> con la lista de meses: <code>['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo']</code></p>`,
+      code: `import pandas as pd
+
+# Completa: reemplaza ___ con la lista de 5 nombres de mes
+temperaturas = pd.Series(
+    [27.2, 27.8, 28.5, 26.3, 25.1],
+    index=___
+)
+
+print("Temperaturas por mes:")
+print(temperaturas)
+print(f"\\nPromedio: {temperaturas.mean():.1f} °C")
+print(f"Mes más cálido: {temperaturas.idxmax()}")`,
+      hints: [
+        "El parámetro <code>index</code> recibe una lista de strings.",
+        "Escribe: <code>index=['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo']</code>",
+      ],
+      validation: { type: "output_contains", values: ["Enero", "Mayo", "27.5"] },
+    },
+    {
+      type: "challenge",
+      title: "Crea tu propio DataFrame",
+      concept: "Practica creando DataFrames con datos inventados para consolidar la sintaxis.",
+      expl: `<p>Crea un DataFrame llamado <code>productos</code> con información de <strong>4 servicios turísticos</strong>.</p>
+<p>Debe tener estas columnas: <code>nombre</code>, <code>precio_usd</code>, <code>duracion_horas</code>.</p>
+<p>Al final imprime el DataFrame y el precio promedio.</p>`,
+      code: `import pandas as pd
+
+# Completa los ___ con listas de 4 elementos
+productos = pd.DataFrame({
+    'nombre':         ___,
+    'precio_usd':     ___,
+    'duracion_horas': ___
+})
+
+print("Mi catálogo de productos:")
+print(productos)
+print(f"\\nPrecio promedio: ${productos['precio_usd'].mean():.2f}")`,
+      hints: [
+        "Cada valor debe ser una lista de 4 elementos: <code>['A', 'B', 'C', 'D']</code>",
+        "Ejemplo de nombres: <code>['Snorkel', 'Buceo', 'Tour terrestre', 'Avistamiento']</code>",
+        "Para el precio usa números: <code>[45, 120, 60, 80]</code>",
+      ],
+      validation: { type: "code_contains", values: ["pd.DataFrame", "precio_usd"] },
+    },
+  ],
+},
+// ──────────────────────────────────────────────────────────
+// MÓDULO 1: Series a fondo
+{
+  title: "Series a fondo",
+  emoji: "📈",
+  activities: [
+    {
+      type: "guided",
+      title: "Índices, acceso y operaciones",
+      concept: "Las Series permiten acceder a valores por etiqueta o por posición, y aplican operaciones a todos sus elementos a la vez.",
+      expl: `<p>Formas de acceder a una Serie:</p>
+<ul>
+  <li><code>serie['etiqueta']</code> — por nombre de índice</li>
+  <li><code>serie[0]</code> — por posición numérica</li>
+  <li><code>serie[serie > valor]</code> — por condición (filtra)</li>
+</ul>
+<p>Las operaciones (<code>+</code>, <code>*</code>, <code>.mean()</code>, etc.) se aplican a <em>cada elemento</em> automáticamente.</p>`,
+      code: `import pandas as pd
+
+ventas_serie = pd.Series(
+    [3200, 4100, 5800, 4500, 3900, 6200],
+    index=['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun']
+)
+
+print("Serie completa:")
+print(ventas_serie)
+
+print("\\nAcceso por etiqueta (Mar):", ventas_serie['Mar'])
+print("Acceso por posición [0]:", ventas_serie[0])
+
+print("\\nMeses con ventas > 4000:")
+print(ventas_serie[ventas_serie > 4000])
+
+print("\\nEstadísticas:")
+print(f"  Máximo : ${ventas_serie.max():,}")
+print(f"  Mínimo : ${ventas_serie.min():,}")
+print(f"  Promedio: ${ventas_serie.mean():,.0f}")
+print(f"  Total  : ${ventas_serie.sum():,}")`,
+      hints: [],
+      validation: null,
+    },
+    {
+      type: "fill",
+      title: "Aritmética elemento a elemento",
+      concept: "Cualquier operación sobre una Serie se aplica automáticamente a todos sus elementos.",
+      expl: `<p>Si multiplicas una Serie por un número, <em>todos</em> los valores se multiplican.</p>
+<p>Fórmula Celsius → Fahrenheit: <strong>F = C × 1.8 + 32</strong></p>
+<p>Reemplaza los <code>___</code> con los operadores y valores correctos.</p>`,
+      code: `import pandas as pd
+
+celsius = pd.Series(
+    [27.2, 27.8, 28.5, 26.3, 25.1, 24.8],
+    index=['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun']
+)
+
+# Convierte a Fahrenheit: multiplica por 1.8 y suma 32
+fahrenheit = celsius ___ 1.8 + ___
+
+print("En Celsius:")
+print(celsius)
+print("\\nEn Fahrenheit:")
+print(fahrenheit.round(1))
+
+# Filtra meses con temperatura celsius mayor a 27
+meses_calidos = celsius[celsius ___ 27]
+print("\\nMeses cálidos (>27 °C):")
+print(meses_calidos)`,
+      hints: [
+        "Para multiplicar usa el operador <code>*</code>",
+        "La fórmula completa: <code>celsius * 1.8 + 32</code>",
+        "Para mayor que usa el operador <code>></code>",
+      ],
+      validation: { type: "output_contains", values: ["80.9", "83.3", "Ene", "Feb"] },
+    },
+    {
+      type: "challenge",
+      title: "Analizar ventas reales",
+      concept: "Aplica lo aprendido sobre Series al dataset ventas, siempre disponible en este entorno.",
+      expl: `<p>El dataset <strong>ventas</strong> tiene columnas: <code>isla</code>, <code>mes</code>, <code>producto</code>, <code>ventas_usd</code>, <code>turistas</code>.</p>
+<p>Completa el código para:</p>
+<ol>
+  <li>Mostrar la isla con más ventas totales (<code>.idxmax()</code>)</li>
+  <li>Mostrar las islas con ventas sobre el promedio</li>
+</ol>`,
+      code: `import pandas as pd
+
+# Ventas totales por isla (groupby genera una Serie)
+totales = ventas.groupby('isla')['ventas_usd'].sum()
+print("Ventas totales por isla:")
+print(totales)
+
+# Isla con más ventas
+print("\\nIsla líder:", ___)
+
+# Islas con ventas sobre el promedio
+print("\\nIslas sobre el promedio:")
+print(___)`,
+      hints: [
+        "<code>totales.idxmax()</code> devuelve la etiqueta del valor máximo.",
+        "<code>totales[totales > totales.mean()]</code> filtra las islas sobre el promedio.",
+      ],
+      validation: { type: "code_contains", values: ["groupby", "idxmax"] },
+    },
+  ],
+},
+// ──────────────────────────────────────────────────────────
+// MÓDULO 2: Explorar DataFrames
+{
+  title: "Explorar DataFrames",
+  emoji: "🔍",
+  activities: [
+    {
+      type: "guided",
+      title: "Anatomía de un DataFrame",
+      concept: "Antes de analizar, siempre explora la estructura del dataset: forma, tipos, primeras filas.",
+      expl: `<p>Métodos esenciales de exploración:</p>
+<ul>
+  <li><code>.shape</code> — (filas, columnas) como tupla</li>
+  <li><code>.columns</code> — nombres de las columnas</li>
+  <li><code>.dtypes</code> — tipo de dato de cada columna</li>
+  <li><code>.head(n)</code> — primeras n filas (por defecto 5)</li>
+  <li><code>.tail(n)</code> — últimas n filas</li>
+  <li><code>.info()</code> — resumen completo con nulos</li>
+</ul>`,
+      code: `import pandas as pd
+
+print("=== FORMA ===")
+print(f"Filas: {estudiantes.shape[0]}, Columnas: {estudiantes.shape[1]}")
+
+print("\\n=== COLUMNAS ===")
+print(estudiantes.columns.tolist())
+
+print("\\n=== TIPOS DE DATOS ===")
+print(estudiantes.dtypes)
+
+print("\\n=== PRIMERAS 5 FILAS ===")
+print(estudiantes.head())
+
+print("\\n=== ÚLTIMAS 3 FILAS ===")
+print(estudiantes.tail(3))`,
+      hints: [],
+      validation: null,
+      dataset: "estudiantes",
+    },
+    {
+      type: "fill",
+      title: "describe() y value_counts()",
+      concept: "describe() calcula estadísticas automáticas. value_counts() cuenta la frecuencia de cada valor único.",
+      expl: `<p><code>.describe()</code> → count, mean, std, min, percentiles, max para columnas numéricas.</p>
+<p><code>df['col'].value_counts()</code> → cuántas veces aparece cada valor en esa columna.</p>
+<p>Reemplaza los <code>___</code> con el nombre correcto del método o columna.</p>`,
+      code: `import pandas as pd
+
+# Estadísticas generales (reemplaza ___ con el método correcto)
+print("=== ESTADÍSTICAS ===")
+print(estudiantes.___)
+
+# Frecuencia de carreras
+print("\\n=== ESTUDIANTES POR CARRERA ===")
+print(estudiantes['___'].value_counts())
+
+# ¿Cuántos tienen beca?
+print("\\n=== ¿TIENEN BECA? ===")
+print(estudiantes['beca'].___())`,
+      hints: [
+        "El método de estadísticas se llama <code>describe()</code>",
+        "La columna de carrera se llama <code>'carrera'</code>",
+        "Para contar valores únicos: <code>value_counts()</code>",
+      ],
+      validation: { type: "output_contains", values: ["Biología", "Empresas", "mean", "True"] },
+      dataset: "estudiantes",
+    },
+    {
+      type: "challenge",
+      title: "Exploración completa",
+      concept: "Aplica el flujo estándar de exploración al dataset ventas.",
+      expl: `<p>Con el dataset <strong>ventas</strong>, realiza una exploración completa:</p>
+<ol>
+  <li>Imprime la forma del dataset</li>
+  <li>Muestra las estadísticas de columnas numéricas</li>
+  <li>Cuenta cuántos registros hay por producto</li>
+  <li>Calcula el promedio de turistas</li>
+</ol>`,
+      code: `import pandas as pd
+
+# 1. Forma
+print("Forma:", ___)
+
+# 2. Estadísticas numéricas
+print("\\nEstadísticas:")
+print(___)
+
+# 3. Registros por producto
+print("\\nPor producto:")
+print(___)
+
+# 4. Promedio de turistas
+print(f"\\nPromedio turistas: {ventas['turistas'].___():.1f}")`,
+      hints: [
+        "<code>ventas.shape</code>",
+        "<code>ventas.describe()</code>",
+        "<code>ventas['producto'].value_counts()</code>",
+        "Para el promedio: <code>.mean()</code>",
+      ],
+      validation: { type: "code_contains", values: ["describe", "value_counts"] },
+      dataset: "ventas",
+    },
+  ],
+},
+// ──────────────────────────────────────────────────────────
+// MÓDULO 3: Seleccionar datos
+{
+  title: "Seleccionar datos",
+  emoji: "🎯",
+  activities: [
+    {
+      type: "guided",
+      title: "Columnas, iloc y loc",
+      concept: "Seleccionar subconjuntos del DataFrame es la operación más frecuente en análisis de datos.",
+      expl: `<p>Selección de columnas:</p>
+<ul>
+  <li><code>df['col']</code> → una columna (Serie)</li>
+  <li><code>df[['c1','c2']]</code> → varias columnas (DataFrame)</li>
+</ul>
+<p>Selección de filas:</p>
+<ul>
+  <li><code>df.iloc[n]</code> → por posición numérica (0, 1, 2...)</li>
+  <li><code>df.iloc[a:b]</code> → rango de posiciones</li>
+  <li><code>df.iloc[filas, cols]</code> → filas y columnas por posición</li>
+  <li><code>df.loc[idx, 'col']</code> → por etiqueta</li>
+</ul>`,
+      code: `import pandas as pd
+
+# Una columna → Serie
+print("=== COLUMNA 'nombre' ===")
+print(estudiantes['nombre'])
+
+# Varias columnas → DataFrame
+print("\\n=== NOMBRE Y NOTA ===")
+print(estudiantes[['nombre', 'nota']])
+
+# iloc: posición exacta
+print("\\n=== FILA EN POSICIÓN 2 (iloc) ===")
+print(estudiantes.iloc[2])
+
+# iloc: rango filas, rango columnas
+print("\\n=== FILAS 0-2, COLUMNAS 0-2 ===")
+print(estudiantes.iloc[0:3, 0:3])`,
+      hints: [],
+      validation: null,
+      dataset: "estudiantes",
+    },
+    {
+      type: "fill",
+      title: "Practicar iloc y loc",
+      concept: "iloc usa posiciones numéricas. loc usa etiquetas del índice y nombres de columnas.",
+      expl: `<p>Recuerda: <code>iloc[fila, columna]</code> — ambos por número.</p>
+<p>Y: <code>loc[fila, 'nombre_columna']</code> — columna por nombre.</p>
+<p>La columna <code>ventas_usd</code> está en la posición 3 del dataset ventas.</p>`,
+      code: `import pandas as pd
+
+# Primeras 4 filas completas (iloc)
+print("=== PRIMERAS 4 FILAS ===")
+print(ventas.iloc[___ : ___])
+
+# Columna en posición 3 de las primeras 5 filas
+print("\\n=== ventas_usd, FILAS 0-4 ===")
+print(ventas.iloc[0:5, ___])
+
+# Columnas 'isla' y 'ventas_usd' de las primeras 3 filas (loc)
+print("\\n=== ISLA Y VENTAS (loc) ===")
+print(ventas.loc[0:2, ['isla', '___']])`,
+      hints: [
+        "Para primeras 4 filas: <code>iloc[0:4]</code>",
+        "La columna ventas_usd está en la posición <code>3</code>",
+        "El nombre exacto es <code>'ventas_usd'</code>",
+      ],
+      validation: { type: "output_contains", values: ["4500", "isla", "ventas_usd"] },
+      dataset: "ventas",
+    },
+    {
+      type: "challenge",
+      title: "Selección precisa",
+      concept: "Combina la selección de columnas y filas para extraer exactamente lo que necesitas.",
+      expl: `<p>Con el dataset <strong>estudiantes</strong>:</p>
+<ol>
+  <li>Selecciona las columnas <code>nombre</code>, <code>carrera</code> y <code>nota</code></li>
+  <li>Muestra las últimas 4 filas de esa selección</li>
+  <li>Imprime el nombre del estudiante en la posición 0 (usa iloc)</li>
+</ol>`,
+      code: `import pandas as pd
+
+# 1. Tres columnas
+seleccion = estudiantes[___]
+print("Selección:")
+print(seleccion)
+
+# 2. Últimas 4 filas
+print("\\nÚltimas 4:")
+print(seleccion.___(4))
+
+# 3. Nombre en posición 0, columna 0
+print("\\nPrimer nombre:", seleccion.iloc[___, ___])`,
+      hints: [
+        "Para múltiples columnas: <code>[['nombre', 'carrera', 'nota']]</code>",
+        "Para las últimas filas: <code>.tail(4)</code>",
+        "Para iloc fila 0, columna 0: <code>iloc[0, 0]</code>",
+      ],
+      validation: { type: "code_contains", values: ["'nombre'", "'nota'", "tail"] },
+      dataset: "estudiantes",
+    },
+  ],
+},
+// ──────────────────────────────────────────────────────────
+// MÓDULO 4: Filtrar datos
+{
+  title: "Filtrar datos",
+  emoji: "🔭",
+  activities: [
+    {
+      type: "guided",
+      title: "Condiciones booleanas",
+      concept: "Pandas filtra filas evaluando una condición que produce True o False para cada fila.",
+      expl: `<p>El patrón es siempre en dos pasos:</p>
+<pre>condicion = df['col'] > valor    # Serie de True/False
+resultado  = df[condicion]         # Solo filas con True</pre>
+<p>También se puede en una línea: <code>df[df['col'] > valor]</code></p>
+<p>Es equivalente a un <code>WHERE</code> en SQL.</p>`,
+      code: `import pandas as pd
+
+# Nota mayor a 8.5
+print("=== NOTA > 8.5 ===")
+top = estudiantes[estudiantes['nota'] > 8.5]
+print(top[['nombre', 'nota', 'carrera']])
+
+# Solo Biología
+print("\\n=== BIOLOGÍA ===")
+bio = estudiantes[estudiantes['carrera'] == 'Biología']
+print(bio[['nombre', 'nota']])
+
+# Quienes tienen beca
+print("\\n=== CON BECA ===")
+becados = estudiantes[estudiantes['beca'] == True]
+print(becados['nombre'].tolist())`,
+      hints: [],
+      validation: null,
+      dataset: "estudiantes",
+    },
+    {
+      type: "fill",
+      title: "Múltiples condiciones",
+      concept: "Combina condiciones con & (Y lógico) y | (O lógico). Cada condición va entre paréntesis.",
+      expl: `<p><strong>Regla importante:</strong> cada condición debe ir entre paréntesis propios.</p>
+<ul>
+  <li><code>(cond1) & (cond2)</code> → ambas deben ser True</li>
+  <li><code>(cond1) | (cond2)</code> → al menos una debe ser True</li>
+</ul>
+<p>No uses <code>and</code> / <code>or</code> de Python; usa <code>&</code> / <code>|</code>.</p>`,
+      code: `import pandas as pd
+
+# Biología CON nota mayor a 8.0
+print("=== BIOLOGÍA Y NOTA > 8.0 ===")
+f1 = estudiantes[
+    (estudiantes['carrera'] == '___') & (estudiantes['nota'] ___ 8.0)
+]
+print(f1[['nombre', 'carrera', 'nota']])
+
+# Con beca O nota >= 9.0
+print("\\n=== CON BECA O NOTA >= 9 ===")
+f2 = estudiantes[
+    (estudiantes['___'] == True) | (estudiantes['nota'] >= ___)
+]
+print(f2[['nombre', 'nota', 'beca']])`,
+      hints: [
+        "La carrera: <code>'Biología'</code> (con acento)",
+        "Para mayor que: operador <code>></code>",
+        "La columna de beca: <code>'beca'</code>, y el umbral: <code>9.0</code>",
+      ],
+      validation: { type: "output_contains", values: ["María", "Pedro", "beca"] },
+      dataset: "estudiantes",
+    },
+    {
+      type: "challenge",
+      title: "Filtros en ventas",
+      concept: "Construye filtros complejos sobre el dataset ventas para extraer insights.",
+      expl: `<p>Con el dataset <strong>ventas</strong>:</p>
+<ol>
+  <li>Filtra registros de Santa Cruz con más de 40 turistas</li>
+  <li>Filtra donde el producto sea "Buceo" <em>o</em> las ventas superen $4000</li>
+  <li>Imprime cuántos registros tiene cada filtro con <code>len()</code></li>
+</ol>`,
+      code: `import pandas as pd
+
+# 1. Santa Cruz con más de 40 turistas
+filtro_a = ventas[(___) & (___)]
+print(f"Santa Cruz >40 turistas: {len(filtro_a)} registros")
+print(filtro_a[['isla', 'producto', 'turistas']])
+
+# 2. Buceo O ventas > 4000
+filtro_b = ventas[(___) | (___)]
+print(f"\\nBuceo o ventas>4000: {len(filtro_b)} registros")
+print(filtro_b[['isla', 'producto', 'ventas_usd']])`,
+      hints: [
+        "<code>(ventas['isla'] == 'Santa Cruz')</code>",
+        "<code>(ventas['turistas'] > 40)</code>",
+        "<code>(ventas['producto'] == 'Buceo')</code>",
+        "<code>(ventas['ventas_usd'] > 4000)</code>",
+      ],
+      validation: { type: "code_contains", values: ["&", "|", "ventas_usd"] },
+      dataset: "ventas",
+    },
+  ],
+},
+// ──────────────────────────────────────────────────────────
+// MÓDULO 5: Limpiar datos
+{
+  title: "Limpiar datos",
+  emoji: "🧹",
+  activities: [
+    {
+      type: "guided",
+      title: "Detectar y rellenar nulos",
+      concept: "Los datos reales siempre tienen valores faltantes. Pandas los representa como NaN.",
+      expl: `<p>Métodos para manejar valores nulos:</p>
+<ul>
+  <li><code>.isnull()</code> → True donde hay NaN</li>
+  <li><code>.isnull().sum()</code> → cuántos nulos por columna</li>
+  <li><code>.fillna(valor)</code> → rellena NaN con un valor fijo o calculado</li>
+  <li><code>.dropna()</code> → elimina filas con algún NaN</li>
+</ul>`,
+      code: `import pandas as pd
+import numpy as np
+
+# Creamos un dataset con valores faltantes
+df = pd.DataFrame({
+    'nombre':  ['Ana', 'Luis', 'María', None, 'Sofía'],
+    'nota':    [8.5, None, 9.1, 8.8, None],
+    'carrera': ['Biología', 'Empresas', None, 'Análisis', 'Empresas']
+})
+
+print("=== DATASET CON NULOS ===")
+print(df)
+
+print("\\n=== NULOS POR COLUMNA ===")
+print(df.isnull().sum())
+
+# Rellenar nota nula con el promedio
+promedio = df['nota'].mean()
+df_limpio = df.copy()
+df_limpio['nota'] = df_limpio['nota'].fillna(round(promedio, 1))
+
+print(f"\\n=== NOTA RELLENADA CON PROMEDIO ({promedio:.1f}) ===")
+print(df_limpio)`,
+      hints: [],
+      validation: null,
+    },
+    {
+      type: "fill",
+      title: "dropna() y drop_duplicates()",
+      concept: "dropna() elimina filas con nulos. drop_duplicates() elimina filas completamente repetidas.",
+      expl: `<p><code>.dropna()</code> → elimina toda fila que tenga al menos un NaN.</p>
+<p><code>.dropna(subset=['col'])</code> → elimina filas con NaN <em>solo</em> en esa columna.</p>
+<p><code>.drop_duplicates()</code> → elimina filas duplicadas exactas.</p>`,
+      code: `import pandas as pd
+import numpy as np
+
+df = pd.DataFrame({
+    'isla':     ['Santa Cruz', 'Isabela', 'Santa Cruz', None, 'Isabela', 'Santa Cruz'],
+    'turistas': [45, None, 45, 30, 38, 45],
+    'mes':      ['Enero', 'Enero', 'Enero', 'Febrero', 'Febrero', 'Enero']
+})
+
+print("Original:", df.shape)
+print(df)
+
+# Elimina filas donde 'isla' es NaN
+df2 = df.___(subset=['___'])
+print("\\nSin nulos en 'isla':", df2.shape)
+
+# Elimina filas duplicadas del resultado anterior
+df3 = df2.___()
+print("Sin duplicados:", df3.shape)
+print(df3)`,
+      hints: [
+        "Para eliminar nulos en una columna: <code>.dropna(subset=['isla'])</code>",
+        "Para eliminar duplicados: <code>.drop_duplicates()</code>",
+      ],
+      validation: { type: "output_contains", values: ["(4,", "(3,"] },
+    },
+    {
+      type: "challenge",
+      title: "Pipeline de limpieza",
+      concept: "Encadena operaciones de limpieza para preparar un dataset antes de analizar.",
+      expl: `<p>Crea un pipeline de limpieza sobre el dataset con problemas:</p>
+<ol>
+  <li>Imprime cuántos nulos hay por columna</li>
+  <li>Rellena los nulos en <code>temperatura</code> con la <strong>mediana</strong></li>
+  <li>Elimina filas donde <code>mes</code> sea NaN</li>
+  <li>Muestra el shape antes y después</li>
+</ol>`,
+      code: `import pandas as pd
+import numpy as np
+
+datos = pd.DataFrame({
+    'mes':         ['Ene', 'Feb', None, 'Abr', 'May', 'Jun', None],
+    'temperatura': [27.2, None, 28.5, 26.3, None, 24.8, 25.1],
+    'lluvia_mm':   [45, 62, 88, None, 32, 18, 12]
+})
+
+print("Antes:", datos.shape)
+print("Nulos:", datos.isnull().sum().to_dict())
+
+d = datos.copy()
+
+# 1. Rellena temperatura con la mediana
+d['temperatura'] = ___
+
+# 2. Elimina filas donde mes es NaN
+d = ___
+
+print("\\nDespués:", d.shape)
+print(d)`,
+      hints: [
+        "<code>d['temperatura'].fillna(d['temperatura'].median())</code>",
+        "<code>d.dropna(subset=['mes'])</code>",
+      ],
+      validation: { type: "code_contains", values: ["fillna", "dropna"] },
+    },
+  ],
+},
+// ──────────────────────────────────────────────────────────
+// MÓDULO 6: Agrupar y agregar
+{
+  title: "Agrupar y agregar",
+  emoji: "📊",
+  activities: [
+    {
+      type: "guided",
+      title: "groupby básico",
+      concept: "groupby() agrupa filas que comparten un valor y permite calcular estadísticas por grupo.",
+      expl: `<p>Patrón estándar: <code>df.groupby('columna')['col_num'].función()</code></p>
+<p>Funciones más comunes: <code>.sum()</code>, <code>.mean()</code>, <code>.count()</code>, <code>.max()</code>, <code>.min()</code></p>
+<p>Equivale a un <code>GROUP BY</code> de SQL.</p>`,
+      code: `import pandas as pd
+
+print("=== VENTAS TOTALES POR ISLA ===")
+print(ventas.groupby('isla')['ventas_usd'].sum())
+
+print("\\n=== PROMEDIO DE TURISTAS POR PRODUCTO ===")
+print(ventas.groupby('producto')['turistas'].mean().round(1))
+
+print("\\n=== CANTIDAD DE REGISTROS POR MES ===")
+print(ventas.groupby('mes')['ventas_usd'].count())
+
+print("\\n=== VENTA MÁXIMA POR ISLA ===")
+print(ventas.groupby('isla')['ventas_usd'].max())`,
+      hints: [],
+      validation: null,
+      dataset: "ventas",
+    },
+    {
+      type: "fill",
+      title: "Múltiples columnas y agg()",
+      concept: "Agrupa por varias columnas a la vez. Usa agg() para calcular múltiples estadísticas en una sola operación.",
+      expl: `<p>Sintaxis con múltiples columnas: <code>groupby(['col1', 'col2'])</code></p>
+<p>Con <code>agg()</code>:</p>
+<pre>df.groupby('col').agg(
+    nuevo_nombre=('col_num', 'funcion')
+)</pre>`,
+      code: `import pandas as pd
+
+# Agrupar por isla Y mes a la vez
+print("=== VENTAS POR ISLA Y MES ===")
+por_isla_mes = ventas.groupby(['___', '___'])['ventas_usd'].sum()
+print(por_isla_mes)
+
+# agg() para múltiples estadísticas en una pasada
+print("\\n=== RESUMEN POR ISLA ===")
+resumen = ventas.groupby('isla').agg(
+    total_ventas    = ('ventas_usd', '___'),
+    prom_turistas   = ('turistas',   '___'),
+    num_registros   = ('ventas_usd', '___')
+)
+print(resumen)`,
+      hints: [
+        "Las columnas de agrupación: <code>['isla', 'mes']</code>",
+        "Funciones de agg: <code>'sum'</code>, <code>'mean'</code>, <code>'count'</code>",
+      ],
+      validation: { type: "output_contains", values: ["total_ventas", "prom_turistas", "Santa Cruz"] },
+      dataset: "ventas",
+    },
+    {
+      type: "challenge",
+      title: "Análisis de estudiantes",
+      concept: "Combina groupby, filtros y agg para extraer insights del dataset de estudiantes.",
+      expl: `<p>Con el dataset <strong>estudiantes</strong>:</p>
+<ol>
+  <li>Calcula nota promedio y máxima por carrera con <code>agg</code></li>
+  <li>Cuenta becados por carrera</li>
+  <li>Muestra la carrera con el promedio más alto usando <code>.idxmax()</code></li>
+</ol>`,
+      code: `import pandas as pd
+
+# 1. Promedio y máximo de nota por carrera
+print("=== NOTAS POR CARRERA ===")
+notas = estudiantes.groupby('carrera')['nota'].agg(['mean', 'max']).round(2)
+print(notas)
+
+# 2. Becados por carrera
+print("\\n=== BECADOS POR CARRERA ===")
+becados = estudiantes[___ == True].groupby('___')['nombre'].count()
+print(becados)
+
+# 3. Carrera con mayor promedio
+print("\\n=== CARRERA DESTACADA ===")
+mejor = notas['mean'].___()
+print(f"Carrera con mayor nota promedio: {mejor}")`,
+      hints: [
+        "<code>estudiantes['beca'] == True</code>",
+        "<code>.groupby('carrera')</code>",
+        "<code>.idxmax()</code> devuelve la etiqueta del valor máximo",
+      ],
+      validation: { type: "code_contains", values: ["groupby", "agg", "idxmax"] },
+      dataset: "estudiantes",
+    },
+  ],
+},
+// ──────────────────────────────────────────────────────────
+// MÓDULO 7: Visualizar datos
+{
+  title: "Visualizar datos",
+  emoji: "🎨",
+  activities: [
+    {
+      type: "guided",
+      title: "Gráfica de barras",
+      concept: "Pandas integra matplotlib: desde cualquier Serie puedes llamar .plot() para visualizar.",
+      expl: `<p>Tipos de gráfica con <code>.plot(kind=...)</code>:</p>
+<ul>
+  <li><code>'bar'</code> — barras verticales</li>
+  <li><code>'barh'</code> — barras horizontales</li>
+  <li><code>'line'</code> — líneas</li>
+  <li><code>'hist'</code> — histograma</li>
+  <li><code>'pie'</code> — pastel</li>
+</ul>
+<p>Siempre termina con <code>plt.show()</code> para renderizar la figura.</p>`,
+      code: `import pandas as pd
+import matplotlib.pyplot as plt
+
+# Ventas totales por isla
+por_isla = ventas.groupby('isla')['ventas_usd'].sum()
+
+fig, ax = plt.subplots(figsize=(7, 4))
+por_isla.plot(kind='bar', ax=ax,
+              color=['#2E86AB', '#A23B72', '#F18F01'],
+              edgecolor='white', linewidth=0.5)
+
+ax.set_title('Ventas totales por isla', fontsize=13, fontweight='bold', pad=12)
+ax.set_xlabel('Isla', labelpad=8)
+ax.set_ylabel('Ventas (USD)')
+ax.tick_params(axis='x', rotation=0)
+ax.spines[['top','right']].set_visible(False)
+plt.tight_layout()
+plt.show()`,
+      hints: [],
+      validation: null,
+      dataset: "ventas",
+    },
+    {
+      type: "fill",
+      title: "Gráfica de líneas y doble eje",
+      concept: "Las líneas muestran tendencias. Un segundo eje Y permite comparar variables de distinta escala.",
+      expl: `<p>Para crear un segundo eje Y: <code>ax2 = ax1.twinx()</code></p>
+<p>Cada eje puede tener su propia escala, color y etiqueta.</p>
+<p>Reemplaza los <code>___</code> con los nombres correctos de columna del dataset <strong>clima</strong>.</p>`,
+      code: `import pandas as pd
+import matplotlib.pyplot as plt
+
+# Columnas disponibles en clima: mes, temperatura, humedad, lluvia_mm
+fig, ax1 = plt.subplots(figsize=(9, 4))
+
+# Temperatura en eje izquierdo (reemplaza ___)
+ax1.plot(clima['mes'], clima['___'],
+         color='#E63946', marker='o', linewidth=2, label='Temperatura (°C)')
+ax1.set_xlabel('Mes')
+ax1.set_ylabel('Temperatura (°C)', color='#E63946')
+ax1.tick_params(axis='x', rotation=40)
+
+# Lluvia en eje derecho (reemplaza ___)
+ax2 = ax1.twinx()
+ax2.bar(clima['mes'], clima['___'],
+        alpha=0.3, color='#457B9D', label='Lluvia (mm)')
+ax2.set_ylabel('Lluvia (mm)', color='#457B9D')
+
+ax1.set_title('Temperatura y lluvia en Galápagos por mes',
+              fontsize=12, fontweight='bold')
+plt.tight_layout()
+plt.show()`,
+      hints: [
+        "La columna de temperatura: <code>'temperatura'</code>",
+        "La columna de lluvia: <code>'lluvia_mm'</code>",
+      ],
+      validation: { type: "code_contains", values: ["temperatura", "lluvia_mm"] },
+      dataset: "clima",
+    },
+    {
+      type: "challenge",
+      title: "Tu propia visualización",
+      concept: "Crea una visualización con criterio: elige el tipo correcto para la historia que quieres contar.",
+      expl: `<p>Diseña una gráfica propia usando cualquier dataset: <code>ventas</code>, <code>estudiantes</code> o <code>clima</code>.</p>
+<p>Tu gráfica debe incluir:</p>
+<ul>
+  <li>Algún tipo de agregación antes de graficar</li>
+  <li>Título descriptivo (<code>ax.set_title</code>)</li>
+  <li>Etiquetas en los ejes (<code>ax.set_xlabel</code>, <code>ax.set_ylabel</code>)</li>
+  <li>Al menos un color personalizado</li>
+</ul>`,
+      code: `import pandas as pd
+import matplotlib.pyplot as plt
+
+# Tienes acceso a: ventas, estudiantes, clima
+# Ejemplo inicial (modifícalo como quieras):
+datos = ventas.groupby('producto')['turistas'].mean()
+
+fig, ax = plt.subplots(figsize=(8, 5))
+
+# Elige el tipo: 'bar', 'barh', 'line', 'pie', 'hist'
+datos.plot(kind='___', ax=ax, color='___')
+
+ax.set_title('___')
+ax.set_xlabel('___')
+ax.set_ylabel('___')
+ax.spines[['top','right']].set_visible(False)
+
+plt.tight_layout()
+plt.show()`,
+      hints: [
+        "Para barras horizontales de notas: <code>estudiantes.groupby('carrera')['nota'].mean().plot(kind='barh')</code>",
+        "Para histograma: <code>estudiantes['nota'].plot(kind='hist', bins=6)</code>",
+        "Colores en hex: <code>'#2E86AB'</code>, <code>'#F18F01'</code>, <code>'#E63946'</code>",
+      ],
+      validation: { type: "code_contains", values: ["plt.show", "set_title"] },
+    },
+  ],
+},
+];
+
+/* ═══════════════════════════════════════════════════════════
+   DATASETS REFERENCE INFO
+═══════════════════════════════════════════════════════════ */
+const DS_INFO = {
+  ventas: `ventas → 12 filas × 5 columnas
+  isla         : str  ('Santa Cruz', 'San Cristóbal', 'Isabela')
+  mes          : str  ('Enero', 'Febrero', 'Marzo', 'Abril')
+  producto     : str  ('Snorkel', 'Buceo', 'Tour')
+  ventas_usd   : int  (ingresos en USD)
+  turistas     : int  (número de turistas)`,
+
+  estudiantes: `estudiantes → 10 filas × 5 columnas
+  nombre       : str  (nombre del estudiante)
+  carrera      : str  ('Biología', 'Empresas', 'Análisis')
+  nota         : float (escala 0-10)
+  año_ingreso  : int  (2021, 2022, 2023)
+  beca         : bool (True/False)`,
+
+  clima: `clima → 12 filas × 4 columnas
+  mes          : str  ('Ene', 'Feb', ..., 'Dic')
+  temperatura  : float (grados Celsius)
+  humedad      : int  (porcentaje)
+  lluvia_mm    : int  (milímetros de precipitación)`,
+};
+
+/* ═══════════════════════════════════════════════════════════
+   REFERENCIA RÁPIDA
+═══════════════════════════════════════════════════════════ */
+const REFERENCE_HTML = `
+<div class="ref-section">
+  <h3>Crear estructuras</h3>
+  <table class="ref-table">
+    <tr><td>pd.Series([1,2,3])</td><td>Serie simple</td></tr>
+    <tr><td>pd.Series(vals, index=idx)</td><td>Serie con índice</td></tr>
+    <tr><td>pd.DataFrame({'col': [...]})</td><td>DataFrame desde diccionario</td></tr>
+    <tr><td>pd.read_csv('archivo.csv')</td><td>Desde archivo CSV</td></tr>
+  </table>
+</div>
+<div class="ref-section">
+  <h3>Explorar</h3>
+  <table class="ref-table">
+    <tr><td>df.shape</td><td>(filas, columnas)</td></tr>
+    <tr><td>df.columns</td><td>Nombres de columnas</td></tr>
+    <tr><td>df.dtypes</td><td>Tipo de cada columna</td></tr>
+    <tr><td>df.head(n)</td><td>Primeras n filas</td></tr>
+    <tr><td>df.tail(n)</td><td>Últimas n filas</td></tr>
+    <tr><td>df.describe()</td><td>Estadísticas numéricas</td></tr>
+    <tr><td>df['col'].value_counts()</td><td>Frecuencia de valores</td></tr>
+    <tr><td>df.info()</td><td>Resumen completo</td></tr>
+  </table>
+</div>
+<div class="ref-section">
+  <h3>Seleccionar</h3>
+  <table class="ref-table">
+    <tr><td>df['col']</td><td>Una columna → Serie</td></tr>
+    <tr><td>df[['c1','c2']]</td><td>Varias columnas → DataFrame</td></tr>
+    <tr><td>df.iloc[n]</td><td>Fila por posición</td></tr>
+    <tr><td>df.iloc[a:b, c:d]</td><td>Rango filas/cols por posición</td></tr>
+    <tr><td>df.loc[idx, 'col']</td><td>Por etiqueta</td></tr>
+  </table>
+</div>
+<div class="ref-section">
+  <h3>Filtrar</h3>
+  <table class="ref-table">
+    <tr><td>df[df['col'] > val]</td><td>Condición simple</td></tr>
+    <tr><td>df[(c1) & (c2)]</td><td>Y lógico (ambas True)</td></tr>
+    <tr><td>df[(c1) | (c2)]</td><td>O lógico (alguna True)</td></tr>
+    <tr><td>df[df['col'].isin([...])]</td><td>Valor en lista</td></tr>
+    <tr><td>df[~condicion]</td><td>Negación (NOT)</td></tr>
+  </table>
+</div>
+<div class="ref-section">
+  <h3>Nulos</h3>
+  <table class="ref-table">
+    <tr><td>df.isnull().sum()</td><td>Nulos por columna</td></tr>
+    <tr><td>df['col'].fillna(val)</td><td>Rellenar NaN</td></tr>
+    <tr><td>df.dropna()</td><td>Eliminar filas con NaN</td></tr>
+    <tr><td>df.dropna(subset=['col'])</td><td>Eliminar NaN en columna</td></tr>
+    <tr><td>df.drop_duplicates()</td><td>Eliminar filas duplicadas</td></tr>
+  </table>
+</div>
+<div class="ref-section">
+  <h3>Agrupar</h3>
+  <table class="ref-table">
+    <tr><td>df.groupby('col')['num'].sum()</td><td>Suma por grupo</td></tr>
+    <tr><td>df.groupby('col')['num'].mean()</td><td>Promedio por grupo</td></tr>
+    <tr><td>df.groupby('col')['num'].count()</td><td>Conteo por grupo</td></tr>
+    <tr><td>df.groupby(['c1','c2']).sum()</td><td>Múltiples columnas</td></tr>
+    <tr><td>.agg(nombre=('col','func'))</td><td>Múltiples estadísticas</td></tr>
+  </table>
+</div>
+<div class="ref-section">
+  <h3>Serie: estadísticas</h3>
+  <table class="ref-table">
+    <tr><td>.mean() / .median()</td><td>Promedio / mediana</td></tr>
+    <tr><td>.sum() / .count()</td><td>Suma / conteo</td></tr>
+    <tr><td>.max() / .min()</td><td>Máximo / mínimo</td></tr>
+    <tr><td>.idxmax() / .idxmin()</td><td>Etiqueta del máx/mín</td></tr>
+    <tr><td>.std() / .var()</td><td>Desviación estándar / varianza</td></tr>
+    <tr><td>.round(n)</td><td>Redondear a n decimales</td></tr>
+  </table>
+</div>
+<div class="ref-section">
+  <h3>Visualización</h3>
+  <table class="ref-table">
+    <tr><td>serie.plot(kind='bar')</td><td>Barras verticales</td></tr>
+    <tr><td>serie.plot(kind='barh')</td><td>Barras horizontales</td></tr>
+    <tr><td>serie.plot(kind='line')</td><td>Líneas</td></tr>
+    <tr><td>serie.plot(kind='hist')</td><td>Histograma</td></tr>
+    <tr><td>ax.set_title('...')</td><td>Título de la gráfica</td></tr>
+    <tr><td>ax.set_xlabel('...')</td><td>Etiqueta eje X</td></tr>
+    <tr><td>plt.tight_layout()</td><td>Ajustar márgenes</td></tr>
+    <tr><td>plt.show()</td><td>Mostrar la figura</td></tr>
+  </table>
+</div>`;
+
+/* ═══════════════════════════════════════════════════════════
+   ESTADO
+═══════════════════════════════════════════════════════════ */
+let pyodideReady = false;
+let pyodide = null;
+let editor = null;
+let curMod = 0;
+let curAct = 0;
+let hintIdx = 0;
+let done = {}; // done[modIdx][actIdx] = true
+
+function setBar(pct) {
+  document.getElementById('load-bar').style.width = pct + '%';
+}
+function setStatus(msg) {
+  document.getElementById('load-status').textContent = msg;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   PYODIDE
+═══════════════════════════════════════════════════════════ */
+async function initPyodide() {
+  setStatus('Cargando motor Python (Pyodide)...'); setBar(5);
+  pyodide = await loadPyodide();
+  setStatus('Instalando pandas, numpy, matplotlib...'); setBar(30);
+  await pyodide.loadPackage(['pandas', 'numpy', 'matplotlib']);
+  setStatus('Preparando datasets...'); setBar(75);
+
+  await pyodide.runPythonAsync(`
+import pandas as pd
+import numpy as np
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
+import sys, io, base64, traceback
+
+# Datasets del simulador
+ventas = pd.DataFrame({
+    'isla':      ['Santa Cruz','San Cristóbal','Isabela',
+                  'Santa Cruz','San Cristóbal','Isabela',
+                  'Santa Cruz','San Cristóbal','Isabela',
+                  'Santa Cruz','San Cristóbal','Isabela'],
+    'mes':       ['Enero','Enero','Enero',
+                  'Febrero','Febrero','Febrero',
+                  'Marzo','Marzo','Marzo',
+                  'Abril','Abril','Abril'],
+    'producto':  ['Snorkel','Buceo','Tour',
+                  'Snorkel','Buceo','Tour',
+                  'Buceo','Snorkel','Tour',
+                  'Buceo','Snorkel','Tour'],
+    'ventas_usd':[3200,4500,1800,2900,5100,2000,
+                  4800,3100,2200,3500,4200,1950],
+    'turistas':  [45,38,22,40,42,25,55,44,28,48,46,24]
+})
+
+estudiantes = pd.DataFrame({
+    'nombre':      ['Ana','Luis','María','Carlos','Sofía',
+                    'Pedro','Laura','Diego','Valeria','Andrés'],
+    'carrera':     ['Biología','Empresas','Biología','Análisis','Empresas',
+                    'Análisis','Biología','Empresas','Análisis','Biología'],
+    'nota':        [8.5,7.2,9.1,8.8,6.5,9.4,7.8,8.2,9.0,7.5],
+    'año_ingreso': [2022,2021,2023,2022,2021,2023,2022,2021,2023,2022],
+    'beca':        [True,False,True,False,False,True,False,True,True,False]
+})
+
+clima = pd.DataFrame({
+    'mes':         ['Ene','Feb','Mar','Abr','May','Jun',
+                    'Jul','Ago','Sep','Oct','Nov','Dic'],
+    'temperatura': [27.2,27.8,28.5,28.1,26.3,25.1,
+                    24.8,24.5,25.2,26.1,26.8,27.3],
+    'humedad':     [78,80,82,81,75,71,68,67,70,73,76,77],
+    'lluvia_mm':   [45,62,88,71,32,18,12,10,22,35,48,52]
+})
+
+# Namespace base para ejecución de usuario
+_BASE_NS = {
+    '__builtins__': __builtins__,
+    'pd': pd, 'np': np, 'plt': plt,
+    'ventas': ventas, 'estudiantes': estudiantes, 'clima': clima
+}
+print("OK")
+`);
+
+  setStatus('Listo.'); setBar(100);
+  pyodideReady = true;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   EDITOR
+═══════════════════════════════════════════════════════════ */
+function initEditor() {
+  editor = CodeMirror.fromTextArea(document.getElementById('code-area'), {
+    mode: 'python',
+    theme: 'default',
+    lineNumbers: true,
+    indentUnit: 4,
+    tabSize: 4,
+    indentWithTabs: false,
+    autoCloseBrackets: true,
+    lineWrapping: false,
+    extraKeys: {
+      'Tab': (cm) => cm.execCommand('insertSoftTab'),
+      'Ctrl-Enter': () => runCode(),
+      'Cmd-Enter':  () => runCode(),
+    }
+  });
+  editor.setSize('100%', '100%');
+  document.getElementById('pane-ref').innerHTML = REFERENCE_HTML;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   NAVIGATION
+═══════════════════════════════════════════════════════════ */
+function buildNav() {
+  const pills = document.getElementById('nav-pills');
+  pills.innerHTML = '';
+  MODULES.forEach((m, i) => {
+    const p = document.createElement('button');
+    p.className = 'nav-pill' + (i === curMod ? ' active' : '');
+    const modDone = done[i] && Object.keys(done[i]).length === m.activities.length;
+    if (modDone) p.classList.add('done');
+    p.title = m.emoji + ' ' + m.title;
+    p.onclick = () => goToModule(i);
+    pills.appendChild(p);
+  });
+}
+
+function goToModule(mIdx) {
+  curMod = mIdx; curAct = 0;
+  loadActivity();
+}
+
+function navigate(dir) {
+  const acts = MODULES[curMod].activities;
+  if (dir === 1) {
+    if (curAct < acts.length - 1) { curAct++; loadActivity(); }
+    else if (curMod < MODULES.length - 1) { curMod++; curAct = 0; loadActivity(); }
+    else { showCompletion(); }
+  } else {
+    if (curAct > 0) { curAct--; loadActivity(); }
+    else if (curMod > 0) { curMod--; curAct = MODULES[curMod].activities.length - 1; loadActivity(); }
+  }
+}
+
+function loadActivity() {
+  const mod = MODULES[curMod];
+  const act = mod.activities[curAct];
+  hintIdx = 0;
+
+  // Nav meta
+  document.getElementById('nav-meta').textContent = `M${curMod+1} · A${curAct+1}`;
+
+  // Module label
+  document.getElementById('mod-label').textContent = `Módulo ${curMod+1}: ${mod.title}`;
+
+  // Activity dots
+  const dotsEl = document.getElementById('act-dots');
+  dotsEl.innerHTML = '';
+  mod.activities.forEach((_, i) => {
+    const d = document.createElement('div');
+    d.className = 'act-dot';
+    if (i === curAct) d.classList.add('active');
+    else if (done[curMod]?.[i]) d.classList.add('done');
+    dotsEl.appendChild(d);
+  });
+
+  // Type badge
+  const badge = document.getElementById('type-badge');
+  const badgeMap = { guided: ['Guiada', 'badge-guided'], fill: ['Completar', 'badge-fill'], challenge: ['Desafío', 'badge-challenge'] };
+  badge.className = 'type-badge ' + badgeMap[act.type][1];
+  badge.textContent = badgeMap[act.type][0];
+
+  // Title
+  document.getElementById('act-title').textContent = act.title;
+  // Concept
+  document.getElementById('concept-box').textContent = act.concept;
+  // Explanation
+  document.getElementById('expl').innerHTML = act.expl;
+
+  // Dataset reference
+  const dsRef = document.getElementById('ds-ref');
+  const dsBody = document.getElementById('ds-ref-body');
+  const datasets = act.dataset ? [act.dataset] : (act.code?.includes('ventas') || act.code?.includes('estudiantes') || act.code?.includes('clima') ?
+    ['ventas','estudiantes','clima'].filter(d => act.code?.includes(d)) : []);
+  if (datasets.length > 0) {
+    dsBody.textContent = datasets.map(d => DS_INFO[d] || '').join('\n\n');
+    dsRef.style.display = '';
+  } else {
+    dsRef.style.display = 'none';
+  }
+
+  // Hints
+  const hintsWrap = document.getElementById('hints-wrap');
+  const hintsList = document.getElementById('hints-list');
+  hintsList.innerHTML = '';
+  if (act.hints && act.hints.length > 0) {
+    hintsWrap.style.display = '';
+    act.hints.forEach((h, i) => {
+      const el = document.createElement('div');
+      el.className = 'hint-item';
+      el.id = `hint-${i}`;
+      el.innerHTML = h;
+      hintsList.appendChild(el);
+    });
+  } else {
+    hintsWrap.style.display = 'none';
+  }
+
+  // Load code
+  editor.setValue(act.code || '');
+  editor.clearHistory();
+  setTimeout(() => editor.refresh(), 50);
+
+  // Clear output
+  clearOutput();
+  document.getElementById('val-bar').className = 'val-bar';
+  document.getElementById('val-bar').textContent = '';
+
+  // Buttons
+  const totalActs = MODULES.reduce((s,m) => s + m.activities.length, 0);
+  const currentIdx = MODULES.slice(0, curMod).reduce((s,m) => s + m.activities.length, 0) + curAct;
+  document.getElementById('btn-prev').disabled = currentIdx === 0;
+  document.getElementById('btn-next').textContent = currentIdx === totalActs - 1 ? 'Finalizar ✓' : 'Siguiente →';
+
+  buildNav();
+
+  // Auto-run guided
+  if (act.type === 'guided' && pyodideReady) {
+    setTimeout(runCode, 300);
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   CODE EXECUTION
+═══════════════════════════════════════════════════════════ */
+async function runCode() {
+  if (!pyodideReady) {
+    setOutputHtml('<span class="out-placeholder">Pyodide aún está cargando. Espera un momento...</span>');
+    return;
+  }
+  const code = editor.getValue();
+  setRunning(true);
+  clearOutput();
+
+  try {
+    pyodide.globals.set('_user_code', code);
+
+    await pyodide.runPythonAsync(`
+import sys, io, base64
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
+
+_ns = dict(_BASE_NS)
+_ns['ventas']      = _BASE_NS['ventas'].copy()
+_ns['estudiantes'] = _BASE_NS['estudiantes'].copy()
+_ns['clima']       = _BASE_NS['clima'].copy()
+
+_buf_out = io.StringIO()
+sys.stdout = _buf_out
+
+try:
+    exec(compile(_user_code, '<actividad>', 'exec'), _ns)
+except Exception as _exc:
+    import traceback
+    print("\\u274c " + type(_exc).__name__ + ": " + str(_exc))
+
+sys.stdout = sys.__stdout__
+_output_text = _buf_out.getvalue()
+
+_img_b64 = None
+if plt.get_fignums():
+    _ibuf = io.BytesIO()
+    plt.savefig(_ibuf, format='png', bbox_inches='tight', dpi=110, facecolor='white')
+    _ibuf.seek(0)
+    _img_b64 = base64.b64encode(_ibuf.read()).decode()
+    plt.close('all')
+`);
+
+    const text = pyodide.globals.get('_output_text') || '';
+    const img  = pyodide.globals.get('_img_b64');
+
+    displayOutput(text, img);
+    validateOutput(text, code);
+
+  } catch(err) {
+    setOutputHtml(`<span class="out-error">❌ Error inesperado: ${err.message}</span>`);
+  }
+
+  setRunning(false);
+}
+
+function displayOutput(text, img) {
+  const body = document.getElementById('out-body');
+  body.innerHTML = '';
+
+  if (text) {
+    const pre = document.createElement('span');
+    const isError = text.includes('❌');
+    pre.className = isError ? 'out-error' : '';
+    pre.textContent = text;
+    body.appendChild(pre);
+  }
+
+  if (img) {
+    const i = document.createElement('img');
+    i.className = 'out-img';
+    i.src = 'data:image/png;base64,' + img;
+    body.appendChild(i);
+  }
+
+  if (!text && !img) {
+    body.innerHTML = '<span class="out-placeholder">(Sin salida. ¿Olvidaste un print?)</span>';
+  }
+}
+
+function validateOutput(text, code) {
+  const act = MODULES[curMod].activities[curAct];
+  if (!act.validation) return;
+
+  const bar = document.getElementById('val-bar');
+  const v = act.validation;
+  let pass = false;
+
+  if (v.type === 'output_contains') {
+    pass = v.values.every(val => text.includes(val));
+  } else if (v.type === 'code_contains') {
+    pass = v.values.every(val => code.includes(val));
+  }
+
+  const hasBlank = code.includes('___');
+
+  if (hasBlank && !pass) {
+    bar.className = 'val-bar warn';
+    bar.textContent = '⚠️  Aún hay blancos sin completar. Reemplaza ___ con tu respuesta.';
+    bar.style.display = 'flex';
+    return;
+  }
+
+  if (pass) {
+    bar.className = 'val-bar success';
+    bar.textContent = '✅  ¡Correcto! La salida es la esperada. Puedes continuar.';
+    if (!done[curMod]) done[curMod] = {};
+    done[curMod][curAct] = true;
+    buildNav();
+    refreshDots();
+  } else if (text.includes('❌')) {
+    bar.className = 'val-bar error';
+    bar.textContent = '❌  Hay un error en el código. Lee el mensaje de arriba y corrígelo.';
+  } else {
+    bar.className = 'val-bar error';
+    bar.textContent = '🔄  La salida no coincide con lo esperado. Revisa los valores o usa las pistas.';
+  }
+  bar.style.display = 'flex';
+}
+
+function refreshDots() {
+  const mod = MODULES[curMod];
+  const dotsEl = document.getElementById('act-dots');
+  const dots = dotsEl.querySelectorAll('.act-dot');
+  dots.forEach((d, i) => {
+    d.className = 'act-dot';
+    if (i === curAct) d.classList.add('active');
+    else if (done[curMod]?.[i]) d.classList.add('done');
+  });
+}
+
+/* ═══════════════════════════════════════════════════════════
+   UI HELPERS
+═══════════════════════════════════════════════════════════ */
+function clearOutput() {
+  document.getElementById('out-body').innerHTML =
+    '<span class="out-placeholder">El resultado aparecerá aquí cuando presiones ▶ Ejecutar</span>';
+}
+function setOutputHtml(html) {
+  document.getElementById('out-body').innerHTML = html;
+}
+function setRunning(on) {
+  document.getElementById('btn-run').disabled = on;
+  document.getElementById('out-running').style.display = on ? 'block' : 'none';
+}
+function resetCode() {
+  const act = MODULES[curMod].activities[curAct];
+  editor.setValue(act.code || '');
+  clearOutput();
+  document.getElementById('val-bar').className = 'val-bar';
+  hintIdx = 0;
+  document.querySelectorAll('.hint-item').forEach(h => h.style.display = 'none');
+}
+function showNextHint() {
+  const items = document.querySelectorAll('.hint-item');
+  if (hintIdx < items.length) {
+    items[hintIdx].style.display = 'block';
+    hintIdx++;
+  }
+}
+function switchTab(tab) {
+  const isEd = tab === 'ed';
+  document.getElementById('pane-editor').style.display = isEd ? '' : 'none';
+  document.getElementById('pane-ref').style.display    = isEd ? 'none' : '';
+  document.getElementById('tbtn-ed').classList.toggle('active', isEd);
+  document.getElementById('tbtn-ref').classList.toggle('active', !isEd);
+  if (isEd) setTimeout(() => editor.refresh(), 30);
+}
+function showCompletion() {
+  document.getElementById('main-layout').style.display = 'none';
+  document.getElementById('completion').style.display = 'flex';
+}
+function restart() {
+  curMod = 0; curAct = 0; done = {};
+  document.getElementById('main-layout').style.display = 'flex';
+  document.getElementById('completion').style.display = 'none';
+  loadActivity();
+}
+
+/* ═══════════════════════════════════════════════════════════
+   INIT
+═══════════════════════════════════════════════════════════ */
+window.addEventListener('load', async () => {
+  await initPyodide();
+  initEditor();
+  buildNav();
+  loadActivity();
+  document.getElementById('loading-screen').style.display = 'none';
+  document.getElementById('app').style.display = 'flex';
+});
+</script>
+</body>
+</html>

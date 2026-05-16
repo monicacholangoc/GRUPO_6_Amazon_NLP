@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Día 10 · Regresión Logística — Seminario EDA 2026</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --sidebar-w: 270px; --topbar-h: 50px;
+      --blue: #2980b9; --blue-dark: #2472a4; --blue-light: #e7f2fa;
+      --navy: #232936; --text: #404040; --text-muted: #888;
+      --border: #ddd; --sidebar-bg: #f8f8f8; --bg: #ffffff; --code-bg: #f8f8f8;
+      --font: 'Lato','Helvetica Neue',Arial,sans-serif;
+      --mono: 'SFMono-Regular',Consolas,'Liberation Mono',Menlo,monospace;
+      --radius: 4px;
+      --green: #2f855a; --green-light: #f0fff4;
+      --orange: #c05621; --orange-light: #fffaf0;
+      --purple: #6b46c1; --purple-light: #faf5ff;
+    }
+    html { font-size: 15px; scroll-behavior: smooth; }
+    body { font-family: var(--font); background: var(--bg); color: var(--text); line-height: 1.75; }
+
+    #topbar { position: fixed; top:0; left:0; right:0; height: var(--topbar-h); background: var(--navy); color: #fcfcfc; display:flex; align-items:center; justify-content:space-between; padding: 0 1rem; z-index: 200; }
+    .brand { color: #fff; text-decoration: none; font-size: .95rem; font-weight: 700; display:flex; align-items:center; gap:.4rem; }
+    .brand .sep { opacity: .3; font-weight: 300; }
+    .brand .sub { font-weight: 400; font-size: .8rem; opacity: .75; }
+    .week-chip { font-size: .7rem; font-weight: 700; letter-spacing:.05em; text-transform: uppercase; padding: .18rem .55rem; background: rgba(255,255,255,.15); border-radius: 3px; }
+
+    #layout { display:flex; margin-top: var(--topbar-h); }
+    #sidebar { width: var(--sidebar-w); flex-shrink: 0; background: var(--sidebar-bg); border-right: 1px solid var(--border); position: fixed; top: var(--topbar-h); bottom: 0; overflow-y: auto; padding-bottom: 2rem; font-size: .875rem; }
+    #sidebar::-webkit-scrollbar { width: 4px; }
+    #sidebar::-webkit-scrollbar-thumb { background: #ccc; border-radius: 4px; }
+    .sb-header { padding: .9rem 1rem .4rem; font-size: .7rem; font-weight: 700; letter-spacing: .09em; text-transform: uppercase; color: #aaa; border-bottom: 1px solid var(--border); margin-bottom: .25rem; }
+    .sb-index-link { display:flex; align-items: center; gap:.5rem; padding: .45rem 1rem; color: var(--text); text-decoration: none; }
+    .sb-index-link:hover { background: var(--blue-light); color: var(--blue-dark); }
+    .sb-week { margin-top: .35rem; }
+    .sb-week-hdr { display:flex; align-items: baseline; justify-content: space-between; padding: .5rem 1rem .25rem; }
+    .sb-week-label { font-size: .7rem; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; }
+    .sb-week-sub { font-size: .68rem; color: var(--text-muted); }
+    .sb-week ul { list-style: none; }
+    .sb-item a { display:flex; align-items: baseline; gap: .45rem; padding: .38rem 1rem .38rem 1.35rem; color: #555; text-decoration: none; border-left: 3px solid transparent; line-height: 1.4; }
+    .sb-item a:hover { background: var(--blue-light); color: var(--blue-dark); }
+    .sb-item.active a { border-left-color: var(--blue); background: var(--blue-light); color: var(--blue-dark); font-weight: 700; }
+    .sb-item .dnum { font-size: .7rem; font-weight: 600; min-width: 2.2rem; color: #aaa; flex-shrink: 0; }
+    .sb-item.active .dnum { color: var(--blue); }
+    .sb-item .dtitle { font-size: .83rem; line-height: 1.35; }
+    .sb-badge { margin-left: auto; font-size: .62rem; font-weight: 700; padding: .08rem .3rem; border-radius: 2px; background: #fef9c3; color: #854d0e; flex-shrink: 0; }
+
+    #main { flex: 1; margin-left: var(--sidebar-w); min-width: 0; }
+    .content-wrap { max-width: 920px; margin: 0 auto; padding: 2rem 2.5rem 4rem; }
+
+    .breadcrumb { font-size: .8rem; color: var(--text-muted); margin-bottom: 1.25rem; padding-bottom: .75rem; border-bottom: 1px solid var(--border); }
+    .breadcrumb a { color: var(--blue); text-decoration: none; }
+    .breadcrumb .sep { color: #ccc; margin: 0 .3rem; }
+
+    h1 { font-size: 2rem; font-weight: 700; color: var(--navy); border-bottom: 2px solid var(--navy); padding-bottom: .6rem; margin-bottom: .5rem; line-height: 1.2; letter-spacing: -.02em; }
+    h2 { font-size: 1.35rem; color: var(--navy); border-bottom: 1px solid var(--border); margin: 2.2rem 0 .6rem; padding-bottom: .35rem; }
+    h3 { font-size: 1.1rem; font-weight: 700; margin: 1.5rem 0 .4rem; color: var(--navy); }
+    h4 { font-size: .95rem; font-weight: 700; margin: 1.2rem 0 .3rem; }
+    p, li { margin-bottom: .75rem; }
+    ul, ol { padding-left: 1.5rem; margin-bottom: .75rem; }
+    a { color: var(--blue); }
+    code { background: var(--code-bg); color: #c0392b; padding: .12em .35em; font-family: var(--mono); font-size: .88em; border-radius: 3px; }
+    pre { background: #f6f8fa; border: 1px solid #e1e4e8; border-radius: var(--radius); padding: 1rem; overflow-x: auto; font-family: var(--mono); font-size: .85rem; line-height: 1.55; margin-bottom: 1rem; }
+    pre code { background: none; color: inherit; padding: 0; font-size: inherit; }
+
+    blockquote { border-left: 4px solid var(--blue); background: var(--blue-light); padding: .8rem 1.1rem; margin: 1rem 0; border-radius: 0 var(--radius) var(--radius) 0; }
+    blockquote p:last-child { margin-bottom: 0; }
+
+    .callout { border-radius: var(--radius); padding: 1rem 1.2rem; margin: 1.1rem 0; border-left: 4px solid; }
+    .callout h4 { margin-top: 0; font-size: .95rem; }
+    .callout p:last-child, .callout ul:last-child { margin-bottom: 0; }
+    .callout.tip { background: var(--green-light); border-left-color: var(--green); }
+    .callout.tip h4 { color: var(--green); }
+    .callout.warn { background: var(--orange-light); border-left-color: var(--orange); }
+    .callout.warn h4 { color: var(--orange); }
+    .callout.concept { background: var(--purple-light); border-left-color: var(--purple); }
+    .callout.concept h4 { color: var(--purple); }
+
+    table { width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: .9rem; }
+    th, td { padding: .55rem .8rem; border: 1px solid var(--border); text-align: left; }
+    th { background: #f8f8f8; font-weight: 700; }
+    tr:nth-child(even) td { background: #fafafa; }
+
+    .action-bar { display:flex; align-items:center; gap:.75rem; flex-wrap: wrap; padding: .65rem .9rem; background: #f0f8ff; border: 1px solid #bee3f8; border-radius: var(--radius); margin-bottom: 1.5rem; font-size: .8rem; color: #2c5282; }
+    .action-label { font-weight: 600; }
+    .action-bar img { height: 18px; vertical-align: middle; }
+
+    .formula { background: #fafbfc; border: 1px solid #e1e4e8; border-radius: var(--radius); padding: 1rem 1.2rem; text-align: center; font-family: 'Cambria Math','Latin Modern Math', Georgia, serif; font-size: 1.05rem; margin: 1rem 0; line-height: 1.8; }
+    .formula sub, .formula sup { font-size: .75em; }
+
+    .sim-embed { margin: 1.5rem 0; border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,.05); }
+    .sim-embed-hdr { background: var(--navy); color: #fff; padding: .55rem .9rem; font-size: .85rem; font-weight: 600; display:flex; align-items:center; justify-content: space-between; gap: .5rem; }
+    .sim-embed-hdr a { color: #c2e1f5; font-size: .75rem; }
+    .sim-embed iframe { display: block; width: 100%; border: none; background: #fff; }
+
+    .step-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin: 1.2rem 0; }
+    .step-card { background: #fafbfc; border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem; }
+    .step-card .step-num { display: inline-block; background: var(--blue); color: #fff; width: 1.6rem; height: 1.6rem; line-height: 1.6rem; text-align: center; border-radius: 50%; font-weight: 700; font-size: .85rem; margin-bottom: .4rem; }
+    .step-card h4 { margin: .2rem 0 .35rem; font-size: .92rem; }
+    .step-card p { font-size: .85rem; margin-bottom: 0; line-height: 1.55; }
+
+    .pill { display:inline-block; padding: .15rem .55rem; border-radius: 12px; font-size: .72rem; font-weight: 700; background: #e7f2fa; color: var(--blue-dark); }
+    .pill.green { background: var(--green-light); color: var(--green); }
+    .pill.orange { background: var(--orange-light); color: var(--orange); }
+
+    .toc { background: #fafbfc; border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem 1.2rem; margin: 1.25rem 0; }
+    .toc h4 { margin: 0 0 .4rem; font-size: .85rem; text-transform: uppercase; letter-spacing: .05em; color: var(--text-muted); }
+    .toc ol { margin: 0; padding-left: 1.3rem; font-size: .9rem; }
+    .toc ol li { margin-bottom: .25rem; }
+
+    @media (max-width: 880px) {
+      #sidebar { transform: translateX(-100%); transition: transform .2s; }
+      #sidebar.open { transform: none; }
+      #main { margin-left: 0; }
+    }
+  </style>
+</head>
+<body>
+
+<header id="topbar">
+  <a href="../index.html" class="brand">🐍 Seminario EDA <span class="sep">·</span> <span class="sub">2026</span></a>
+  <span class="week-chip">Semana 3 · Día 10</span>
+</header>
+
+<div id="layout">
+  <nav id="sidebar">
+    <div class="sb-header">Curso</div>
+    <a class="sb-index-link" href="../index.html">📋 Presentación del curso</a>
+
+    <div class="sb-week"><div class="sb-week-hdr"><span class="sb-week-label">Semana 1</span><span class="sb-week-sub">21–24 abr</span></div><ul>
+      <li class="sb-item"><a href="../Dia%2001%20-%202026-04-21%20-%20Kick-off%20del%20seminario/index.html"><span class="dnum">Día 01</span><span class="dtitle">Kick-off</span></a></li>
+      <li class="sb-item"><a href="../Dia%2002%20-%202026-04-22%20-%20Fundamentos%20de%20Python%20I/index.html"><span class="dnum">Día 02</span><span class="dtitle">Python I</span></a></li>
+      <li class="sb-item"><a href="../Dia%2003%20-%202026-04-23%20-%20Fundamentos%20de%20Python%20II/index.html"><span class="dnum">Día 03</span><span class="dtitle">Python II</span></a></li>
+      <li class="sb-item"><a href="../Dia%2004%20-%202026-04-24%20-%20Planteamiento%20del%20proyecto/index.html"><span class="dnum">Día 04</span><span class="dtitle">Proyecto</span><span class="sb-badge">S1</span></a></li>
+    </ul></div>
+    <div class="sb-week"><div class="sb-week-hdr"><span class="sb-week-label">Semana 2</span><span class="sb-week-sub">27–29 abr</span></div><ul>
+      <li class="sb-item"><a href="../Dia%2005%20-%202026-04-27%20-%20OOP/index.html"><span class="dnum">Día 05</span><span class="dtitle">OOP</span></a></li>
+      <li class="sb-item"><a href="../Dia%2006%20-%202026-04-28%20-%20Pandas%20I/index.html"><span class="dnum">Día 06</span><span class="dtitle">Pandas I</span></a></li>
+      <li class="sb-item"><a href="../Dia%2007%20-%202026-04-29%20-%20Pandas%20II/index.html"><span class="dnum">Día 07</span><span class="dtitle">Pandas II</span><span class="sb-badge">S2</span></a></li>
+    </ul></div>
+    <div class="sb-week"><div class="sb-week-hdr"><span class="sb-week-label">Semana 3</span><span class="sb-week-sub">4–8 may</span></div><ul>
+      <li class="sb-item"><a href="../Dia%2008%20-%202026-05-04%20-%20Visualizaciones/index.html"><span class="dnum">Día 08</span><span class="dtitle">Visualizaciones</span></a></li>
+      <li class="sb-item"><a href="../Dia%2009%20-%202026-05-05%20-%20Regresiones/index.html"><span class="dnum">Día 09</span><span class="dtitle">Regresiones</span></a></li>
+      <li class="sb-item active"><a href="./index.html"><span class="dnum">Día 10</span><span class="dtitle">Reg. logística</span></a></li>
+      <li class="sb-item"><a href="../Dia%2011%20-%202026-05-07%20-%20%C3%81rbol%20de%20Decisi%C3%B3n/index.html"><span class="dnum">Día 11</span><span class="dtitle">Árbol decisión</span></a></li>
+      <li class="sb-item"><a href="../Dia%2012%20-%202026-05-08%20-%20M%C3%A9tricas%20-%20ENTREGA%20SEMANA%203/index.html"><span class="dnum">Día 12</span><span class="dtitle">Métricas</span><span class="sb-badge">S3</span></a></li>
+    </ul></div>
+    <div class="sb-week"><div class="sb-week-hdr"><span class="sb-week-label">Semana 4</span><span class="sb-week-sub">11–15 may</span></div><ul>
+      <li class="sb-item"><a href="../Dia%2013%20-%202026-05-11%20-%20Ensembles%20y%20Random%20Forest/index.html"><span class="dnum">Día 13</span><span class="dtitle">Ensembles / RF</span></a></li>
+      <li class="sb-item"><a href="../Dia%2014%20-%202026-05-12%20-%20Hip%C3%B3tesis%20y%20pruebas%20estad%C3%ADsticas/index.html"><span class="dnum">Día 14</span><span class="dtitle">Hipótesis</span></a></li>
+      <li class="sb-item"><a href="../Dia%2015%20-%202026-05-13%20-%20Dashboards%20con%20Streamlit/index.html"><span class="dnum">Día 15</span><span class="dtitle">Streamlit</span></a></li>
+      <li class="sb-item"><a href="../Dia%2016%20-%202026-05-14%20-%20APIs%20con%20FastAPI%20y%20buenas%20pr%C3%A1cticas/index.html"><span class="dnum">Día 16</span><span class="dtitle">FastAPI</span></a></li>
+      <li class="sb-item"><a href="../Dia%2017%20-%202026-05-15%20-%20Presentaciones%20finales/index.html"><span class="dnum">Día 17</span><span class="dtitle">Defensa</span><span class="sb-badge">FINAL</span></a></li>
+    </ul></div>
+  </nav>
+
+  <main id="main">
+    <div class="content-wrap">
+
+      <div class="breadcrumb">
+        <a href="../index.html">Seminario EDA 2026</a><span class="sep">›</span>
+        <a href="../index.html#sesiones">Semana 3</a><span class="sep">›</span>
+        <span>Día 10 · Regresión Logística</span>
+      </div>
+
+      <h1>Día 10 · Regresión Logística</h1>
+      <p style="color:#666; margin-top:.4rem">
+        <strong>Fecha:</strong> Miércoles 6 de mayo de 2026 &nbsp;·&nbsp;
+        <strong>Duración:</strong> 2 h sincrónicas + 1 h trabajo guiado &nbsp;·&nbsp;
+        <span class="pill">Módulo 3</span>
+      </p>
+
+      <div class="action-bar">
+        <span class="action-label">📓 Notebook:</span>
+        <a href="./clase_10.ipynb">clase_10.ipynb</a>
+        <span style="color:#94a3b8">·</span>
+        <span class="action-label">🎮 Simuladores:</span>
+        <a href="../simuladores/simulador-confusion-matrix.html">Matriz de confusión</a>
+        <span style="color:#94a3b8">·</span>
+        <a href="../simuladores/simulador-overfitting.html">Overfitting</a>
+      </div>
+
+      <div class="toc">
+        <h4>En esta clase</h4>
+        <ol>
+          <li>¿Por qué clasificar? Del valor numérico a la etiqueta.</li>
+          <li>¿Por qué NO usar regresión lineal para clasificar?</li>
+          <li>La función sigmoide y los log-odds.</li>
+          <li>Frontera de decisión y umbral.</li>
+          <li>Ejemplo guiado: dataset Pima Diabetes.</li>
+          <li>El problema de las clases desbalanceadas.</li>
+          <li>SMOTE — Synthetic Minority Over-sampling Technique.</li>
+          <li>Regularización L1/L2.</li>
+          <li>Simulador de matriz de confusión.</li>
+          <li>Cierre y entregable parcial S3.</li>
+        </ol>
+      </div>
+
+      <h2>1. ¿Por qué clasificar? Del valor numérico a la etiqueta</h2>
+      <p>
+        En la clase anterior aprendimos a predecir un <em>número</em> — ventas, precios, temperaturas — mediante regresión lineal.
+        Hoy saltamos a un problema diferente: <strong>predecir una categoría</strong>. El ejemplo más simple es
+        <strong>clasificación binaria</strong>: ¿sí o no?, ¿tiene churn o no?, ¿es fraude o no?.
+      </p>
+
+      <p>
+        Tres ejemplos de negocio que motivan clasificación:
+      </p>
+      <ul>
+        <li><strong>Churn:</strong> predecir si un cliente de telefonía abandonará la empresa en los próximos 3 meses. Éxito = detección temprana → retención.</li>
+        <li><strong>Fraude:</strong> detectar transacciones fraudulentas. Éxito = evitar pérdidas y sanciones regulatorias.</li>
+        <li><strong>Default crediticio:</strong> estimar si un solicitante de préstamo no pagará. Éxito = reducir pérdidas de cartera.</li>
+      </ul>
+
+      <div class="callout concept">
+        <h4>📌 Idea central</h4>
+        <p>
+          La clasificación binaria es el puente entre regresión (problema de números) y decisiones de negocio (sí/no).
+          El modelo no solo predice una probabilidad: debe traducirla en una acción. Hoy veremos cómo.
+        </p>
+      </div>
+
+      <h2>2. ¿Por qué NO usar regresión lineal para clasificar?</h2>
+
+      <p>
+        A primera vista, podrías pensar: «Si regresión lineal predice números, ¿por qué no la uso y redondeo la salida?»
+        Hay tres problemas graves:
+      </p>
+
+      <h3>2.1 Predicciones fuera de [0,1]</h3>
+      <p>
+        Regresión lineal predice <em>cualquier</em> número. Si entrenas un modelo con <code>ŷ = β₀ + β₁·x</code> sobre una variable
+        objetivo binaria (0 ó 1), el modelo puede predecir ŷ = 2.5 ó ŷ = −1.3. Esas no son probabilidades válidas.
+      </p>
+
+      <h3>2.2 Homocedasticidad violada</h3>
+      <p>
+        En regresión lineal asumimos que el error tiene varianza constante (homocedasticidad). En clasificación binaria, la varianza
+        de y es alta cerca de 0.5 (incertidumbre) y baja en los extremos (certeza). Eso viola el supuesto.
+      </p>
+
+      <h3>2.3 Sensibilidad a outliers</h3>
+      <p>
+        Imagina un conjunto de datos donde casi todos valen 0 ó 1 (clasificación clara), pero hay un outlier atípico.
+        La recta de OLS se sesga para minimizar el error de ese punto — los coeficientes pueden invertir el sentido.
+      </p>
+
+      <h2>3. La función sigmoide y los log-odds</h2>
+
+      <p>
+        La solución es cambiar la forma de la recta a una <strong>curva que siempre queda entre 0 y 1</strong>. Esa curva es la
+        <strong>función sigmoide</strong>:
+      </p>
+
+      <div class="formula">σ(z) = 1 / (1 + e<sup>−z</sup>)</div>
+
+      <p>
+        donde <em>z</em> es el mismo término lineal que en regresión: <em>z = β₀ + β₁·x₁ + ... + β<sub>p</sub>·x<sub>p</sub></em>.
+        La sigmoide convierte cualquier valor de <em>z</em> en una probabilidad entre 0 y 1.
+      </p>
+
+      <p>
+        Matemáticamente, esto es equivalente a modelar los <strong>log-odds</strong> (logaritmo de las probabilidades):
+      </p>
+
+      <div class="formula">log(p / (1−p)) = β₀ + β₁·x₁ + ... + β<sub>p</sub>·x<sub>p</sub></div>
+
+      <p>
+        La razón es pedagogía: <strong>los coeficientes β<sub>j</sub> se interpretan como cambios en el log-odds</strong>.
+        Para obtener el odds ratio (cuántas veces sube la probabilidad relativa de la clase positiva), exponenciamos:
+      </p>
+
+      <div class="formula">Odds Ratio = e<sup>β<sub>j</sub></sup></div>
+
+      <p>
+        Por ejemplo, si β₁ = 0.5, entonces e^0.5 ≈ 1.65: un aumento unitario en x₁ multiplica las odds por 1.65 (incremento de 65%).
+      </p>
+
+      <h2>4. Frontera de decisión y umbral</h2>
+
+      <p>
+        El modelo de regresión logística predice P(y=1|x), la probabilidad de la clase positiva. Pero para tomar una decisión
+        («¿es fraude o no?»), necesitamos <strong>cruzar un umbral</strong>:
+      </p>
+
+      <ul>
+        <li>Si P(y=1|x) ≥ umbral → clasificar como 1 (positivo).</li>
+        <li>Si P(y=1|x) &lt; umbral → clasificar como 0 (negativo).</li>
+      </ul>
+
+      <p>
+        El umbral <strong>default es 0.5</strong> (la clase con mayor probabilidad), pero es ajustable. La elección del umbral
+        depende del <strong>costo de negocio</strong> de los errores:
+      </p>
+
+      <ul>
+        <li>Falso positivo (predecir fraude cuando no lo es): costo = pérdida de cliente satisfecho.</li>
+        <li>Falso negativo (no detectar fraude): costo = pérdida económica directa.</li>
+      </ul>
+
+      <p>
+        Si el falso negativo es 10 veces más caro, subirás el umbral a 0.3 para ser más agresivo en la detección. Lo veremos en detalle
+        el viernes en métricas.
+      </p>
+
+      <h2>5. Ejemplo guiado: dataset Pima Diabetes</h2>
+
+      <p>
+        Trabajaremos con el clásico dataset de diabetes Pima. Contiene 768 muestras, 8 features (medidas clínicas) y 1 variable objetivo binaria
+        (Outcome: 0 = no diabetes, 1 = diabetes).
+      </p>
+
+      <p>URL del dataset (sin headers):</p>
+      <pre><code>https://raw.githubusercontent.com/jbrownlee/Datasets/master/pima-indians-diabetes.data.csv</code></pre>
+
+      <p>Headers que usaremos:</p>
+      <pre><code>Pregnancies, Glucose, BloodPressure, SkinThickness, Insulin, BMI, DiabetesPedigreeFunction, Age, Outcome</code></pre>
+
+      <p>Entrenamos el modelo:</p>
+
+<pre><code>import pandas as pd
+from sklearn.linear_model import LogisticRegression
+from sklearn.model_selection import train_test_split
+
+# Carga
+url = "https://raw.githubusercontent.com/jbrownlee/Datasets/master/pima-indians-diabetes.data.csv"
+cols = ["Pregnancies","Glucose","BloodPressure","SkinThickness","Insulin","BMI","DiabetesPedigreeFunction","Age","Outcome"]
+df = pd.read_csv(url, names=cols)
+
+X = df.iloc[:, :8]
+y = df["Outcome"]
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Modelo logístico
+modelo = LogisticRegression(random_state=42, max_iter=1000)
+modelo.fit(X_train, y_train)
+
+# Coeficientes
+for nombre, beta in zip(X.columns, modelo.coef_[0]):
+    odds_ratio = np.exp(beta)
+    print(f"{nombre:&lt;25s} β={beta:+.4f}  OR={odds_ratio:.3f}")
+
+print(f"\nAccuracy train: {modelo.score(X_train, y_train):.3f}")
+print(f"Accuracy test:  {modelo.score(X_test, y_test):.3f}")</code></pre>
+
+      <p>
+        Resultado típico: los coeficientes principales son Glucose (β≈0.04, OR≈1.04 — cada unidad de glucosa sube 4% la probabilidad relativa)
+        y Age. El intercept es negativo (probabilidad base baja sin factores de riesgo).
+      </p>
+
+      <h2>6. El problema de las clases desbalanceadas</h2>
+
+      <p>
+        En muchos problemas reales, las clases no están equilibradas. En Pima, ~35% tiene diabetes (clase positiva).
+        Pero imagina un dataset de fraude: tal vez solo el 0.1% de las transacciones son fraudulentas.
+      </p>
+
+      <p>
+        El problema: <strong>accuracy es engañosa</strong>. Un modelo que siempre predice «no fraudulento» tendría 99.9% de accuracy,
+        pero es completamente inútil — nunca detecta fraude.
+      </p>
+
+      <div class="callout warn">
+        <h4>⚠️ No confíes en accuracy con clases desbalanceadas</h4>
+        <p>
+          Usa métricas alternativas: precision, recall, F1, ROC-AUC. El viernes veremos todas en detalle.
+          Por ahora, retén que <strong>no todas las clases valen lo mismo</strong>.
+        </p>
+      </div>
+
+      <h2>7. SMOTE — Synthetic Minority Over-sampling Technique</h2>
+
+      <p>
+        La solución estándar para desbalance es <strong>generar ejemplos sintéticos de la clase minoritaria</strong>.
+        SMOTE funciona así: para cada muestra de la clase minoritaria, encuentra sus k-vecinos más cercanos
+        (en el espacio de features) e interpola puntos entre ellos. Los nuevos puntos son sintéticos pero «realistas»
+        en el sentido de que respetan la geometría de los datos.
+      </p>
+
+      <pre><code>from imblearn.over_sampling import SMOTE
+
+sm = SMOTE(random_state=42)
+X_train_res, y_train_res = sm.fit_resample(X_train, y_train)
+
+# Entrenar el modelo con datos balanceados
+modelo = LogisticRegression(random_state=42, max_iter=1000)
+modelo.fit(X_train_res, y_train_res)</code></pre>
+
+      <div class="callout warn">
+        <h4>⚠️ SMOTE solo en el train</h4>
+        <p>
+          <strong>NUNCA</strong> apliques SMOTE al test. Los datos sintéticos son artificiales — si los incluyes en validación,
+          las métricas dirán que el modelo es mejor de lo que realmente es (data leakage). SMOTE es solo para enriquecer
+          el entrenamiento.
+        </p>
+      </div>
+
+      <p>Comparación típica (dataset Pima desbalanceado):</p>
+
+      <table>
+        <thead><tr><th>Estrategia</th><th>AUC (test)</th><th>Recall (test)</th><th>Precisión (test)</th></tr></thead>
+        <tbody>
+          <tr><td>Sin SMOTE</td><td>0.824</td><td>0.64</td><td>0.72</td></tr>
+          <tr><td>Con SMOTE</td><td><strong>0.855</strong></td><td><strong>0.71</strong></td><td><strong>0.75</strong></td></tr>
+        </tbody>
+      </table>
+
+      <h2>8. Regularización L1/L2</h2>
+
+      <p>
+        La regresión logística, como la regresión lineal, puede sobreajustarse si hay muchos predictores o multicolinealidad.
+        La solución es regularización: penalizar coeficientes grandes.
+      </p>
+
+      <p><strong>L2 (Ridge):</strong> penaliza la suma de cuadrados de los coeficientes. Tiende a distribuir el peso entre variables correlacionadas.</p>
+
+      <p><strong>L1 (Lasso):</strong> penaliza el valor absoluto. Tiende a forzar algunos coeficientes a exactamente cero (selección de variables).</p>
+
+      <p><strong>Elastic Net:</strong> combinación de L1 + L2.</p>
+
+      <pre><code>from sklearn.linear_model import LogisticRegression
+
+# L2 (default)
+modelo_l2 = LogisticRegression(penalty='l2', C=1.0, random_state=42)
+
+# L1
+modelo_l1 = LogisticRegression(penalty='l1', solver='liblinear', C=1.0, random_state=42)
+
+# Elastic Net
+modelo_en = LogisticRegression(penalty='elasticnet', solver='saga', C=1.0, random_state=42)
+
+modelo_l2.fit(X_train, y_train)
+print(f"L2 - Coefs no cero: {(modelo_l2.coef_[0] != 0).sum()}")
+print(f"L1 - Coefs no cero: {(modelo_l1.coef_[0] != 0).sum()}")</code></pre>
+
+      <p>
+        El parámetro <code>C</code> es el inverso de lambda: C pequeño = más regularización (menos coeficientes grandes).
+        Gridsearch sobre C te ayuda a encontrar el balance.
+      </p>
+
+      <h2>9. Simulador: Matriz de confusión</h2>
+
+      <p>
+        Mañana veremos métricas en detalle. Por ahora, familiarízate con el simulador: puedes cambiar el umbral
+        y ver cómo evolucionan TP, FP, FN, TN.
+      </p>
+
+      <div class="sim-embed">
+        <div class="sim-embed-hdr">
+          <span>🎮 Simulador · Matriz de confusión — ajusta el umbral y observa el balance</span>
+          <a href="../simuladores/simulador-confusion-matrix.html" target="_blank">Abrir en pestaña ↗</a>
+        </div>
+        <iframe src="../simuladores/simulador-confusion-matrix.html" height="640" loading="lazy" title="Simulador Matriz de Confusión"></iframe>
+      </div>
+
+      <h2>10. Cierre y entregable parcial S3</h2>
+
+      <h3>10.1 Recapitulación</h3>
+      <ul>
+        <li>La regresión logística resuelve clasificación binaria usando una función sigmoide que garantiza probabilidades en [0,1].</li>
+        <li>Los coeficientes se interpretan como cambios en log-odds; para odds ratios, exponencia.</li>
+        <li>El umbral de decisión es ajustable según los costos de negocio.</li>
+        <li>El desbalance de clases es un problema real; SMOTE es la solución estándar (solo en train).</li>
+        <li>La regularización L1/L2 controla el overfitting.</li>
+      </ul>
+
+      <h3>10.2 Entregable parcial para Semana 3</h3>
+      <ol>
+        <li>En tu notebook, identifica o crea una variable objetivo <strong>binaria</strong> (ej. si un valor está arriba/abajo de un umbral).</li>
+        <li>Entrena un modelo de <strong>regresión logística</strong>. Reporta los coeficientes en forma de odds ratios.</li>
+        <li>Si hay desbalance, aplica <strong>SMOTE</strong> al train. Reporta las métricas antes y después (AUC, precision, recall).</li>
+        <li>Escribe 5 líneas: «Si la variable X sube en 1 unidad, la probabilidad de la clase positiva esperaría que...».</li>
+        <li>Experimenta con L1 vs L2. ¿Cuál da menos coeficientes no cero?</li>
+      </ol>
+
+      <blockquote>
+        <p>
+          <em>«La clasificación no es adivinanza: es asignar probabilidades y traducirlas en decisiones. El modelo no toma la decisión — la toma el negocio.»</em>
+        </p>
+      </blockquote>
+
+    </div>
+  </main>
+</div>
+</body>
+</html>

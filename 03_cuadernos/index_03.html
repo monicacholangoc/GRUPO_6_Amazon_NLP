@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Día 03 · Fundamentos de Python II - Seminario EDA 2026</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    :root { --blue: #2980b9; --navy: #232936; --text: #404040; --border: #ddd; --font: 'Lato', sans-serif; --mono: 'Courier New', monospace; }
+    html { font-size: 15px; }
+    body { font-family: var(--font); color: var(--text); line-height: 1.75; }
+    #topbar { position: fixed; top: 0; left: 0; right: 0; height: 50px; background: var(--navy); color: #fcfcfc; display: flex; align-items: center; padding: 0 1rem; z-index: 200; }
+    .brand { color: #fff; text-decoration: none; font-size: .95rem; font-weight: 700; }
+    #layout { display: flex; margin-top: 50px; }
+    #main { flex: 1; margin-left: 270px; }
+    .content-wrap { max-width: 880px; margin: 0 auto; padding: 2rem 2.5rem 4rem; }
+    h1 { font-size: 2rem; font-weight: 700; color: var(--navy); border-bottom: 2px solid var(--navy); padding-bottom: .6rem; }
+    h2 { font-size: 1.35rem; color: var(--navy); border-bottom: 1px solid var(--border); margin: 2rem 0 .5rem; }
+    h3 { font-size: 1.1rem; font-weight: 700; margin: 1.5rem 0 .4rem; }
+    p, li { margin-bottom: .85rem; }
+    ul { padding-left: 1.5rem; }
+    code { background: #f8f8f8; color: #c0392b; padding: .1em .3em; font-family: var(--mono); border-radius: 3px; }
+    a { color: var(--blue); }
+    blockquote { border-left: 4px solid var(--blue); background: #f4f8fb; padding: .6rem 1rem; margin: 1rem 0; }
+  </style>
+</head>
+<body>
+  <header id="topbar">
+    <div class="brand">🐍 Seminario EDA 2026</div>
+  </header>
+  <div id="layout">
+    <main id="main">
+      <div class="content-wrap">
+        <h1>Día 3 · Fundamentos de Python II – Control, colecciones y funciones</h1>
+        <p><strong>Fecha:</strong> Miércoles 23 de abril de 2026 · <strong>Duración:</strong> 2 horas</p>
+
+        <h2>Introducción</h2>
+        <p>Hoy damos el salto de scripts lineales a código organizado. Controlamos el flujo con condicionales y bucles, almacenamos datos en estructuras (listas, tuplas, sets, diccionarios), y modularizamos con funciones. Esta sesión es clave para todo lo que viene.</p>
+
+        <h2>Contenidos de la sesión</h2>
+        <h3>1. Condicionales</h3>
+        <p><code>if / elif / else</code>. Ejecutan código solo si se cumple una condición. Expresiones ternarias: <code>x if condicion else y</code>.</p>
+
+        <h3>2. Bucles</h3>
+        <p><code>for</code> itera sobre colecciones. <code>while</code> ejecuta mientras una condición sea verdad. <code>break</code> sale del bucle, <code>continue</code> salta a la próxima iteración.</p>
+
+        <h3>3. Estructuras de datos</h3>
+        <ul>
+          <li><strong>Listas</strong>: mutables, ordenadas, con duplicados. <code>[1, 2, 3]</code></li>
+          <li><strong>Tuplas</strong>: inmutables, ordenadas. <code>(1, 2, 3)</code></li>
+          <li><strong>Sets</strong>: sin duplicados, operaciones de conjuntos. <code>{1, 2, 3}</code></li>
+          <li><strong>Diccionarios</strong>: pares clave-valor, búsqueda O(1). <code>{"nombre": "Juan"}</code></li>
+        </ul>
+
+        <h3>4. Comprensiones</h3>
+        <p>List comprehensions: <code>[x*2 for x in xs if x > 0]</code>. Más legibles y rápidas que bucles equivalentes.</p>
+
+        <h3>5. Funciones</h3>
+        <p>Encapsulan lógica. Parámetros posicionales, por nombre, valores por defecto. <code>*args</code>, <code>**kwargs</code>. Type hints y docstrings. Principio: una función, una responsabilidad.</p>
+
+        <h3>6. Manejo de errores</h3>
+        <p><code>try / except / else / finally</code>. Captura excepciones específicas, no genéricas.</p>
+
+        <h2>Actividad práctica</h2>
+        <ol>
+          <li>Refactoriza las 3 katas de ayer como funciones con type hints y docstrings.</li>
+          <li>Dada lista de tuplas <code>ventas = [("A", 100), ("B", 50), ("A", 30), ("C", 10)]</code>, calcula con una comprensión y diccionario el total por producto. Esperado: <code>{'A': 130, 'B': 50, 'C': 10}</code></li>
+          <li>Escribe una función que reciba un email y valide si es válido.</li>
+        </ol>
+
+        <h2>Trabajo en equipo</h2>
+        <p>Completen 10 a 15 historias de usuario. Suban archivo actualizado a <code>docs/historias_usuario.md</code>. Cubran usuarios, administradores y roles analíticos.</p>
+
+        <h2>Entregable del día</h2>
+        <p>Módulo .py con funciones documentadas + notebook actualizado en el repo.</p>
+
+        <h2>Recursos recomendados</h2>
+        <ul>
+          <li><a href="https://docs.python.org/3/tutorial/datastructures.html">Estructuras de datos Python</a></li>
+          <li><a href="https://docs.python.org/3/library/typing.html">Type hints</a></li>
+        </ul>
+
+        <blockquote>
+          <p><em>Funciones bien escritas te ahorran horas de debug. Tómate el tiempo de pensar en la estructura.</em></p>
+        </blockquote>
+      </div>
+    </main>
+  </div>
+</body>
+</html>

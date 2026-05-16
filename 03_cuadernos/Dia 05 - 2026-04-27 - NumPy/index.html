@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Día 05 · NumPy – Arrays y operaciones vectorizadas — Seminario EDA 2026</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --sidebar-w: 270px; --topbar-h: 50px; --blue: #2980b9; --blue-dark: #2472a4;
+      --blue-light: #e7f2fa; --navy: #232936; --text: #404040; --text-muted: #888;
+      --border: #ddd; --sidebar-bg: #f8f8f8; --bg: #ffffff; --code-bg: #f8f8f8;
+      --font: 'Lato', 'Helvetica Neue', Arial, sans-serif;
+      --mono: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+      --radius: 4px;
+    }
+    html { font-size: 15px; scroll-behavior: smooth; }
+    body { font-family: var(--font); background: var(--bg); color: var(--text); line-height: 1.75; -webkit-font-smoothing: antialiased; }
+    #topbar { position: fixed; top: 0; left: 0; right: 0; height: var(--topbar-h); background: var(--navy); color: #fcfcfc; display: flex; align-items: center; justify-content: space-between; padding: 0 1rem; z-index: 200; box-shadow: 0 2px 4px rgba(0, 0, 0, .3); }
+    .topbar-left, .topbar-right { display: flex; align-items: center; gap: .6rem; }
+    .brand { color: #fff; text-decoration: none; font-size: .95rem; font-weight: 700; display: flex; align-items: center; gap: .4rem; white-space: nowrap; }
+    .brand span.sep { opacity: .3; font-weight: 300; }
+    .brand span.sub { font-weight: 400; font-size: .8rem; opacity: .75; }
+    .week-chip { font-size: .7rem; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; padding: .18rem .55rem; background: rgba(255, 255, 255, .15); border-radius: 3px; color: #fff; }
+    #menu-toggle { display: none; background: none; border: none; color: #fff; font-size: 1.15rem; cursor: pointer; padding: .3rem .4rem; line-height: 1; }
+    #layout { display: flex; margin-top: var(--topbar-h); }
+    #sidebar { width: var(--sidebar-w); flex-shrink: 0; background: var(--sidebar-bg); border-right: 1px solid var(--border); position: fixed; top: var(--topbar-h); bottom: 0; overflow-y: auto; overflow-x: hidden; padding-bottom: 2rem; font-size: .875rem; }
+    #sidebar::-webkit-scrollbar { width: 4px; }
+    #sidebar::-webkit-scrollbar-thumb { background: #ccc; border-radius: 4px; }
+    .sb-header { padding: .9rem 1rem .4rem; font-size: .7rem; font-weight: 700; letter-spacing: .09em; text-transform: uppercase; color: #aaa; border-bottom: 1px solid var(--border); margin-bottom: .25rem; }
+    .sb-index-link { display: flex; align-items: center; gap: .5rem; padding: .45rem 1rem; color: var(--text); text-decoration: none; border-left: 3px solid transparent; transition: background .12s, color .12s; }
+    .sb-index-link:hover { background: var(--blue-light); color: var(--blue-dark); }
+    .sb-index-link.active { border-left-color: var(--blue); background: var(--blue-light); color: var(--blue-dark); font-weight: 700; }
+    .sb-week { margin-top: .35rem; }
+    .sb-week-hdr { display: flex; align-items: baseline; justify-content: space-between; padding: .5rem 1rem .25rem; }
+    #content-wrap { margin-left: var(--sidebar-w); padding: 2rem 3rem 4rem; max-width: 900px; }
+    h1, h2, h3 { margin-top: 2rem; margin-bottom: 1rem; color: var(--navy); }
+    h1 { font-size: 2.2rem; border-bottom: 3px solid var(--blue); padding-bottom: 0.5rem; }
+    h2 { font-size: 1.6rem; }
+    h3 { font-size: 1.2rem; }
+    p { margin-bottom: 1.2rem; }
+    a { color: var(--blue); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    ul, ol { margin-left: 1.5rem; margin-bottom: 1.2rem; }
+    li { margin-bottom: 0.5rem; }
+    code { background: var(--code-bg); padding: 0.2rem 0.5rem; border-radius: var(--radius); font-family: var(--mono); }
+    pre { background: var(--code-bg); padding: 1rem; border-radius: var(--radius); overflow-x: auto; margin-bottom: 1.2rem; }
+    blockquote { border-left: 4px solid var(--blue); padding-left: 1rem; margin-left: 0; margin-bottom: 1.2rem; color: var(--text-muted); }
+    .content-intro { font-size: 1.05rem; line-height: 1.85; color: #2c3e50; margin-bottom: 2rem; }
+  </style>
+</head>
+<body>
+  <div id="topbar">
+    <div class="topbar-left">
+      <a href="#" class="brand">Seminario EDA 2026 <span class="sep">—</span> <span class="sub">Python</span></a>
+      <span class="week-chip">Semana 2</span>
+    </div>
+    <div class="topbar-right">
+      <button id="menu-toggle">☰</button>
+    </div>
+  </div>
+
+  <div id="layout">
+    <div id="sidebar">
+      <div class="sb-header">Navegación</div>
+      <a href="#" class="sb-index-link active">Día 5 · NumPy</a>
+      <a href="#" class="sb-index-link">Día 6 · Pandas I</a>
+      <a href="#" class="sb-index-link">Día 7 · Pandas II</a>
+      <a href="#" class="sb-index-link">Día 8 · Estadística</a>
+      <a href="#" class="sb-index-link">Día 9 · SQL</a>
+    </div>
+
+    <div id="content-wrap">
+      <h1>Día 5 · NumPy — Arrays y operaciones vectorizadas</h1>
+
+      <div class="content-intro">
+        <p>
+          NumPy es raro al principio porque vienes de listas Python. Arrays son distintos: más rápidos,
+          más restrictivos, y esa diferencia importa cuando procesas un millón de filas. El corazón de
+          NumPy es <strong>broadcasting</strong> — la idea de que puedas normalizar 1.000.000 de puntos
+          sin escribir un bucle. Una línea. NumPy entiende las dimensiones y replica internamente.
+        </p>
+      </div>
+
+      <h2>Contenidos de la sesión</h2>
+      <p>Lo que cubrimos hoy:</p>
+      <ul>
+        <li><strong>Arrays n-dimensionales:</strong> cómo crearlos con shape, reshape, transpose</li>
+        <li><strong>Broadcasting:</strong> operaciones entre arrays de distintos shapes sin bucles</li>
+        <li><strong>Vectorización vs. bucles:</strong> por qué NumPy es 100–1000× más rápido</li>
+        <li><strong>Indexación booleana:</strong> filtrar datos sin loops explícitos</li>
+        <li><strong>Agregaciones:</strong> sum, mean, std con axis=0/1</li>
+      </ul>
+
+      <h2>Por qué importa</h2>
+      <p>
+        En data science pasarás 80% del tiempo procesando datos. NumPy es la base. Pandas se construye
+        sobre NumPy. Si entiendes arrays y broadcasting, entiendes cómo funciona todo lo que viene después.
+      </p>
+
+      <h2>Antes de empezar</h2>
+      <p>Necesitas:</p>
+      <ul>
+        <li>Jupyter Notebook o Google Colab abiertos</li>
+        <li>NumPy instalado (debería estar si instalaste Anaconda)</li>
+        <li>Entender qué es una lista en Python y por qué es lenta</li>
+        <li>5 bucles en tu vida para apreciar que no necesites más</li>
+      </ul>
+
+      <h2>Recurso práctico</h2>
+      <p>
+        <a href="./clase_05.ipynb" target="_blank">Abre el cuaderno práctico</a> para hacer los ejercicios.
+        Ejecuta cada celda con Shift + Enter. Los ejercicios tienen soluciones ocultas si te atascas.
+      </p>
+
+      <h2>Después de esta sesión</h2>
+      <p>
+        Mañana veremos Pandas I — cargar datos reales, explorarlos, hacer selecciones. NumPy seguirá
+        viviendo debajo, pero raramente lo tocarás directamente. Hoy es el día de entender qué hace posible.
+      </p>
+
+      <h2>Materiales adicionales</h2>
+      <ul>
+        <li><a href="https://numpy.org/doc/stable/user/absolute_beginners.html" target="_blank">NumPy Absolute Beginners Guide</a></li>
+        <li><a href="https://numpy.org/doc/stable/user/basics.broadcasting.html" target="_blank">Broadcasting: How NumPy Replicates Dimensions</a></li>
+        <li><a href="https://towardsdatascience.com/ten-numpy-tips-for-data-science-b29ef6c5c1f5" target="_blank">Ten NumPy Tips for Data Science</a></li>
+      </ul>
+    </div>
+  </div>
+
+  <script>
+    document.querySelectorAll('.sb-index-link').forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        document.querySelectorAll('.sb-index-link').forEach(l => l.classList.remove('active'));
+        link.classList.add('active');
+      });
+    });
+  </script>
+</body>
+</html>

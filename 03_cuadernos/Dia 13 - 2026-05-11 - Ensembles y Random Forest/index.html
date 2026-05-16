@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Día 13 · Ensembles y Random Forest — Seminario EDA 2026</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --sidebar-w: 270px; --topbar-h: 50px;
+      --blue: #2980b9; --blue-dark: #2472a4; --blue-light: #e7f2fa;
+      --navy: #232936; --text: #404040; --text-muted: #888;
+      --border: #ddd; --sidebar-bg: #f8f8f8; --bg: #ffffff; --code-bg: #f8f8f8;
+      --font: 'Lato','Helvetica Neue',Arial,sans-serif;
+      --mono: 'SFMono-Regular',Consolas,'Liberation Mono',Menlo,monospace;
+      --radius: 4px;
+      --green: #2f855a; --green-light: #f0fff4;
+      --orange: #c05621; --orange-light: #fffaf0;
+      --purple: #6b46c1; --purple-light: #faf5ff;
+    }
+    html { font-size: 15px; scroll-behavior: smooth; }
+    body { font-family: var(--font); background: var(--bg); color: var(--text); line-height: 1.75; }
+
+    #topbar { position: fixed; top:0; left:0; right:0; height: var(--topbar-h); background: var(--navy); color: #fcfcfc; display:flex; align-items:center; justify-content:space-between; padding: 0 1rem; z-index: 200; }
+    .brand { color: #fff; text-decoration: none; font-size: .95rem; font-weight: 700; display:flex; align-items:center; gap:.4rem; }
+    .brand .sep { opacity: .3; font-weight: 300; }
+    .brand .sub { font-weight: 400; font-size: .8rem; opacity: .75; }
+    .week-chip { font-size: .7rem; font-weight: 700; letter-spacing:.05em; text-transform: uppercase; padding: .18rem .55rem; background: rgba(255,255,255,.15); border-radius: 3px; }
+
+    #layout { display:flex; margin-top: var(--topbar-h); }
+    #sidebar { width: var(--sidebar-w); flex-shrink: 0; background: var(--sidebar-bg); border-right: 1px solid var(--border); position: fixed; top: var(--topbar-h); bottom: 0; overflow-y: auto; padding-bottom: 2rem; font-size: .875rem; }
+    #sidebar::-webkit-scrollbar { width: 4px; }
+    #sidebar::-webkit-scrollbar-thumb { background: #ccc; border-radius: 4px; }
+    .sb-header { padding: .9rem 1rem .4rem; font-size: .7rem; font-weight: 700; letter-spacing: .09em; text-transform: uppercase; color: #aaa; border-bottom: 1px solid var(--border); margin-bottom: .25rem; }
+    .sb-index-link { display:flex; align-items: center; gap:.5rem; padding: .45rem 1rem; color: var(--text); text-decoration: none; }
+    .sb-index-link:hover { background: var(--blue-light); color: var(--blue-dark); }
+    .sb-week { margin-top: .35rem; }
+    .sb-week-hdr { display:flex; align-items: baseline; justify-content: space-between; padding: .5rem 1rem .25rem; }
+    .sb-week-label { font-size: .7rem; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; }
+    .sb-week-sub { font-size: .68rem; color: var(--text-muted); }
+    .sb-week ul { list-style: none; }
+    .sb-item a { display:flex; align-items: baseline; gap: .45rem; padding: .38rem 1rem .38rem 1.35rem; color: #555; text-decoration: none; border-left: 3px solid transparent; line-height: 1.4; }
+    .sb-item a:hover { background: var(--blue-light); color: var(--blue-dark); }
+    .sb-item.active a { border-left-color: var(--blue); background: var(--blue-light); color: var(--blue-dark); font-weight: 700; }
+    .sb-item .dnum { font-size: .7rem; font-weight: 600; min-width: 2.2rem; color: #aaa; flex-shrink: 0; }
+    .sb-item.active .dnum { color: var(--blue); }
+    .sb-item .dtitle { font-size: .83rem; line-height: 1.35; }
+    .sb-badge { margin-left: auto; font-size: .62rem; font-weight: 700; padding: .08rem .3rem; border-radius: 2px; background: #fef9c3; color: #854d0e; flex-shrink: 0; }
+
+    #main { flex: 1; margin-left: var(--sidebar-w); min-width: 0; }
+    .content-wrap { max-width: 920px; margin: 0 auto; padding: 2rem 2.5rem 4rem; }
+
+    .breadcrumb { font-size: .8rem; color: var(--text-muted); margin-bottom: 1.25rem; padding-bottom: .75rem; border-bottom: 1px solid var(--border); }
+    .breadcrumb a { color: var(--blue); text-decoration: none; }
+    .breadcrumb .sep { color: #ccc; margin: 0 .3rem; }
+
+    h1 { font-size: 2rem; font-weight: 700; color: var(--navy); border-bottom: 2px solid var(--navy); padding-bottom: .6rem; margin-bottom: .5rem; line-height: 1.2; letter-spacing: -.02em; }
+    h2 { font-size: 1.35rem; color: var(--navy); border-bottom: 1px solid var(--border); margin: 2.2rem 0 .6rem; padding-bottom: .35rem; }
+    h3 { font-size: 1.1rem; font-weight: 700; margin: 1.5rem 0 .4rem; color: var(--navy); }
+    h4 { font-size: .95rem; font-weight: 700; margin: 1.2rem 0 .3rem; }
+    p, li { margin-bottom: .75rem; }
+    ul, ol { padding-left: 1.5rem; margin-bottom: .75rem; }
+    a { color: var(--blue); }
+    code { background: var(--code-bg); color: #c0392b; padding: .12em .35em; font-family: var(--mono); font-size: .88em; border-radius: 3px; }
+    pre { background: #f6f8fa; border: 1px solid #e1e4e8; border-radius: var(--radius); padding: 1rem; overflow-x: auto; font-family: var(--mono); font-size: .85rem; line-height: 1.55; margin-bottom: 1rem; }
+    pre code { background: none; color: inherit; padding: 0; font-size: inherit; }
+
+    blockquote { border-left: 4px solid var(--blue); background: var(--blue-light); padding: .8rem 1.1rem; margin: 1rem 0; border-radius: 0 var(--radius) var(--radius) 0; }
+    blockquote p:last-child { margin-bottom: 0; }
+
+    .callout { border-radius: var(--radius); padding: 1rem 1.2rem; margin: 1.1rem 0; border-left: 4px solid; }
+    .callout h4 { margin-top: 0; font-size: .95rem; }
+    .callout p:last-child, .callout ul:last-child { margin-bottom: 0; }
+    .callout.tip { background: var(--green-light); border-left-color: var(--green); }
+    .callout.tip h4 { color: var(--green); }
+    .callout.warn { background: var(--orange-light); border-left-color: var(--orange); }
+    .callout.warn h4 { color: var(--orange); }
+    .callout.concept { background: var(--purple-light); border-left-color: var(--purple); }
+    .callout.concept h4 { color: var(--purple); }
+
+    table { width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: .9rem; }
+    th, td { padding: .55rem .8rem; border: 1px solid var(--border); text-align: left; }
+    th { background: #f8f8f8; font-weight: 700; }
+    tr:nth-child(even) td { background: #fafafa; }
+
+    .action-bar { display:flex; align-items:center; gap:.75rem; flex-wrap: wrap; padding: .65rem .9rem; background: #f0f8ff; border: 1px solid #bee3f8; border-radius: var(--radius); margin-bottom: 1.5rem; font-size: .8rem; color: #2c5282; }
+    .action-label { font-weight: 600; }
+    .action-bar img { height: 18px; vertical-align: middle; }
+
+    .formula { background: #fafbfc; border: 1px solid #e1e4e8; border-radius: var(--radius); padding: 1rem 1.2rem; text-align: center; font-family: 'Cambria Math','Latin Modern Math', Georgia, serif; font-size: 1.05rem; margin: 1rem 0; line-height: 1.8; }
+    .formula sub, .formula sup { font-size: .75em; }
+
+    .step-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin: 1.2rem 0; }
+    .step-card { background: #fafbfc; border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem; }
+    .step-card .step-num { display: inline-block; background: var(--blue); color: #fff; width: 1.6rem; height: 1.6rem; line-height: 1.6rem; text-align: center; border-radius: 50%; font-weight: 700; font-size: .85rem; margin-bottom: .4rem; }
+    .step-card h4 { margin: .2rem 0 .35rem; font-size: .92rem; }
+    .step-card p { font-size: .85rem; margin-bottom: 0; line-height: 1.55; }
+
+    .pill { display:inline-block; padding: .15rem .55rem; border-radius: 12px; font-size: .72rem; font-weight: 700; background: #e7f2fa; color: var(--blue-dark); }
+    .pill.green { background: var(--green-light); color: var(--green); }
+    .pill.orange { background: var(--orange-light); color: var(--orange); }
+
+    .toc { background: #fafbfc; border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem 1.2rem; margin: 1.25rem 0; }
+    .toc h4 { margin: 0 0 .4rem; font-size: .85rem; text-transform: uppercase; letter-spacing: .05em; color: var(--text-muted); }
+    .toc ol { margin: 0; padding-left: 1.3rem; font-size: .9rem; }
+    .toc ol li { margin-bottom: .25rem; }
+
+    @media (max-width: 880px) {
+      #sidebar { transform: translateX(-100%); transition: transform .2s; }
+      #sidebar.open { transform: none; }
+      #main { margin-left: 0; }
+    }
+  </style>
+</head>
+<body>
+
+<header id="topbar">
+  <a href="../index.html" class="brand">🐍 Seminario EDA <span class="sep">·</span> <span class="sub">2026</span></a>
+  <span class="week-chip">Semana 4 · Día 13</span>
+</header>
+
+<div id="layout">
+  <nav id="sidebar">
+    <div class="sb-header">Curso</div>
+    <a class="sb-index-link" href="../index.html">📋 Presentación del curso</a>
+
+    <div class="sb-week"><div class="sb-week-hdr"><span class="sb-week-label">Semana 1</span><span class="sb-week-sub">21–24 abr</span></div><ul>
+      <li class="sb-item"><a href="../Dia%2001%20-%202026-04-21%20-%20Kick-off%20del%20seminario/index.html"><span class="dnum">Día 01</span><span class="dtitle">Kick-off</span></a></li>
+      <li class="sb-item"><a href="../Dia%2002%20-%202026-04-22%20-%20Fundamentos%20de%20Python%20I/index.html"><span class="dnum">Día 02</span><span class="dtitle">Python I</span></a></li>
+      <li class="sb-item"><a href="../Dia%2003%20-%202026-04-23%20-%20Fundamentos%20de%20Python%20II/index.html"><span class="dnum">Día 03</span><span class="dtitle">Python II</span></a></li>
+      <li class="sb-item"><a href="../Dia%2004%20-%202026-04-24%20-%20Planteamiento%20del%20proyecto/index.html"><span class="dnum">Día 04</span><span class="dtitle">Proyecto</span><span class="sb-badge">S1</span></a></li>
+    </ul></div>
+    <div class="sb-week"><div class="sb-week-hdr"><span class="sb-week-label">Semana 2</span><span class="sb-week-sub">27–29 abr</span></div><ul>
+      <li class="sb-item"><a href="../Dia%2005%20-%202026-04-27%20-%20OOP/index.html"><span class="dnum">Día 05</span><span class="dtitle">OOP</span></a></li>
+      <li class="sb-item"><a href="../Dia%2006%20-%202026-04-28%20-%20Pandas%20I/index.html"><span class="dnum">Día 06</span><span class="dtitle">Pandas I</span></a></li>
+      <li class="sb-item"><a href="../Dia%2007%20-%202026-04-29%20-%20Pandas%20II/index.html"><span class="dnum">Día 07</span><span class="dtitle">Pandas II</span><span class="sb-badge">S2</span></a></li>
+    </ul></div>
+    <div class="sb-week"><div class="sb-week-hdr"><span class="sb-week-label">Semana 3</span><span class="sb-week-sub">4–8 may</span></div><ul>
+      <li class="sb-item"><a href="../Dia%2008%20-%202026-05-04%20-%20Visualizaciones/index.html"><span class="dnum">Día 08</span><span class="dtitle">Visualizaciones</span></a></li>
+      <li class="sb-item"><a href="../Dia%2009%20-%202026-05-05%20-%20Regresiones/index.html"><span class="dnum">Día 09</span><span class="dtitle">Regresiones</span></a></li>
+      <li class="sb-item"><a href="../Dia%2010%20-%202026-05-06%20-%20Regresi%C3%B3n%20Log%C3%ADstica/index.html"><span class="dnum">Día 10</span><span class="dtitle">Reg. logística</span></a></li>
+      <li class="sb-item"><a href="../Dia%2011%20-%202026-05-07%20-%20%C3%81rbol%20de%20Decisi%C3%B3n/index.html"><span class="dnum">Día 11</span><span class="dtitle">Árbol decisión</span></a></li>
+      <li class="sb-item"><a href="../Dia%2012%20-%202026-05-08%20-%20M%C3%A9tricas%20-%20ENTREGA%20SEMANA%203/index.html"><span class="dnum">Día 12</span><span class="dtitle">Métricas</span><span class="sb-badge">S3</span></a></li>
+    </ul></div>
+    <div class="sb-week"><div class="sb-week-hdr"><span class="sb-week-label">Semana 4</span><span class="sb-week-sub">11–15 may</span></div><ul>
+      <li class="sb-item active"><a href="./index.html"><span class="dnum">Día 13</span><span class="dtitle">Ensembles / RF</span></a></li>
+      <li class="sb-item"><a href="../Dia%2014%20-%202026-05-12%20-%20Hip%C3%B3tesis%20y%20pruebas%20estad%C3%ADsticas/index.html"><span class="dnum">Día 14</span><span class="dtitle">Hipótesis</span></a></li>
+      <li class="sb-item"><a href="../Dia%2015%20-%202026-05-13%20-%20Dashboards%20con%20Streamlit/index.html"><span class="dnum">Día 15</span><span class="dtitle">Streamlit</span></a></li>
+      <li class="sb-item"><a href="../Dia%2016%20-%202026-05-14%20-%20APIs%20con%20FastAPI%20y%20buenas%20pr%C3%A1cticas/index.html"><span class="dnum">Día 16</span><span class="dtitle">FastAPI</span></a></li>
+      <li class="sb-item"><a href="../Dia%2017%20-%202026-05-15%20-%20Presentaciones%20finales/index.html"><span class="dnum">Día 17</span><span class="dtitle">Defensa</span><span class="sb-badge">FINAL</span></a></li>
+    </ul></div>
+  </nav>
+
+  <main id="main">
+    <div class="content-wrap">
+
+      <div class="breadcrumb">
+        <a href="../index.html">Seminario EDA 2026</a><span class="sep">›</span>
+        <a href="../index.html#sesiones">Semana 4</a><span class="sep">›</span>
+        <span>Día 13 · Ensembles y Random Forest</span>
+      </div>
+
+      <h1>Día 13 · Ensembles y Random Forest</h1>
+      <p style="color:#666; margin-top:.4rem">
+        <strong>Fecha:</strong> Lunes 11 de mayo de 2026 &nbsp;·&nbsp;
+        <strong>Duración:</strong> 2 h sincrónicas + 1 h trabajo guiado &nbsp;·&nbsp;
+        <span class="pill green">Semana 4</span>
+      </p>
+
+      <div class="action-bar">
+        <span class="action-label">📓 Notebook:</span>
+        <a href="./clase_13.ipynb">clase_13.ipynb</a>
+      </div>
+
+      <div class="toc">
+        <h4>En esta clase</h4>
+        <ol>
+          <li>Recap del árbol único y su problema: alta varianza.</li>
+          <li>Sabiduría de las multitudes — principio de ensembles.</li>
+          <li>Bagging (Bootstrap Aggregating).</li>
+          <li>Random Forest — bagging + selección aleatoria de features.</li>
+          <li>Ejemplo guiado en scikit-learn — Pima Diabetes.</li>
+          <li>Out-of-Bag (OOB) score para validación gratis.</li>
+          <li>Introducción a Boosting (Gradient Boosting, XGBoost).</li>
+          <li>Cierre y entregable parcial S4.</li>
+        </ol>
+      </div>
+
+      <h2>1. Recap: el árbol único y su problema</h2>
+
+      <p>
+        El árbol de decisión individual es interpretable y flexible — captura no-linealidad sin asumir supuestos.
+        Pero tiene un defecto fatal: <strong>alta varianza</strong>.
+      </p>
+
+      <p>
+        Pequeños cambios en el dataset pueden producir árboles radicalmente distintos. Entrenar en 90% de los datos
+        y luego en otro 90% diferente puede dar dos modelos casi opuestos. Eso es varianza: inestabilidad.
+      </p>
+
+      <div class="callout concept">
+        <h4>📌 El problema que resolvemos hoy</h4>
+        <p>
+          Si entrenas un árbol, su predicción depende mucho del ruido de los datos. Si entrenas muchos árboles
+          (con variaciones de los datos) y promedias sus predicciones, la varianza colectiva baja. Eso es
+          la sabiduría de las multitudes.
+        </p>
+      </div>
+
+      <h2>2. Sabiduría de las multitudes</h2>
+
+      <p>
+        Un grupo de expertos con opiniones ligeramente distintas, cuando promedian sus respuestas, suele acertar más
+        que cualquier experto individual. Eso ocurre si: (a) los expertos son diversos, (b) son razonablemente buenos,
+        (c) no hay un sesgo colectivo.
+      </p>
+
+      <p>
+        En machine learning es igual: si combinas muchos modelos débiles pero diversos, el promedio es fuerte.
+      </p>
+
+      <h2>3. Bagging (Bootstrap Aggregating)</h2>
+
+      <p>
+        Procedimiento:
+      </p>
+      <ol>
+        <li>Muestrea el dataset <strong>con reemplazo</strong> (bootstrap) — creas m muestras del mismo tamaño que el original.</li>
+        <li>En cada muestra, entrena un árbol completo (sin restricción — para que sea «débil»).</li>
+        <li>Para clasificación: <strong>votación</strong> entre árboles. Para regresión: <strong>promedio</strong>.</li>
+      </ol>
+
+      <p>
+        Resultado: la varianza cae porque los árboles están correlacionados pero no idénticos.
+      </p>
+
+      <h2>4. Random Forest — Bagging + truco extra</h2>
+
+      <p>
+        Random Forest es Bagging con un giro: en cada split de cada árbol, solo considera un subconjunto aleatorio
+        de features (parámetro <code>max_features</code>, típicamente √p para clasificación, p/3 para regresión).
+      </p>
+
+      <p>
+        <strong>¿Por qué?</strong> Si hay un feature muy fuerte (ej. Glucose en Pima), todos los árboles lo usarán
+        en el primer split. Los árboles siguen siendo similares — varianza no cae tanto. Al forzar cada árbol
+        a considerar solo un subconjunto aleatorio, descorrelacionas las predicciones.
+      </p>
+
+      <h3>4.1 Hyperparámetros clave</h3>
+      <ul>
+        <li><code>n_estimators</code>: número de árboles. Típicamente 100–1000. Más = mejor (pero + lento).</li>
+        <li><code>max_depth</code>: profundidad de cada árbol. A menudo ilimitada (None), permitiendo overfitting local. El bagging promedia.</li>
+        <li><code>max_features</code>: cuántos features considerar en cada split. Defecto: 'sqrt'.</li>
+        <li><code>min_samples_leaf</code>: mínimo de muestras en hoja. Controla complejidad local.</li>
+        <li><code>bootstrap</code>: si False, usa todas las muestras (sin reemplazo) en cada árbol.</li>
+      </ul>
+
+      <h2>5. Ejemplo guiado — Pima Diabetes</h2>
+
+      <pre><code>from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score, roc_auc_score
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Árbol único (para comparar)
+tree = DecisionTreeClassifier(max_depth=4, random_state=42)
+tree.fit(X_train, y_train)
+tree_acc = tree.score(X_test, y_test)
+tree_auc = roc_auc_score(y_test, tree.predict_proba(X_test)[:, 1])
+
+# Random Forest
+rf = RandomForestClassifier(n_estimators=300, max_depth=10, random_state=42, n_jobs=-1)
+rf.fit(X_train, y_train)
+rf_acc = rf.score(X_test, y_test)
+rf_auc = roc_auc_score(y_test, rf.predict_proba(X_test)[:, 1])
+
+print(f"Árbol único — Accuracy: {tree_acc:.3f}, AUC: {tree_auc:.3f}")
+print(f"Random Forest — Accuracy: {rf_acc:.3f}, AUC: {rf_auc:.3f}")</code></pre>
+
+      <p>
+        Resultado típico: Random Forest supera al árbol único en ~5–10% en AUC. Los 300 árboles promedian sus errores.
+      </p>
+
+      <h3>5.1 Feature importance</h3>
+
+      <pre><code>importances = rf.feature_importances_
+for feat, imp in sorted(zip(X.columns, importances), key=lambda x: -x[1])[:5]:
+    print(f"{feat:25s} {imp:.4f}")</code></pre>
+
+      <p>
+        Feature importance en RF es más robusto que en árbol único: si un feature es útil, múltiples árboles lo usarán.
+      </p>
+
+      <h2>6. Out-of-Bag (OOB) Score</h2>
+
+      <p>
+        En Bagging, cada muestra bootstrap deja fuera aproximadamente 37% de los datos originales.
+        Esos datos «out-of-bag» sirven como validación gratis — sin necesidad de un test set separado.
+      </p>
+
+      <pre><code>rf = RandomForestClassifier(n_estimators=300, oob_score=True, random_state=42)
+rf.fit(X_train, y_train)
+print(f"OOB score: {rf.oob_score_:.3f}")</code></pre>
+
+      <p>
+        El OOB score es una estimación insesgada del test score. Útil cuando los datos son escasos.
+      </p>
+
+      <h2>7. Más allá: Boosting (Gradient Boosting, XGBoost)</h2>
+
+      <p>
+        <strong>Bagging:</strong> entrena árboles en paralelo, cada uno en bootstrap del dataset original. Promedia.
+      </p>
+
+      <p>
+        <strong>Boosting:</strong> entrena árboles <strong>secuencialmente</strong>. Cada árbol intenta corregir los errores
+        del anterior. El énfasis se pone en las muestras que los árboles anteriores clasificaron mal.
+      </p>
+
+      <p>
+        Resultado: Boosting a menudo da mejor rendimiento que Bagging, pero es más propenso a overfitting si no se tunea bien.
+      </p>
+
+      <h3>7.1 Gradient Boosting en scikit-learn</h3>
+
+      <pre><code>from sklearn.ensemble import GradientBoostingClassifier
+
+gb = GradientBoostingClassifier(n_estimators=100, learning_rate=0.1, max_depth=3, random_state=42)
+gb.fit(X_train, y_train)
+gb_auc = roc_auc_score(y_test, gb.predict_proba(X_test)[:, 1])
+print(f"Gradient Boosting AUC: {gb_auc:.3f}")</code></pre>
+
+      <p>
+        Hyperparámetros clave: <code>n_estimators</code>, <code>learning_rate</code> (qué tan rápido aprende de los errores),
+        <code>max_depth</code> (árboles suelen ser poco profundos en boosting).
+      </p>
+
+      <h2>8. Comparación: Bagging vs Boosting</h2>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Aspecto</th>
+            <th>Bagging (Random Forest)</th>
+            <th>Boosting (Gradient Boosting)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Entrenamiento</strong></td>
+            <td>Paralelo (independiente)</td>
+            <td>Secuencial (depende del anterior)</td>
+          </tr>
+          <tr>
+            <td><strong>Énfasis</strong></td>
+            <td>Todos los datos iguales</td>
+            <td>Énfasis en errores previos</td>
+          </tr>
+          <tr>
+            <td><strong>Varianza</strong></td>
+            <td>Reduce (promedio de diversos)</td>
+            <td>Reduce y reduce bias</td>
+          </tr>
+          <tr>
+            <td><strong>Bias</strong></td>
+            <td>Sin cambios respecto a árbol único</td>
+            <td>Reduce (va aprendiendo)</td>
+          </tr>
+          <tr>
+            <td><strong>Velocidad</strong></td>
+            <td>Rápido (paralelo)</td>
+            <td>Lento (secuencial)</td>
+          </tr>
+          <tr>
+            <td><strong>Overfitting</strong></td>
+            <td>Bajo (robusto)</td>
+            <td>Riesgo si n_estimators alto</td>
+          </tr>
+          <tr>
+            <td><strong>Interpretabilidad</strong></td>
+            <td>Feature importance clara</td>
+            <td>Menos clara (acumulativo)</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h2>9. Cierre y entregable parcial</h2>
+
+      <h3>9.1 Resumen de Semana 4 hasta ahora</h3>
+      <ul>
+        <li>Los árboles únicos tienen varianza alta — pequeños cambios en datos → árboles muy distintos.</li>
+        <li>Bagging reduce varianza promediando predicciones de árboles entrenados en muestras bootstrap.</li>
+        <li>Random Forest es Bagging + selección aleatoria de features — descorrelaciona los árboles.</li>
+        <li>Boosting entrena árboles secuencialmente, corrigiendo errores previos — reduce bias y varianza.</li>
+        <li>OOB score permite validación sin test set separado.</li>
+      </ul>
+
+      <h3>9.2 Entregable parcial S4</h3>
+      <ol>
+        <li>Entrena Random Forest con n_estimators=300 y max_depth=10 sobre tu dataset. Reporta AUC y Recall en CV.</li>
+        <li>Compara con el árbol único del Día 11 — ¿cuánto mejora en AUC?</li>
+        <li>Experimenta con <code>max_features</code>: ¿'sqrt' o 'log2' o la mitad de las features? ¿Cuál da mejor AUC?</li>
+        <li>Reporta los top 10 features según <code>feature_importances_</code>. ¿Coinciden con tu intuición del negocio?</li>
+        <li>Prueba Gradient Boosting (n_estimators=100, max_depth=3) — ¿supera a Random Forest?</li>
+      </ol>
+
+      <blockquote>
+        <p>
+          <em>«Un árbol fuerte es predecible. Cien árboles débiles y diversos son impredecibles — en el buen sentido.»</em>
+        </p>
+      </blockquote>
+
+    </div>
+  </main>
+</div>
+</body>
+</html>

@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Índice del curso — Seminario EDA 2026</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css">
+  <style>
+/* ── RESET & VARIABLES ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --sidebar-w: 270px;
+  --topbar-h: 50px;
+  --blue:       #2980b9;
+  --blue-dark:  #2472a4;
+  --blue-light: #e7f2fa;
+  --navy:       #232936;
+  --text:       #404040;
+  --text-muted: #888;
+  --border:     #ddd;
+  --sidebar-bg: #f8f8f8;
+  --bg:         #ffffff;
+  --code-bg:    #f8f8f8;
+  --font:       'Lato', 'Helvetica Neue', Arial, sans-serif;
+  --mono:       'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+  --radius:     4px;
+}
+
+html { font-size: 15px; scroll-behavior: smooth; }
+body { font-family: var(--font); background: var(--bg); color: var(--text);
+       line-height: 1.75; -webkit-font-smoothing: antialiased; }
+
+/* ── TOPBAR ── */
+#topbar {
+  position: fixed; top: 0; left: 0; right: 0; height: var(--topbar-h);
+  background: var(--navy); color: #fcfcfc;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 1rem; z-index: 200;
+  box-shadow: 0 2px 4px rgba(0,0,0,.3);
+}
+.topbar-left  { display: flex; align-items: center; gap: .6rem; }
+.topbar-right { display: flex; align-items: center; gap: .75rem; }
+.brand {
+  color: #fff; text-decoration: none; font-size: .95rem; font-weight: 700;
+  display: flex; align-items: center; gap: .4rem;
+  white-space: nowrap;
+}
+.brand span.sep { opacity: .3; font-weight: 300; }
+.brand span.sub { font-weight: 400; font-size: .8rem; opacity: .75; }
+.week-chip {
+  font-size: .7rem; font-weight: 700; letter-spacing: .05em;
+  text-transform: uppercase; padding: .18rem .55rem;
+  background: rgba(255,255,255,.15); border-radius: 3px; color: #fff;
+}
+#menu-toggle {
+  display: none; background: none; border: none; color: #fff;
+  font-size: 1.15rem; cursor: pointer; padding: .3rem .4rem;
+  line-height: 1;
+}
+
+/* ── LAYOUT ── */
+#layout { display: flex; margin-top: var(--topbar-h); }
+
+/* ── SIDEBAR ── */
+#sidebar {
+  width: var(--sidebar-w); flex-shrink: 0;
+  background: var(--sidebar-bg);
+  border-right: 1px solid var(--border);
+  position: fixed; top: var(--topbar-h); bottom: 0;
+  overflow-y: auto; overflow-x: hidden;
+  padding-bottom: 2rem;
+  font-size: .875rem;
+}
+#sidebar::-webkit-scrollbar { width: 4px; }
+#sidebar::-webkit-scrollbar-thumb { background: #ccc; border-radius: 4px; }
+
+.sb-header {
+  padding: .9rem 1rem .4rem;
+  font-size: .7rem; font-weight: 700; letter-spacing: .09em;
+  text-transform: uppercase; color: #aaa; border-bottom: 1px solid var(--border);
+  margin-bottom: .25rem;
+}
+
+.sb-index-link {
+  display: flex; align-items: center; gap: .5rem;
+  padding: .45rem 1rem;
+  color: var(--text); text-decoration: none;
+  border-left: 3px solid transparent;
+  transition: background .12s, color .12s;
+}
+.sb-index-link:hover { background: var(--blue-light); color: var(--blue-dark); }
+.sb-index-link.active {
+  border-left-color: var(--blue); background: var(--blue-light);
+  color: var(--blue-dark); font-weight: 700;
+}
+
+.sb-week { margin-top: .35rem; }
+.sb-week-hdr {
+  display: flex; align-items: baseline; justify-content: space-between;
+  padding: .5rem 1rem .25rem;
+}
+.sb-week-label {
+  font-size: .7rem; font-weight: 700; letter-spacing: .07em;
+  text-transform: uppercase; color: var(--blue);
+}
+.sb-week-sub { font-size: .68rem; color: var(--text-muted); }
+.sb-week ul { list-style: none; }
+
+.sb-item a {
+  display: flex; align-items: baseline; gap: .45rem;
+  padding: .38rem 1rem .38rem 1.35rem;
+  color: #555; text-decoration: none;
+  border-left: 3px solid transparent;
+  transition: background .1s, color .1s;
+  line-height: 1.4;
+}
+.sb-item a:hover { background: var(--blue-light); color: var(--blue-dark); }
+.sb-item.active a {
+  border-left-color: var(--blue);
+  background: var(--blue-light); color: var(--blue-dark); font-weight: 700;
+}
+.sb-item .dnum {
+  font-size: .7rem; font-weight: 600; min-width: 2.2rem;
+  color: #aaa; flex-shrink: 0;
+}
+.sb-item.active .dnum { color: var(--blue); }
+.sb-item .dtitle { font-size: .83rem; line-height: 1.35; }
+.sb-badge {
+  margin-left: auto; font-size: .62rem; font-weight: 700;
+  padding: .08rem .3rem; border-radius: 2px;
+  background: #fef9c3; color: #854d0e; flex-shrink: 0;
+}
+
+/* ── MAIN CONTENT ── */
+#main { flex: 1; margin-left: var(--sidebar-w); min-width: 0; }
+.content-wrap {
+  max-width: 880px;
+  margin: 0 auto;
+  padding: 2rem 2.5rem 4rem;
+}
+
+/* ── BREADCRUMB ── */
+.breadcrumb {
+  font-size: .8rem; color: var(--text-muted);
+  margin-bottom: 1.25rem;
+  display: flex; align-items: center; gap: .3rem; flex-wrap: wrap;
+  padding-bottom: .75rem; border-bottom: 1px solid var(--border);
+}
+.breadcrumb a { color: var(--blue); text-decoration: none; }
+.breadcrumb a:hover { text-decoration: underline; }
+.breadcrumb .sep { color: #ccc; }
+.breadcrumb .cur { color: var(--text); }
+
+/* ── ACTION BAR ── */
+.action-bar {
+  display: flex; align-items: center; gap: .75rem; flex-wrap: wrap;
+  padding: .65rem .9rem;
+  background: #f0f8ff; border: 1px solid #bee3f8;
+  border-radius: var(--radius); margin-bottom: 1.5rem;
+  font-size: .8rem; color: #2c5282;
+}
+.action-bar a { display: inline-flex; align-items: center; }
+.action-bar img { height: 18px; }
+.action-label { font-weight: 600; }
+
+/* ── TYPOGRAPHY ── */
+.content-wrap h1 {
+  font-size: 2rem; font-weight: 700; color: #232936;
+  letter-spacing: -.02em; line-height: 1.2;
+  margin: 0 0 .5rem;
+  padding-bottom: .6rem; border-bottom: 2px solid #232936;
+}
+.content-wrap h2 {
+  font-size: 1.35rem; font-weight: 700; color: #232936;
+  margin: 2rem 0 .5rem;
+  padding-bottom: .35rem; border-bottom: 1px solid var(--border);
+}
+.content-wrap h3 {
+  font-size: 1.1rem; font-weight: 700; color: #232936;
+  margin: 1.5rem 0 .4rem;
+}
+.content-wrap h4 {
+  font-size: .95rem; font-weight: 700; color: var(--text);
+  margin: 1.2rem 0 .3rem;
+}
+.content-wrap p { margin-bottom: .85rem; }
+.content-wrap a { color: var(--blue); text-decoration: none; }
+.content-wrap a:hover { text-decoration: underline; color: var(--blue-dark); }
+.content-wrap strong { color: #333; }
+.content-wrap em { font-style: italic; }
+
+.content-wrap ul, .content-wrap ol {
+  padding-left: 1.5rem; margin-bottom: .9rem;
+}
+.content-wrap li { margin-bottom: .25rem; }
+.content-wrap li > ul, .content-wrap li > ol { margin-top: .25rem; margin-bottom: .25rem; }
+
+/* ── CODE ── */
+.content-wrap code {
+  font-family: var(--mono); font-size: .875em;
+  background: var(--code-bg); color: #c0392b;
+  padding: .1em .3em; border-radius: 3px;
+  border: 1px solid #e1e4e5;
+}
+.content-wrap pre {
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--blue);
+  border-radius: var(--radius);
+  padding: 1rem 1.1rem;
+  overflow-x: auto;
+  margin: 1rem 0;
+  line-height: 1.6;
+}
+.content-wrap pre code {
+  background: none; color: inherit; padding: 0;
+  border: none; font-size: .875rem;
+}
+
+/* ── TABLES ── */
+.content-wrap table {
+  width: 100%; border-collapse: collapse;
+  margin: 1rem 0; font-size: .9rem;
+  border: 1px solid var(--border); border-radius: var(--radius);
+  overflow: hidden;
+}
+.content-wrap thead th {
+  background: #f0f0f0; color: #404040;
+  padding: .55rem .9rem;
+  text-align: left; font-size: .8rem; font-weight: 700;
+  letter-spacing: .04em; text-transform: uppercase;
+  border-bottom: 2px solid var(--border);
+}
+.content-wrap tbody tr:nth-child(even) { background: #f9f9f9; }
+.content-wrap tbody tr:hover { background: #eaf5fb; }
+.content-wrap td {
+  padding: .5rem .9rem;
+  border-bottom: 1px solid #eee; vertical-align: top;
+}
+
+/* ── BLOCKQUOTE ── */
+.content-wrap blockquote {
+  border-left: 4px solid var(--blue);
+  background: #f4f8fb;
+  padding: .6rem 1rem;
+  margin: 1rem 0;
+  border-radius: 0 var(--radius) var(--radius) 0;
+  color: #2c3e50;
+}
+.content-wrap blockquote p { margin-bottom: 0; }
+
+/* ── HR ── */
+.content-wrap hr { border: none; border-top: 1px solid var(--border); margin: 1.75rem 0; }
+
+/* ── IMAGES ── */
+.content-wrap img { max-width: 100%; height: auto; }
+.content-wrap img[src*="badge"] { height: 18px; vertical-align: middle; }
+
+/* ── PREV/NEXT ── */
+.page-nav {
+  display: flex; justify-content: space-between; gap: 1rem;
+  margin-top: 2.5rem; padding-top: 1.25rem;
+  border-top: 1px solid var(--border);
+}
+.pn-btn {
+  display: flex; flex-direction: column; gap: .15rem;
+  padding: .65rem 1rem; max-width: 46%;
+  border: 1px solid var(--border); border-radius: var(--radius);
+  text-decoration: none; color: var(--text);
+  transition: border-color .15s, background .15s;
+}
+.pn-btn:hover { border-color: var(--blue); background: var(--blue-light); text-decoration: none; }
+.pn-btn.next { text-align: right; margin-left: auto; }
+.pn-label { font-size: .7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: .05em; }
+.pn-title { font-size: .875rem; font-weight: 600; color: #232936; line-height: 1.3; }
+.pn-btn.prev .pn-label::before { content: '← '; }
+.pn-btn.next .pn-label::after  { content: ' →'; }
+
+/* ── FOOTER ── */
+#footer {
+  background: #f8f8f8; border-top: 1px solid var(--border);
+  margin-left: var(--sidebar-w);
+  padding: 1rem 2rem;
+  font-size: .8rem; color: var(--text-muted);
+  display: flex; justify-content: space-between; align-items: center;
+  gap: 1rem; flex-wrap: wrap;
+}
+#footer a { color: var(--text-muted); text-decoration: none; }
+#footer a:hover { color: var(--blue); }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 880px) {
+  :root { --sidebar-w: 0px; }
+  #sidebar {
+    width: 270px; transform: translateX(-100%); z-index: 150;
+    transition: transform .2s ease; box-shadow: 2px 0 8px rgba(0,0,0,.15);
+  }
+  #sidebar.open { transform: translateX(0); }
+  #main, #footer { margin-left: 0; }
+  #menu-toggle { display: block; }
+  .content-wrap { padding: 1.5rem 1rem 3rem; }
+}
+@media print {
+  #topbar, #sidebar, .action-bar, .page-nav, #footer { display: none !important; }
+  #main { margin-left: 0; }
+  .content-wrap { max-width: 100%; padding: 0; }
+}
+</style>
+</head>
+<body>
+
+<header id="topbar">
+  <div class="topbar-left">
+    <button id="menu-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')" aria-label="Menú">&#9776;</button>
+    <a href="index.html" class="brand">
+      🐍 Seminario EDA <span class="sep">·</span> <span class="sub">Análisis Exploratorio de Datos 2026</span>
+    </a>
+  </div>
+  <div class="topbar-right">
+    
+  </div>
+</header>
+
+<div id="layout">
+  <nav id="sidebar">
+    <div class="sb-header">Contenidos</div>
+<a href="index.html" class="sb-index-link active">📋 Presentación del curso</a>
+<div class="sb-week" style="margin-top:.5rem">
+  <div class="sb-week-hdr" style="padding-bottom:.1rem">
+    <span class="sb-week-label">En esta página</span>
+  </div>
+  <ul>
+    <li class="sb-item"><a href="#resultados"><span class="dtitle">1. Resultados de aprendizaje</span></a></li>
+    <li class="sb-item"><a href="#modulos"><span class="dtitle">2. Estructura modular</span></a></li>
+    <li class="sb-item"><a href="#calendario"><span class="dtitle">3. Calendario general</span></a></li>
+    <li class="sb-item"><a href="#sesiones"><span class="dtitle">4. Sesiones</span></a></li>
+    <li class="sb-item"><a href="#evaluacion"><span class="dtitle">7. Evaluación</span></a></li>
+    <li class="sb-item"><a href="#recursos"><span class="dtitle">8. Recursos y herramientas</span></a></li>
+  </ul>
+</div>
+<div class="sb-week" style="margin-top:.5rem">
+  <div class="sb-week-hdr"><span class="sb-week-label">Proyectos</span></div>
+  <ul>
+    <li class="sb-item"><a href="casos/index.html"><span class="dtitle">📂 Casos de estudio</span></a></li>
+  </ul>
+</div>
+<div class="sb-week"><div class="sb-week-hdr"><span class="sb-week-label">Semana 1</span><span class="sb-week-sub">21–24 abr</span></div><ul>
+<li class="sb-item"><a href="Dia%2001%20-%202026-04-21%20-%20Kick-off%20del%20seminario/index.html"><span class="dnum">Día 01</span><span class="dtitle">Kick-off</span></a></li>
+<li class="sb-item"><a href="Dia%2002%20-%202026-04-22%20-%20Fundamentos%20de%20Python%20I/index.html"><span class="dnum">Día 02</span><span class="dtitle">Python I</span></a></li>
+<li class="sb-item"><a href="Dia%2003%20-%202026-04-23%20-%20Fundamentos%20de%20Python%20II/index.html"><span class="dnum">Día 03</span><span class="dtitle">Python II</span></a></li>
+<li class="sb-item"><a href="Dia%2004%20-%202026-04-24%20-%20Planteamiento%20del%20proyecto/index.html"><span class="dnum">Día 04</span><span class="dtitle">Proyecto</span><span class="sb-badge">S1</span></a></li>
+</ul></div>
+<div class="sb-week"><div class="sb-week-hdr"><span class="sb-week-label">Semana 2</span><span class="sb-week-sub">27–29 abr</span></div><ul>
+<li class="sb-item"><a href="Dia%2005%20-%202026-04-27%20-%20OOP/index.html"><span class="dnum">Día 05</span><span class="dtitle">OOP</span></a></li>
+<li class="sb-item"><a href="Dia%2006%20-%202026-04-28%20-%20Pandas%20I/index.html"><span class="dnum">Día 06</span><span class="dtitle">Pandas I</span></a></li>
+<li class="sb-item"><a href="Dia%2007%20-%202026-04-29%20-%20Pandas%20II/index.html"><span class="dnum">Día 07</span><span class="dtitle">Pandas II</span><span class="sb-badge">S2</span></a></li>
+</ul></div>
+<div class="sb-week"><div class="sb-week-hdr"><span class="sb-week-label">Semana 3</span><span class="sb-week-sub">4–8 may</span></div><ul>
+<li class="sb-item"><a href="Dia%2008%20-%202026-05-04%20-%20Visualizaciones/index.html"><span class="dnum">Día 08</span><span class="dtitle">Visualizaciones</span></a></li>
+<li class="sb-item"><a href="Dia%2009%20-%202026-05-05%20-%20Regresiones/index.html"><span class="dnum">Día 09</span><span class="dtitle">Regresiones</span></a></li>
+<li class="sb-item"><a href="Dia%2010%20-%202026-05-06%20-%20Regresi%C3%B3n%20Log%C3%ADstica/index.html"><span class="dnum">Día 10</span><span class="dtitle">Reg. logística</span></a></li>
+<li class="sb-item"><a href="Dia%2011%20-%202026-05-07%20-%20%C3%81rbol%20de%20Decisi%C3%B3n/index.html"><span class="dnum">Día 11</span><span class="dtitle">Árbol decisión</span></a></li>
+<li class="sb-item"><a href="Dia%2012%20-%202026-05-08%20-%20M%C3%A9tricas%20-%20ENTREGA%20SEMANA%203/index.html"><span class="dnum">Día 12</span><span class="dtitle">Métricas</span><span class="sb-badge">S3</span></a></li>
+</ul></div>
+<div class="sb-week"><div class="sb-week-hdr"><span class="sb-week-label">Semana 4</span><span class="sb-week-sub">11–15 may</span></div><ul>
+<li class="sb-item"><a href="Dia%2013%20-%202026-05-11%20-%20Ensembles%20y%20Random%20Forest/index.html"><span class="dnum">Día 13</span><span class="dtitle">Ensembles / RF</span></a></li>
+<li class="sb-item"><a href="Dia%2014%20-%202026-05-12%20-%20Hip%C3%B3tesis%20y%20pruebas%20estad%C3%ADsticas/index.html"><span class="dnum">Día 14</span><span class="dtitle">Hipótesis</span></a></li>
+<li class="sb-item"><a href="Dia%2015%20-%202026-05-13%20-%20Dashboards%20con%20Streamlit/index.html"><span class="dnum">Día 15</span><span class="dtitle">Streamlit</span></a></li>
+<li class="sb-item"><a href="Dia%2016%20-%202026-05-14%20-%20APIs%20con%20FastAPI%20y%20buenas%20pr%C3%A1cticas/index.html"><span class="dnum">Día 16</span><span class="dtitle">FastAPI</span></a></li>
+<li class="sb-item"><a href="Dia%2017%20-%202026-05-15%20-%20Presentaciones%20finales/index.html"><span class="dnum">Día 17</span><span class="dtitle">Defensa</span><span class="sb-badge">FINAL</span></a></li>
+</ul></div>
+
+  </nav>
+  <main id="main">
+    <div class="content-wrap">
+      <div class="breadcrumb"><span class="cur">📋 Presentación del curso</span></div>
+
+      <h1>🐍 Seminario de Análisis Exploratorio de Datos</h1>
+      <h3 style="margin-top:.25rem; color:#666; font-weight:400">Carrera de Software &nbsp;·&nbsp; Abril – Mayo 2026</h3>
+
+      <p style="margin-top:1rem">
+        <img alt="Python" src="https://img.shields.io/badge/Python-3.11+-blue?logo=python&logoColor=white" />
+        <img alt="Jupyter" src="https://img.shields.io/badge/Jupyter-Notebooks-orange?logo=jupyter" style="margin-left:.4rem"/>
+        <img alt="License: MIT" src="https://img.shields.io/badge/License-MIT-yellow.svg" style="margin-left:.4rem"/>
+      </p>
+
+      <p style="margin-top:1rem; font-size:1.05rem; max-width:720px; line-height:1.8">
+        En <strong>17 sesiones sincrónicas distribuidas en 4 semanas</strong>, los estudiantes construyen un
+        <strong>Producto de Software Analítico</strong> completo: desde la formulación de la pregunta de negocio
+        hasta un dashboard en Streamlit y una API documentada en FastAPI.
+      </p>
+
+      <hr id="resultados" />
+
+      <h2>1. Resultados de aprendizaje</h2>
+      <h3>1.1 Resultados de aprendizaje globales</h3>
+      <ul>
+        <li>Aplica los fundamentos de Python y librerías especializadas para diseñar, estructurar y ejecutar procesos de análisis de datos que respondan a problemas de negocio reales.</li>
+        <li>Integra datos provenientes de distintas fuentes (archivos, bases de datos SQL, APIs) y construye pipelines reproducibles que aseguren consistencia, calidad y confiabilidad.</li>
+        <li>Analiza y visualiza datos mediante técnicas estadísticas y exploratorias, generando hallazgos útiles para la toma de decisiones.</li>
+        <li>Implementa modelos predictivos básicos con Python y evalúa su desempeño con métricas apropiadas.</li>
+        <li>Entrega resultados en forma de productos de software analítico (dashboards y/o APIs) alineados a estándares de la industria.</li>
+        <li>Demuestra pensamiento crítico y capacidad de comunicación técnica, presentando hallazgos, limitaciones y propuestas de mejora de manera fundamentada.</li>
+      </ul>
+
+      <hr id="modulos" />
+
+      <h2>2. Estructura modular</h2>
+      <p>El seminario se divide en 4 módulos que se despliegan de forma incremental en 17 sesiones sincrónicas. Cada módulo avanza un paso más en el ciclo completo de un proyecto analítico.</p>
+
+      <table>
+        <thead><tr><th>Módulo</th><th>Nombre</th><th>Contenidos principales</th><th>Sesiones</th></tr></thead>
+        <tbody>
+          <tr><td><strong>M1</strong></td><td>Introducción a Python y kick-off del proyecto</td><td>Fundamentos de Python, sintaxis, estructuras de control, funciones, estructura de proyecto y pregunta de negocio.</td><td>Días 1 – 4</td></tr>
+          <tr><td><strong>M2</strong></td><td>Manipulación y exploración de datos</td><td>Programación orientada a objetos, Pandas (lectura, exploración, limpieza) y primeros pasos de análisis.</td><td>Días 5 – 7</td></tr>
+          <tr><td><strong>M3</strong></td><td>Modelado supervisado: del EDA al primer modelo</td><td>Visualizaciones, regresión lineal/polinomial + VIF, regresión logística + SMOTE, árboles de decisión y métricas de evaluación.</td><td>Días 8 – 12</td></tr>
+          <tr><td><strong>M4</strong></td><td>Ciencia de datos aplicada y producto analítico</td><td>Ensembles (Random Forest), pruebas de hipótesis, dashboards con Streamlit, APIs con FastAPI, buenas prácticas y presentación final.</td><td>Días 13 – 17</td></tr>
+        </tbody>
+      </table>
+
+      <hr id="calendario" />
+
+      <h2>3. Calendario general (21 abr – 15 may)</h2>
+      <p>Resumen rápido de las 17 sesiones sincrónicas del seminario. El detalle diario y los materiales se encuentran en la sección&nbsp;4.</p>
+
+      <table>
+        <thead><tr><th>Día</th><th>Fecha</th><th>Mód.</th><th>Tema</th></tr></thead>
+        <tbody>
+          <tr style="background:#e7f2fa"><td colspan="4" style="font-weight:700; color:#2472a4; letter-spacing:.05em; text-transform:uppercase; font-size:.78rem">SEMANA 1</td></tr>
+          <tr><td>1</td><td>Martes 21 de abril</td><td>M1</td><td>Kick-off del seminario y formación de equipos</td></tr>
+          <tr><td>2</td><td>Miércoles 22 de abril</td><td>M1</td><td>Fundamentos de Python I – Sintaxis y tipos primitivos</td></tr>
+          <tr><td>3</td><td>Jueves 23 de abril</td><td>M1</td><td>Fundamentos de Python II – Control, colecciones y funciones</td></tr>
+          <tr><td>4</td><td>Viernes 24 de abril</td><td>M1</td><td>Planteamiento del proyecto analítico y estructura del repositorio &nbsp;<strong>· ENTREGA SEMANA 1</strong></td></tr>
+          <tr style="background:#e7f2fa"><td colspan="4" style="font-weight:700; color:#2472a4; letter-spacing:.05em; text-transform:uppercase; font-size:.78rem">SEMANA 2 <span style="font-weight:400; text-transform:none; color:#888">(parcial)</span></td></tr>
+          <tr><td>5</td><td>Lunes 27 de abril</td><td>M2</td><td>Programación Orientada a Objetos (OOP)</td></tr>
+          <tr><td>6</td><td>Martes 28 de abril</td><td>M2</td><td>Pandas I – Series, DataFrames y carga de datos</td></tr>
+          <tr><td>7</td><td>Miércoles 29 de abril</td><td>M2</td><td>Pandas II – Limpieza y transformación de datos &nbsp;<strong>· ENTREGA SEMANA 2</strong></td></tr>
+          <tr style="background:#fff8e7"><td colspan="4" style="color:#b7791f; font-size:.82rem; font-style:italic">Feriado nacional — Jueves 30 abr al domingo 3 may (sin clases)</td></tr>
+          <tr style="background:#e7f2fa"><td colspan="4" style="font-weight:700; color:#2472a4; letter-spacing:.05em; text-transform:uppercase; font-size:.78rem">SEMANA 3 — del EDA al primer modelo</td></tr>
+          <tr><td>8</td><td>Lunes 4 de mayo</td><td>M3</td><td>Visualizaciones avanzadas (Matplotlib, Seaborn, Plotly) y estadística descriptiva aplicada</td></tr>
+          <tr><td>9</td><td>Martes 5 de mayo</td><td>M3</td><td>Regresión lineal, polinomial y VIF (multicolinealidad)</td></tr>
+          <tr><td>10</td><td>Miércoles 6 de mayo</td><td>M3</td><td>Regresión logística + balanceo de clases con SMOTE</td></tr>
+          <tr><td>11</td><td>Jueves 7 de mayo</td><td>M3</td><td>Árbol de decisión: ramificación, criterios y poda</td></tr>
+          <tr><td>12</td><td>Viernes 8 de mayo</td><td>M3</td><td>Métricas y comparación de modelos (regresión + clasificación) &nbsp;<strong>· ENTREGA SEMANA 3</strong></td></tr>
+          <tr style="background:#e7f2fa"><td colspan="4" style="font-weight:700; color:#2472a4; letter-spacing:.05em; text-transform:uppercase; font-size:.78rem">SEMANA 4 — del modelo al producto analítico</td></tr>
+          <tr><td>13</td><td>Lunes 11 de mayo</td><td>M4</td><td>Ensembles y Random Forest: del árbol al bosque</td></tr>
+          <tr><td>14</td><td>Martes 12 de mayo</td><td>M4</td><td>Hipótesis y pruebas estadísticas aplicadas a modelos</td></tr>
+          <tr><td>15</td><td>Miércoles 13 de mayo</td><td>M4</td><td>Dashboards interactivos con Streamlit</td></tr>
+          <tr><td>16</td><td>Jueves 14 de mayo</td><td>M4</td><td>APIs con FastAPI + buenas prácticas (testing, documentación, portafolio)</td></tr>
+          <tr><td>17</td><td>Viernes 15 de mayo</td><td>M4</td><td>Presentaciones finales y defensa oral &nbsp;<strong>· ENTREGA FINAL</strong></td></tr>
+        </tbody>
+      </table>
+
+      <hr id="sesiones" />
+
+      <h2>4. Sesiones — Materiales y acceso</h2>
+      <p>Accede a cada sesión desde su página o abre el notebook directamente en Google Colab.</p>
+
+      <h3>Semana 1 &nbsp;·&nbsp; 21–24 abr</h3>
+      <blockquote><p>Entregable: <strong>S1 — Definición del Problema</strong></p></blockquote>
+      <table>
+        <thead><tr><th>#</th><th>Fecha</th><th>Tema</th><th>Clase</th><th>Colab</th></tr></thead>
+        <tbody>
+          <tr><td>01</td><td>Mar 21 abr</td><td>Kick-off del seminario y formación de equipos</td><td><a href="./Dia%2001%20-%202026-04-21%20-%20Kick-off%20del%20seminario/index.html">📄</a></td><td><a href="https://colab.research.google.com/github/we-human-centric/CursoPythonDatos_2026/blob/main/Dia%2001%20-%202026-04-21%20-%20Kick-off%20del%20seminario/clase_01.ipynb"><img alt="Colab" src="https://colab.research.google.com/assets/colab-badge.svg" /></a></td></tr>
+          <tr><td>02</td><td>Mié 22 abr</td><td>Fundamentos de Python I</td><td><a href="./Dia%2002%20-%202026-04-22%20-%20Fundamentos%20de%20Python%20I/index.html">📄</a></td><td><a href="https://colab.research.google.com/github/we-human-centric/CursoPythonDatos_2026/blob/main/Dia%2002%20-%202026-04-22%20-%20Fundamentos%20de%20Python%20I/clase_02.ipynb"><img alt="Colab" src="https://colab.research.google.com/assets/colab-badge.svg" /></a></td></tr>
+          <tr><td>03</td><td>Jue 23 abr</td><td>Fundamentos de Python II</td><td><a href="./Dia%2003%20-%202026-04-23%20-%20Fundamentos%20de%20Python%20II/index.html">📄</a></td><td><a href="https://colab.research.google.com/github/we-human-centric/CursoPythonDatos_2026/blob/main/Dia%2003%20-%202026-04-23%20-%20Fundamentos%20de%20Python%20II/clase_03.ipynb"><img alt="Colab" src="https://colab.research.google.com/assets/colab-badge.svg" /></a></td></tr>
+          <tr><td>04</td><td>Vie 24 abr</td><td>Planteamiento del proyecto &nbsp;<strong>· ENTREGA S1</strong></td><td><a href="./Dia%2004%20-%202026-04-24%20-%20Planteamiento%20del%20proyecto/index.html">📄</a></td><td><a href="https://colab.research.google.com/github/we-human-centric/CursoPythonDatos_2026/blob/main/Dia%2004%20-%202026-04-24%20-%20Planteamiento%20del%20proyecto/clase_04.ipynb"><img alt="Colab" src="https://colab.research.google.com/assets/colab-badge.svg" /></a></td></tr>
+        </tbody>
+      </table>
+
+      <h3>Semana 2 &nbsp;·&nbsp; 27–29 abr</h3>
+      <blockquote><p>Entregable: <strong>S2 — Pipeline de Datos</strong></p></blockquote>
+      <table>
+        <thead><tr><th>#</th><th>Fecha</th><th>Tema</th><th>Clase</th><th>Colab</th></tr></thead>
+        <tbody>
+          <tr><td>05</td><td>Lun 27 abr</td><td>Programación Orientada a Objetos (OOP)</td><td><a href="./Dia%2005%20-%202026-04-27%20-%20OOP/index.html">📄</a></td><td><a href="https://colab.research.google.com/github/we-human-centric/CursoPythonDatos_2026/blob/main/Dia%2005%20-%202026-04-27%20-%20OOP/clase_05.ipynb"><img alt="Colab" src="https://colab.research.google.com/assets/colab-badge.svg" /></a></td></tr>
+          <tr><td>06</td><td>Mar 28 abr</td><td>Pandas I – Series, DataFrames y carga de datos</td><td><a href="./Dia%2006%20-%202026-04-28%20-%20Pandas%20I/index.html">📄</a></td><td><a href="https://colab.research.google.com/github/we-human-centric/CursoPythonDatos_2026/blob/main/Dia%2006%20-%202026-04-28%20-%20Pandas%20I/clase_06.ipynb"><img alt="Colab" src="https://colab.research.google.com/assets/colab-badge.svg" /></a></td></tr>
+          <tr><td>07</td><td>Mié 29 abr</td><td>Pandas II – Limpieza y transformación &nbsp;<strong>· ENTREGA S2</strong></td><td><a href="./Dia%2007%20-%202026-04-29%20-%20Pandas%20II/index.html">📄</a></td><td><a href="https://colab.research.google.com/github/we-human-centric/CursoPythonDatos_2026/blob/main/Dia%2007%20-%202026-04-29%20-%20Pandas%20II/clase_07.ipynb"><img alt="Colab" src="https://colab.research.google.com/assets/colab-badge.svg" /></a></td></tr>
+        </tbody>
+      </table>
+
+      <h3>Semana 3 &nbsp;·&nbsp; 4–8 may &nbsp;·&nbsp; <em>del EDA al primer modelo</em></h3>
+      <blockquote><p>Entregable: <strong>S3 — EDA + 3 modelos comparados (lineal, logística y árbol) con métricas</strong></p></blockquote>
+      <table>
+        <thead><tr><th>#</th><th>Fecha</th><th>Tema</th><th>Clase</th><th>Colab</th></tr></thead>
+        <tbody>
+          <tr><td>08</td><td>Lun 4 may</td><td>Visualizaciones avanzadas (Matplotlib, Seaborn, Plotly)</td><td><a href="./Dia%2008%20-%202026-05-04%20-%20Visualizaciones/index.html">📄</a></td><td><a href="https://colab.research.google.com/github/we-human-centric/CursoPythonDatos_2026/blob/main/Dia%2008%20-%202026-05-04%20-%20Visualizaciones/clase_08.ipynb"><img alt="Colab" src="https://colab.research.google.com/assets/colab-badge.svg" /></a></td></tr>
+          <tr><td>09</td><td>Mar 5 may</td><td>Regresión lineal, polinomial y VIF</td><td><a href="./Dia%2009%20-%202026-05-05%20-%20Regresiones/index.html">📄</a></td><td><a href="https://colab.research.google.com/github/we-human-centric/CursoPythonDatos_2026/blob/main/Dia%2009%20-%202026-05-05%20-%20Regresiones/clase_09.ipynb"><img alt="Colab" src="https://colab.research.google.com/assets/colab-badge.svg" /></a></td></tr>
+          <tr><td>10</td><td>Mié 6 may</td><td>Regresión logística + SMOTE</td><td><a href="./Dia%2010%20-%202026-05-06%20-%20Regresi%C3%B3n%20Log%C3%ADstica/index.html">📄</a></td><td><a href="https://colab.research.google.com/github/we-human-centric/CursoPythonDatos_2026/blob/main/Dia%2010%20-%202026-05-06%20-%20Regresi%C3%B3n%20Log%C3%ADstica/clase_10.ipynb"><img alt="Colab" src="https://colab.research.google.com/assets/colab-badge.svg" /></a></td></tr>
+          <tr><td>11</td><td>Jue 7 may</td><td>Árbol de decisión: ramificación, criterios y poda</td><td><a href="./Dia%2011%20-%202026-05-07%20-%20%C3%81rbol%20de%20Decisi%C3%B3n/index.html">📄</a></td><td><a href="https://colab.research.google.com/github/we-human-centric/CursoPythonDatos_2026/blob/main/Dia%2011%20-%202026-05-07%20-%20%C3%81rbol%20de%20Decisi%C3%B3n/clase_11.ipynb"><img alt="Colab" src="https://colab.research.google.com/assets/colab-badge.svg" /></a></td></tr>
+          <tr><td>12</td><td>Vie 8 may</td><td>Métricas y comparación de modelos &nbsp;<strong>· ENTREGA S3</strong></td><td><a href="./Dia%2012%20-%202026-05-08%20-%20M%C3%A9tricas%20-%20ENTREGA%20SEMANA%203/index.html">📄</a></td><td><a href="https://colab.research.google.com/github/we-human-centric/CursoPythonDatos_2026/blob/main/Dia%2012%20-%202026-05-08%20-%20M%C3%A9tricas%20-%20ENTREGA%20SEMANA%203/clase_12.ipynb"><img alt="Colab" src="https://colab.research.google.com/assets/colab-badge.svg" /></a></td></tr>
+        </tbody>
+      </table>
+
+      <h3>Semana 4 &nbsp;·&nbsp; 11–15 may &nbsp;·&nbsp; <em>del modelo al producto analítico</em></h3>
+      <blockquote><p>Entregable: <strong>S4 — Producto Analítico Final (dashboard + API + portafolio)</strong></p></blockquote>
+      <table>
+        <thead><tr><th>#</th><th>Fecha</th><th>Tema</th><th>Clase</th><th>Colab</th></tr></thead>
+        <tbody>
+          <tr><td>13</td><td>Lun 11 may</td><td>Ensembles y Random Forest</td><td><a href="./Dia%2013%20-%202026-05-11%20-%20Ensembles%20y%20Random%20Forest/index.html">📄</a></td><td><a href="https://colab.research.google.com/github/we-human-centric/CursoPythonDatos_2026/blob/main/Dia%2013%20-%202026-05-11%20-%20Ensembles%20y%20Random%20Forest/clase_13.ipynb"><img alt="Colab" src="https://colab.research.google.com/assets/colab-badge.svg" /></a></td></tr>
+          <tr><td>14</td><td>Mar 12 may</td><td>Hipótesis y pruebas estadísticas aplicadas</td><td><a href="./Dia%2014%20-%202026-05-12%20-%20Hip%C3%B3tesis%20y%20pruebas%20estad%C3%ADsticas/index.html">📄</a></td><td><a href="https://colab.research.google.com/github/we-human-centric/CursoPythonDatos_2026/blob/main/Dia%2014%20-%202026-05-12%20-%20Hip%C3%B3tesis%20y%20pruebas%20estad%C3%ADsticas/clase_14.ipynb"><img alt="Colab" src="https://colab.research.google.com/assets/colab-badge.svg" /></a></td></tr>
+          <tr><td>15</td><td>Mié 13 may</td><td>Dashboards interactivos con Streamlit</td><td><a href="./Dia%2015%20-%202026-05-13%20-%20Dashboards%20con%20Streamlit/index.html">📄</a></td><td><a href="https://colab.research.google.com/github/we-human-centric/CursoPythonDatos_2026/blob/main/Dia%2015%20-%202026-05-13%20-%20Dashboards%20con%20Streamlit/clase_15.ipynb"><img alt="Colab" src="https://colab.research.google.com/assets/colab-badge.svg" /></a></td></tr>
+          <tr><td>16</td><td>Jue 14 may</td><td>APIs con FastAPI + buenas prácticas</td><td><a href="./Dia%2016%20-%202026-05-14%20-%20APIs%20con%20FastAPI%20y%20buenas%20pr%C3%A1cticas/index.html">📄</a></td><td><a href="https://colab.research.google.com/github/we-human-centric/CursoPythonDatos_2026/blob/main/Dia%2016%20-%202026-05-14%20-%20APIs%20con%20FastAPI%20y%20buenas%20pr%C3%A1cticas/clase_16.ipynb"><img alt="Colab" src="https://colab.research.google.com/assets/colab-badge.svg" /></a></td></tr>
+          <tr><td>17</td><td>Vie 15 may</td><td>Presentaciones finales y defensa oral &nbsp;<strong>· ENTREGA FINAL</strong></td><td><a href="./Dia%2017%20-%202026-05-15%20-%20Presentaciones%20finales/index.html">📄</a></td><td><a href="https://colab.research.google.com/github/we-human-centric/CursoPythonDatos_2026/blob/main/Dia%2017%20-%202026-05-15%20-%20Presentaciones%20finales/clase_17.ipynb"><img alt="Colab" src="https://colab.research.google.com/assets/colab-badge.svg" /></a></td></tr>
+        </tbody>
+      </table>
+
+      <hr id="evaluacion" />
+
+      <h2>7. Evaluación</h2>
+      <table>
+        <thead><tr><th>Componente</th><th>Peso</th><th>Criterios clave</th></tr></thead>
+        <tbody>
+          <tr><td>Entregable Semana 1 – Definición del problema</td><td>10 %</td><td>Claridad de la pregunta de negocio, calidad de historias de usuario, ficha del dataset.</td></tr>
+          <tr><td>Entregable Semana 2 – Pipeline</td><td>20 %</td><td>Reproducibilidad, manejo de calidad de datos, validaciones automatizadas.</td></tr>
+          <tr><td>Entregable Semana 3 – EDA + primer modelo</td><td>25 %</td><td>Profundidad del EDA, rigor estadístico, pertinencia del modelo y métricas.</td></tr>
+          <tr><td>Entregable Semana 4 – Producto analítico</td><td>30 %</td><td>Comparación de modelos, dashboard/API funcional, modularización, documentación.</td></tr>
+          <tr><td>Defensa oral y trabajo en equipo</td><td>15 %</td><td>Claridad, dominio técnico, manejo de preguntas, colaboración observada.</td></tr>
+        </tbody>
+      </table>
+
+      <hr id="recursos" />
+
+      <h2>8. Recursos y herramientas recomendadas</h2>
+
+      <h3>8.1 Entorno y lenguajes</h3>
+      <ul>
+        <li>Python 3.11+, pip / venv / conda.</li>
+        <li>VS Code con extensiones Python, Jupyter, GitLens y Black.</li>
+        <li>Git 2.40+ y cuenta en GitHub.</li>
+      </ul>
+
+      <h3>8.2 Librerías principales</h3>
+      <ul>
+        <li><strong>Análisis de datos:</strong> NumPy, Pandas, SciPy, statsmodels.</li>
+        <li><strong>Visualización:</strong> Matplotlib, Seaborn, Plotly.</li>
+        <li><strong>Machine learning:</strong> scikit-learn, LightGBM (opcional).</li>
+        <li><strong>Serialización y validación:</strong> joblib, pydantic, pandera.</li>
+        <li><strong>Productos analíticos:</strong> Streamlit, FastAPI, Uvicorn.</li>
+        <li><strong>Testing y calidad:</strong> pytest, black, ruff.</li>
+      </ul>
+
+      <hr id="casos" />
+
+      <h2>5. Casos de estudio — Proyectos grupales</h2>
+      <p>
+        Cada grupo elige <strong>un caso</strong> de entre los 10 disponibles y lo desarrolla durante las 4 semanas del seminario.
+        Los casos cubren dominios reales: retail, banca, deporte, movilidad urbana, geofísica, NLP, música, fraude financiero, logística y tendencias tecnológicas.
+      </p>
+      <table>
+        <thead><tr><th>#</th><th>Caso</th><th>Dominio</th><th>Técnica</th></tr></thead>
+        <tbody>
+          <tr><td><a href="casos/caso_01.html">01</a></td><td><a href="casos/caso_01.html">Segmentación de Clientes — Retail</a></td><td>Retail</td><td>K-Means / RFM</td></tr>
+          <tr><td><a href="casos/caso_02.html">02</a></td><td><a href="casos/caso_02.html">Sistema Bancario Ecuatoriano</a></td><td>Finanzas / Ecuador</td><td>EDA + Rankings</td></tr>
+          <tr><td><a href="casos/caso_03.html">03</a></td><td><a href="casos/caso_03.html">Scouting y Valoración FIFA 21</a></td><td>Deporte / Analytics</td><td>Regresión</td></tr>
+          <tr><td><a href="casos/caso_04.html">04</a></td><td><a href="casos/caso_04.html">Movilidad Urbana Nueva York</a></td><td>Transporte</td><td>Análisis geoespacial</td></tr>
+          <tr><td><a href="casos/caso_05.html">05</a></td><td><a href="casos/caso_05.html">Actividad Sísmica Ecuador</a></td><td>Geofísica / Ecuador</td><td>Series de tiempo + Geo</td></tr>
+          <tr><td><a href="casos/caso_06.html">06</a></td><td><a href="casos/caso_06.html">Reseñas Amazon — Utilidad</a></td><td>E-Commerce / NLP</td><td>Clasificación + texto</td></tr>
+          <tr><td><a href="casos/caso_07.html">07</a></td><td><a href="casos/caso_07.html">Predicción de Hits de Spotify</a></td><td>Música / Analytics</td><td>Clasificación binaria</td></tr>
+          <tr><td><a href="casos/caso_08.html">08</a></td><td><a href="casos/caso_08.html">Detección de Fraude Financiero</a></td><td>Fintech</td><td>Clasificación desbalanceada</td></tr>
+          <tr><td><a href="casos/caso_09.html">09</a></td><td><a href="casos/caso_09.html">E-Commerce OLIST Brasil</a></td><td>Logística / LatAm</td><td>Multi-tabla + Clasificación</td></tr>
+          <tr><td><a href="casos/caso_10.html">10</a></td><td><a href="casos/caso_10.html">Tendencias Tecnológicas Stack Overflow</a></td><td>Comunidad Tech</td><td>Series de tiempo + tags</td></tr>
+        </tbody>
+      </table>
+      <p style="margin-top:.75rem"><a href="casos/index.html">→ Ver todos los casos con detalle completo</a></p>
+      <blockquote style="margin-top:1rem"><p>📦 <strong><a href="casos/entregable_intermedio.html">Entregable intermedio del lunes</a></strong> — punto de control transversal a todos los casos: estructura de repo en GitHub, contexto del negocio, cuadernos de preparación y EDA con insights, y bitácora obligatoria de uso de IA (Antigravity, Claude Code y similares).</p></blockquote>
+
+      <hr />
+
+      <h2>🚀 Cómo usar este repositorio</h2>
+
+      <h3>Opción A · Google Colab (sin instalar nada)</h3>
+      <p>Haz clic en el botón <strong>Open in Colab</strong> de cualquier sesión en la sección 4. Solo necesitas una cuenta de Google.</p>
+
+      <h3>Opción B · Ejecución local</h3>
+<pre><code class="language-bash">git clone https://github.com/we-human-centric/CursoPythonDatos_2026.git
+cd CursoPythonDatos_2026
+python -m venv .venv
+source .venv/bin/activate      # Windows: .venv\Scripts\activate
+pip install -r requirements.txt
+jupyter lab
+</code></pre>
+
+    </div>
+  </main>
+</div>
+
+<footer id="footer">
+  <span>Seminario de Análisis Exploratorio de Datos </span>
+  <span><a href="https://github.com/we-human-centric/CursoPythonDatos_2026" target="_blank">github.com/we-human-centric/CursoPythonDatos_2026</a></span>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('pre code').forEach(function(block) {
+      hljs.highlightElement(block);
+    });
+    // close sidebar on main click (mobile)
+    document.getElementById('main').addEventListener('click', function() {
+      document.getElementById('sidebar').classList.remove('open');
+    });
+  });
+</script>
+</body>
+</html>

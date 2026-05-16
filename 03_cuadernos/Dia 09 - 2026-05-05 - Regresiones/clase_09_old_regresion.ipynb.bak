@@ -1,0 +1,494 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "id": "cell-0",
+   "metadata": {},
+   "source": [
+    "<a href=\"https://colab.research.google.com/github/we-human-centric/CursoPythonDatos_2026/blob/main/Dia%2012%20-%202026-05-08%20-%20Correlaciones%2C%20regresiones%20e%20intro%20a%20scikit-learn/clase_12.ipynb\" target=\"_parent\"><img src=\"https://colab.research.google.com/assets/colab-badge.svg\" alt=\"Open In Colab\"/></a>\n",
+    "\n",
+    "# Día 12 · Correlaciones, regresiones e intro a scikit-learn\n",
+    "\n",
+    "Hoy es el día del umbral. Pasamos de \"puedo describir los datos\" a \"puedo construir algo que predice\". Es un cambio de paradigma.\n",
+    "\n",
+    "Hasta ahora: análisis exploratorio. Hoy: modelado predictivo. Scikit-learn es la librería que hace esto accesible. Y todas sus funciones siguen el mismo patrón: `.fit()`, `.predict()`, `.score()`. Aprendés uno, aprendés a usar todos.\n",
+    "\n",
+    "Empezamos con lo más simple: regresión lineal. Que en realidad es solo: ajustar una línea a los puntos."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "> **Hoy haces** · Los tres ejercicios sobre correlaciones, regresión lineal y primer modelo con sklearn, las dos pausas y el checkpoint. ~2h.\n",
+    ">\n",
+    "> **Entrega** · El notebook ejecutado con tu primer modelo entrenado, al repo del equipo antes de la próxima clase."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "cell-1",
+   "metadata": {},
+   "source": [
+    "## Setup"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "cell-2",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import random\n",
+    "import numpy as np\n",
+    "import pandas as pd\n",
+    "import matplotlib.pyplot as plt\n",
+    "import seaborn as sns\n",
+    "from scipy import stats\n",
+    "\n",
+    "from sklearn.linear_model import LinearRegression, LogisticRegression\n",
+    "from sklearn.model_selection import train_test_split\n",
+    "from sklearn.metrics import r2_score, mean_absolute_error, accuracy_score, classification_report\n",
+    "from sklearn.preprocessing import StandardScaler\n",
+    "\n",
+    "SEED = 42\n",
+    "random.seed(SEED)\n",
+    "np.random.seed(SEED)\n",
+    "\n",
+    "sns.set_theme(style=\"whitegrid\", palette=\"deep\")\n",
+    "plt.rcParams[\"figure.figsize\"] = (10, 4)\n",
+    "plt.rcParams[\"figure.dpi\"] = 100\n",
+    "\n",
+    "print(\"Setup completo ✓\")\n",
+    "print(f\"scikit-learn {__import__('sklearn').__version__}\")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "cell-3",
+   "metadata": {},
+   "source": [
+    "---\n",
+    "\n",
+    "## La pregunta\n",
+    "\n",
+    "Titanic: sabemos que edad, clase y sexo se relacionan con la tarifa. Pero ¿puedo **predecir** cuánto pagó alguien solo con esos datos? ¿Cuán bien funciona?"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "cell-4",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "titanic = sns.load_dataset(\"titanic\").dropna(subset=[\"age\", \"fare\"])\n",
+    "print(f\"Shape: {titanic.shape}\")\n",
+    "print(f\"\\nPrimeras 3 filas:\")\n",
+    "titanic[[\"age\", \"pclass\", \"sex\", \"fare\"]].head(3)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "cell-4",
+   "metadata": {},
+   "source": [
+    "---\n",
+    "\n",
+    "## 1. Correlación de Pearson\n",
+    "\n",
+    "Antes de modelar, veo cómo se relacionan las variables. Pearson mide relación **lineal**: rango [-1, +1]. Un valor de 0.8 significa: \"cuando una sube, la otra sube bastante consistentemente\"."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "cell-5",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "r_age_fare = titanic[\"age\"].corr(titanic[\"fare\"])\n",
+    "print(f\"Pearson(edad, tarifa) = {r_age_fare:.3f}\")\n",
+    "\n",
+    "r, p = stats.pearsonr(titanic[\"age\"], titanic[\"fare\"])\n",
+    "print(f\"Pearson r = {r:.3f}, p-value = {p:.4f}\")\n",
+    "print(f\"Significativa: {'sí' if p < 0.05 else 'no'}\")\n",
+    "\n",
+    "plt.figure(figsize=(10, 4))\n",
+    "plt.scatter(titanic[\"age\"], titanic[\"fare\"], alpha=0.5, s=30)\n",
+    "z = np.polyfit(titanic[\"age\"], titanic[\"fare\"], 1)\n",
+    "p_fit = np.poly1d(z)\n",
+    "plt.plot(titanic[\"age\"].sort_values(), p_fit(titanic[\"age\"].sort_values()), \"r-\", lw=2, label=\"Fit lineal\")\n",
+    "plt.xlabel(\"Edad (años)\")\n",
+    "plt.ylabel(\"Tarifa (£)\")\n",
+    "plt.title(f\"Edad vs Tarifa (r={r:.3f})\")\n",
+    "plt.legend()\n",
+    "plt.tight_layout()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "cell-6",
+   "metadata": {},
+   "source": [
+    "### Ejercicio 1\n",
+    "\n",
+    "Crea una matriz de correlación de Pearson para `age`, `fare`, `pclass`, `survived`. Visualiza con `sns.heatmap()`."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "cell-7",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "cols_numericas = [\"age\", \"fare\", \"pclass\", \"survived\"]\n",
+    "corr_matrix = titanic[cols_numericas].___()\n",
+    "\n",
+    "plt.figure(figsize=(8, 6))\n",
+    "sns.heatmap(corr_matrix, annot=True, cmap=\"coolwarm\", center=0, vmin=-1, vmax=1, square=True)\n",
+    "plt.title(\"Matriz de correlación — Titanic\")\n",
+    "plt.tight_layout()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "cell-8",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "assert corr_matrix.shape == (4, 4)\n",
+    "print(\"✅ Ejercicio 1 completado\")"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "cell-9",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# %% [solution]\n",
+    "# corr_matrix = titanic[cols_numericas].corr()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "cell-10",
+   "metadata": {},
+   "source": [
+    "---\n",
+    "\n",
+    "## 2. Regresión lineal · ajustar una línea\n",
+    "\n",
+    "Regresión lineal busca ajustar `y = β₀ + β₁·x` minimizando el error cuadrático. Los coeficientes son interpretables: β₁ = \"cada unidad más de x se asocia con β₁ unidades más de y\"."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "cell-11",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "X = titanic[[\"age\"]].values\n",
+    "y = titanic[\"fare\"].values\n",
+    "\n",
+    "modelo = LinearRegression()\n",
+    "modelo.fit(X, y)\n",
+    "\n",
+    "intercept = modelo.intercept_\n",
+    "coef = modelo.coef_[0]\n",
+    "\n",
+    "print(f\"Modelo: tarifa = {intercept:.2f} + {coef:.3f} * edad\")\n",
+    "print(f\"Interpretación: cada año más de edad se asocia con £{coef:.2f} más de tarifa.\")\n",
+    "\n",
+    "edad_prueba = np.array([[25], [50]])\n",
+    "pred = modelo.predict(edad_prueba)\n",
+    "print(f\"\\nPredicción: edad=25 → tarifa={pred[0]:.2f}, edad=50 → tarifa={pred[1]:.2f}\")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "cell-12",
+   "metadata": {},
+   "source": [
+    "### Ejercicio 2\n",
+    "\n",
+    "Entrena una regresión lineal múltiple para predecir tarifa usando edad, clase y sexo (encoding sexo como 0/1). Reporta R² en test."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "cell-13",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "df_model = titanic.copy()\n",
+    "df_model[\"sex_int\"] = (df_model[\"sex\"] == \"female\").astype(int)\n",
+    "\n",
+    "X = df_model[[\"age\", \"pclass\", \"sex_int\"]]\n",
+    "y = df_model[\"fare\"]\n",
+    "\n",
+    "X_tr, X_te, y_tr, y_te = train_test_split(X, y, test_size=0.2, random_state=42)\n",
+    "\n",
+    "lr = LinearRegression()\n",
+    "lr.___(X_tr, y_tr)\n",
+    "\n",
+    "pred = lr.___(X_te)\n",
+    "r2 = r2_score(y_te, pred)\n",
+    "mae = mean_absolute_error(y_te, pred)\n",
+    "\n",
+    "print(f\"R² en test = {r2:.3f}\")\n",
+    "print(f\"MAE = {mae:.2f} (error promedio en £)\")\n",
+    "print(f\"\\nCoeficientes:\")\n",
+    "for name, coef in zip(X.columns, lr.coef_):\n",
+    "    print(f\"  {name}: {coef:+.3f}\")\n",
+    "print(f\"  intercepto: {lr.intercept_:+.3f}\")"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "cell-14",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "assert r2 > 0, \"R² debe ser positivo\"\n",
+    "print(\"✅ Ejercicio 2 completado\")"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "cell-15",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# %% [solution]\n",
+    "# lr.fit(X_tr, y_tr)\n",
+    "# pred = lr.predict(X_te)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "cell-16",
+   "metadata": {},
+   "source": [
+    "---\n",
+    "\n",
+    "## 3. Regresión logística · clasificación\n",
+    "\n",
+    "LinearRegression predice valores continuos. Si tu objetivo es categórico (sí/no), usas LogisticRegression. Predice probabilidades [0, 1], no valores arbitrarios."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "cell-17",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "df_clf = titanic.dropna(subset=[\"survived\"]).copy()\n",
+    "df_clf[\"sex_int\"] = (df_clf[\"sex\"] == \"female\").astype(int)\n",
+    "\n",
+    "X = df_clf[[\"age\", \"pclass\", \"sex_int\"]]\n",
+    "y = df_clf[\"survived\"]\n",
+    "\n",
+    "X_tr, X_te, y_tr, y_te = train_test_split(X, y, test_size=0.2, random_state=42)\n",
+    "\n",
+    "clf = LogisticRegression(max_iter=1000)\n",
+    "clf.fit(X_tr, y_tr)\n",
+    "\n",
+    "pred_class = clf.predict(X_te)\n",
+    "accuracy = accuracy_score(y_te, pred_class)\n",
+    "\n",
+    "print(f\"Accuracy en test = {accuracy:.3f}\")\n",
+    "print(f\"\\nReporte de clasificación:\")\n",
+    "print(classification_report(y_te, pred_class, target_names=[\"Murió\", \"Sobrevivió\"]))\n",
+    "\n",
+    "pred_proba = clf.predict_proba(X_te[:3])\n",
+    "print(f\"\\nPrimeras 3 probabilidades predichas:\")\n",
+    "print(pd.DataFrame(pred_proba, columns=[\"P(murió)\", \"P(sobrevivió)\"]))"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "cell-18",
+   "metadata": {},
+   "source": [
+    "### Ejercicio 3\n",
+    "\n",
+    "Entrena un LogisticRegression para predecir supervivencia usando edad, clase, sexo y tarifa. Reporta accuracy."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "cell-19",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "X = df_clf[[\"age\", \"pclass\", \"sex_int\", \"fare\"]]\n",
+    "y = df_clf[\"survived\"]\n",
+    "\n",
+    "X_tr, X_te, y_tr, y_te = train_test_split(X, y, test_size=0.2, random_state=42)\n",
+    "\n",
+    "clf2 = LogisticRegression(max_iter=1000)\n",
+    "clf2.___(X_tr, y_tr)\n",
+    "\n",
+    "acc = accuracy_score(y_te, clf2.___(X_te))\n",
+    "print(f\"Accuracy = {acc:.3f}\")\n",
+    "\n",
+    "coefs = pd.Series(abs(clf2.coef_[0]), index=X.columns).sort_values(ascending=False)\n",
+    "print(f\"\\nFeatures más importantes:\")\n",
+    "print(coefs)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "cell-20",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "assert acc > 0\n",
+    "print(\"✅ Ejercicio 3 completado\")"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "cell-21",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# %% [solution]\n",
+    "# clf2.fit(X_tr, y_tr)\n",
+    "# acc = accuracy_score(y_te, clf2.predict(X_te))"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "cell-22",
+   "metadata": {},
+   "source": [
+    "---\n",
+    "\n",
+    "## Desafío · Pipeline completo\n",
+    "\n",
+    "Construye un **pipeline end-to-end**:\n",
+    "\n",
+    "1. Prepara datos: limpieza, encoding categóricas, selección de features.\n",
+    "2. Estandariza (StandardScaler — importante para interpretabilidad).\n",
+    "3. Divide train/test con random_state=42.\n",
+    "4. Entrena regresión o clasificación.\n",
+    "5. Reporta métrica + top 3 features importantes.\n",
+    "6. Escribe conclusión en 3-4 oraciones.\n",
+    "\n",
+    "Criterios:\n",
+    "- Random state 42 en todo.\n",
+    "- Features claros, sin duplicados.\n",
+    "- Métrica apropiada (R² o accuracy).\n",
+    "- Interpretación de coeficientes."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "cell-23",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# === PASO 1: Preparación ===\n",
+    "# Dataset: Titanic, tips, diamonds, penguins (o el tuyo)\n",
+    "# ← Tu código aquí\n",
+    "\n",
+    "# === PASO 2: Feature engineering ===\n",
+    "# Selecciona 4-6 features numéricas o codifica categóricas\n",
+    "# ← Tu código aquí\n",
+    "\n",
+    "# === PASO 3: Train/test split ===\n",
+    "# ← Tu código aquí\n",
+    "\n",
+    "# === PASO 4: Estandarización ===\n",
+    "# ← Tu código aquí\n",
+    "\n",
+    "# === PASO 5: Entrenamiento ===\n",
+    "# ← Tu código aquí\n",
+    "\n",
+    "# === PASO 6: Evaluación ===\n",
+    "# ← Tu código aquí\n",
+    "\n",
+    "# === PASO 7: Conclusión ===\n",
+    "# Escribe 3-4 oraciones aquí\n",
+    "\n",
+    "print(\"\\n🎯 Desafío: Entregado\")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "cell-24",
+   "metadata": {},
+   "source": [
+    "---\n",
+    "\n",
+    "## Lo que aprendiste\n",
+    "\n",
+    "Pearson mide relación lineal. LinearRegression para predecir números. LogisticRegression para clasificación. Train/test split con random_state=42 (siempre). StandardScaler para que los coeficientes sean comparables. Scikit-learn: mismo patrón en todo.\n",
+    "\n",
+    "Mañana: ¿cómo sé que mi modelo es bueno? Métricas. Comparación. Validación cruzada."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "> **Recordatorio** · Notebook ejecutado al repo antes de la próxima sesión."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "cell-25",
+   "metadata": {},
+   "source": [
+    "---\n",
+    "\n",
+    "## Trabajo en equipo\n",
+    "\n",
+    "Para vuestro proyecto:\n",
+    "\n",
+    "- Matriz de correlación de vuestro dataset.\n",
+    "- 3 features más prometedoras para predecir el objetivo.\n",
+    "- Modelo baseline (regresión o clasificación) con esos features.\n",
+    "\n",
+    "Entrega: `baseline_model.ipynb` con datos, modelo, métrica y top 3 features."
+   ]
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.11.0"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 5
+}

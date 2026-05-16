@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Caso 08 · Detección de Fraude en E-Commerce — Seminario EDA 2026</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css">
+  <style>*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --sidebar-w: 270px; --topbar-h: 50px;
+  --blue: #2980b9; --blue-dark: #2472a4; --blue-light: #e7f2fa;
+  --navy: #232936; --text: #404040; --text-muted: #888;
+  --border: #ddd; --sidebar-bg: #f8f8f8; --bg: #ffffff;
+  --code-bg: #f8f8f8; --font: 'Lato','Helvetica Neue',Arial,sans-serif;
+  --mono: 'SFMono-Regular',Consolas,'Liberation Mono',Menlo,monospace;
+  --radius: 4px;
+}
+html { font-size: 15px; scroll-behavior: smooth; }
+body { font-family: var(--font); background: var(--bg); color: var(--text); line-height: 1.75; -webkit-font-smoothing: antialiased; }
+#topbar { position:fixed; top:0; left:0; right:0; height:var(--topbar-h); background:var(--navy); color:#fcfcfc; display:flex; align-items:center; padding:0 1rem; z-index:200; box-shadow:0 2px 4px rgba(0,0,0,.3); gap:.6rem; }
+.brand { color:#fff; text-decoration:none; font-size:.95rem; font-weight:700; display:flex; align-items:center; gap:.4rem; white-space:nowrap; }
+.brand span.sep { opacity:.3; font-weight:300; }
+.brand span.sub { font-weight:400; font-size:.8rem; opacity:.75; }
+#menu-toggle { display:none; background:none; border:none; color:#fff; font-size:1.15rem; cursor:pointer; padding:.3rem .4rem; line-height:1; }
+#layout { display:flex; margin-top:var(--topbar-h); }
+#sidebar { width:var(--sidebar-w); flex-shrink:0; background:var(--sidebar-bg); border-right:1px solid var(--border); position:fixed; top:var(--topbar-h); bottom:0; overflow-y:auto; overflow-x:hidden; padding-bottom:2rem; font-size:.875rem; }
+#sidebar::-webkit-scrollbar { width:4px; }
+#sidebar::-webkit-scrollbar-thumb { background:#ccc; border-radius:4px; }
+.sb-header { padding:.7rem 1rem .4rem; font-size:.65rem; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--text-muted); border-bottom:1px solid var(--border); margin-bottom:.4rem; }
+.sb-index-link { display:block; padding:.38rem 1rem; color:var(--text); text-decoration:none; font-size:.875rem; }
+.sb-index-link:hover, .sb-index-link.active { background:var(--blue-light); color:var(--blue-dark); }
+.sb-week { margin-top:.35rem; }
+.sb-week-hdr { display:flex; align-items:baseline; justify-content:space-between; padding:.5rem 1rem .25rem; }
+.sb-week-label { font-size:.7rem; font-weight:700; letter-spacing:.07em; text-transform:uppercase; color:var(--blue); }
+.sb-week ul { list-style:none; }
+.sb-item a { display:flex; align-items:baseline; gap:.4rem; padding:.32rem 1rem; color:#555; text-decoration:none; line-height:1.35; }
+.sb-item a:hover { background:var(--blue-light); color:var(--blue-dark); }
+.sb-item a.active { background:var(--blue-light); color:var(--blue-dark); font-weight:700; border-left:3px solid var(--blue); }
+.sb-item .dnum { font-size:.7rem; color:var(--text-muted); min-width:2.2rem; flex-shrink:0; font-family:var(--mono); }
+.sb-item .dtitle { font-size:.82rem; }
+#main { margin-left:var(--sidebar-w); flex:1; min-width:0; }
+.content-wrap { max-width:860px; padding:2rem 2.5rem 4rem; }
+.breadcrumb { font-size:.8rem; color:var(--text-muted); margin-bottom:1.2rem; }
+.breadcrumb a { color:var(--blue); text-decoration:none; }
+.breadcrumb a:hover { text-decoration:underline; }
+.breadcrumb .sep { margin:0 .4rem; }
+.content-wrap h1 { font-size:1.75rem; font-weight:700; color:#2c3e50; margin-bottom:.75rem; line-height:1.2; }
+.content-wrap h2 { font-size:1.2rem; font-weight:700; color:#2c3e50; margin:2rem 0 .75rem; padding-bottom:.4rem; border-bottom:1px solid #e8e8e8; }
+.content-wrap h3 { font-size:1rem; font-weight:700; color:#2c3e50; margin:1.25rem 0 .5rem; }
+.content-wrap p { margin-bottom:.9rem; }
+.content-wrap ul, .content-wrap ol { padding-left:1.6rem; margin-bottom:.9rem; }
+.content-wrap li { margin-bottom:.35rem; }
+.content-wrap a { color:var(--blue); text-decoration:none; }
+.content-wrap a:hover { text-decoration:underline; }
+.content-wrap hr { border:none; border-top:1px solid var(--border); margin:1.75rem 0; }
+.content-wrap code { font-family:var(--mono); font-size:.875em; background:var(--code-bg); color:#c0392b; padding:.1em .3em; border-radius:3px; border:1px solid #e1e4e5; }
+.content-wrap pre { background:var(--code-bg); border:1px solid var(--border); border-left:4px solid var(--blue); border-radius:var(--radius); padding:1rem 1.1rem; overflow-x:auto; margin:1rem 0; line-height:1.6; }
+.content-wrap pre code { background:none; color:inherit; padding:0; border:none; font-size:.875rem; }
+.content-wrap table { width:100%; border-collapse:collapse; margin:1rem 0; font-size:.9rem; border:1px solid var(--border); border-radius:var(--radius); overflow:hidden; }
+.content-wrap thead th { background:#f0f0f0; color:#404040; padding:.55rem .9rem; text-align:left; font-size:.8rem; font-weight:700; letter-spacing:.04em; text-transform:uppercase; border-bottom:2px solid var(--border); }
+.content-wrap tbody tr:nth-child(even) { background:#f9f9f9; }
+.content-wrap tbody tr:hover { background:#eaf5fb; }
+.content-wrap td { padding:.5rem .9rem; border-bottom:1px solid #eee; vertical-align:top; }
+.content-wrap blockquote { border-left:4px solid var(--blue); background:#f4f8fb; padding:.6rem 1rem; margin:1rem 0; border-radius:0 var(--radius) var(--radius) 0; color:#2c3e50; }
+.content-wrap blockquote p { margin-bottom:0; }
+.caso-ficha { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:.75rem; margin:1rem 0 1.75rem; }
+.caso-chip { background:#f0f4f8; border:1px solid #dce6ef; border-radius:6px; padding:.6rem .9rem; display:flex; flex-direction:column; gap:.2rem; }
+.caso-chip .chip-label { font-size:.65rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:#7a8fa6; }
+.caso-chip .chip-value { font-size:.85rem; font-weight:700; color:#2c3e50; }
+.phase-list { display:flex; flex-direction:column; gap:1.1rem; margin:1rem 0; }
+.phase-card { border:1px solid #dce6ef; border-radius:8px; border-left:5px solid var(--blue); overflow:hidden; }
+.phase-card-header { display:flex; align-items:center; gap:.75rem; background:#f7fafd; padding:.7rem 1.1rem; border-bottom:1px solid #dce6ef; }
+.phase-num { width:1.8rem; height:1.8rem; border-radius:50%; background:var(--blue); color:#fff; font-size:.8rem; font-weight:700; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.phase-title { font-weight:700; font-size:.95rem; color:#2c3e50; }
+.phase-body { padding:.85rem 1.1rem; font-size:.9rem; line-height:1.7; }
+.phase-body p { margin-bottom:.6rem; }
+.phase-body ul { padding-left:1.4rem; margin-bottom:.5rem; }
+.phase-body ol { padding-left:1.4rem; margin-bottom:.5rem; }
+.phase-body li { margin-bottom:.3rem; }
+.phase-body h3 { font-size:.9rem; font-weight:700; color:#2c3e50; margin:.75rem 0 .25rem; }
+.phase-body strong { color:#2c3e50; }
+.phase-body table { width:100%; border-collapse:collapse; margin:.5rem 0; font-size:.85rem; border:1px solid #dce6ef; border-radius:4px; overflow:hidden; }
+.phase-body thead th { background:#e8f0f8; padding:.4rem .7rem; text-align:left; font-size:.75rem; font-weight:700; text-transform:uppercase; border-bottom:1px solid #dce6ef; }
+.phase-body td { padding:.4rem .7rem; border-bottom:1px solid #eee; vertical-align:top; }
+.phase-body tbody tr:nth-child(even) { background:#f7fafd; }
+.phase-body code { font-family:var(--mono); font-size:.82em; background:#f8f8f8; color:#c0392b; padding:.1em .3em; border-radius:3px; border:1px solid #e1e4e5; }
+.phase-body pre { background:#f8f8f8; border:1px solid #ddd; border-left:4px solid var(--blue); border-radius:4px; padding:.8rem 1rem; overflow-x:auto; margin:.6rem 0; line-height:1.6; }
+.phase-body pre code { background:none; color:inherit; padding:0; border:none; font-size:.82rem; }
+.phase-body blockquote { border-left:4px solid #e6a817; background:#fff8e6; padding:.5rem .9rem; margin:.5rem 0; border-radius:0 4px 4px 0; font-size:.88rem; }
+.phase-body blockquote p { margin-bottom:0; }
+.ra-box { background:#f0faf4; border:1px solid #a9dfbf; border-left:4px solid #27ae60; border-radius:0 6px 6px 0; padding:.7rem 1rem; margin:0 0 1.25rem; font-size:.9rem; font-style:italic; color:#1a5e35; }
+.dataset-box { background:#f0f7ff; border:1px solid #b6d7f5; border-radius:8px; padding:1rem 1.2rem; margin:1rem 0; }
+.dataset-box .ds-title { font-weight:700; font-size:.9rem; color:#1a5276; margin-bottom:.5rem; }
+#footer { margin-left:var(--sidebar-w); background:#f5f5f5; border-top:1px solid #ddd; padding:.75rem 2rem; font-size:.78rem; color:#888; display:flex; justify-content:space-between; gap:1rem; flex-wrap:wrap; }
+#footer a { color:var(--blue); text-decoration:none; }
+@media (max-width:768px) {
+  #sidebar { position:fixed; left:0; top:var(--topbar-h); height:calc(100vh - var(--topbar-h)); transform:translateX(-100%); transition:transform .2s ease; box-shadow:2px 0 8px rgba(0,0,0,.15); z-index:150; }
+  #sidebar.open { transform:translateX(0); }
+  #main, #footer { margin-left:0; }
+  #menu-toggle { display:block; }
+  .content-wrap { padding:1.5rem 1rem 3rem; }
+}
+</style>
+</head>
+<body>
+<header id="topbar">
+  <button id="menu-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')" aria-label="Menu">&#9776;</button>
+  <a href="../index.html" class="brand">
+    🐍 Seminario EDA <span class="sep">·</span> <span class="sub">Análisis Exploratorio de Datos 2026</span>
+  </a>
+</header>
+<div id="layout">
+  <nav id="sidebar"><div class="sb-header">Casos de Estudio</div><a href="../index.html" class="sb-index-link">← Inicio del curso</a><a href="index.html" class="sb-index-link ">📋 Todos los casos</a><a href="entregable_intermedio.html" class="sb-index-link">📦 Entregable intermedio</a><div class="sb-week" style="margin-top:.4rem"><div class="sb-week-hdr"><span class="sb-week-label">Proyectos</span></div><ul><li class="sb-item"><a href="caso_01.html" class=""><span class="dnum">C01</span><span class="dtitle">Segmentación de Clientes — Retail</span></a></li>
+<li class="sb-item"><a href="caso_02.html" class=""><span class="dnum">C02</span><span class="dtitle">Sistema Bancario Ecuatoriano</span></a></li>
+<li class="sb-item"><a href="caso_03.html" class=""><span class="dnum">C03</span><span class="dtitle">Scouting y Valoración FIFA 21</span></a></li>
+<li class="sb-item"><a href="caso_04.html" class=""><span class="dnum">C04</span><span class="dtitle">Movilidad Urbana Nueva York</span></a></li>
+<li class="sb-item"><a href="caso_05.html" class=""><span class="dnum">C05</span><span class="dtitle">Actividad Sísmica Ecuador</span></a></li>
+<li class="sb-item"><a href="caso_06.html" class=""><span class="dnum">C06</span><span class="dtitle">Reseñas Amazon — Predicción de Utilidad</span></a></li>
+<li class="sb-item"><a href="caso_07.html" class=""><span class="dnum">C07</span><span class="dtitle">Predicción de Hits de Spotify</span></a></li>
+<li class="sb-item"><a href="caso_08.html" class="active"><span class="dnum">C08</span><span class="dtitle">Detección de Fraude en E-Commerce</span></a></li>
+<li class="sb-item"><a href="caso_09.html" class=""><span class="dnum">C09</span><span class="dtitle">E-Commerce OLIST Brasil</span></a></li>
+<li class="sb-item"><a href="caso_10.html" class=""><span class="dnum">C10</span><span class="dtitle">Tendencias Tecnológicas Stack Overflow</span></a></li></ul></div></nav>
+  <main id="main">
+    <div class="content-wrap"><div class="breadcrumb"><a href="../index.html">Inicio</a><span class="sep">›</span><a href="index.html">Casos de estudio</a><span class="sep">›</span><span class="cur">Caso 08</span></div>
+<h1>Caso 08 · Detección de Fraude en Transacciones de E-Commerce</h1>
+<div class="caso-ficha"><div class="caso-chip"><span class="chip-label">Dominio</span><span class="chip-value">Fintech / E-Commerce</span></div><div class="caso-chip"><span class="chip-label">Técnica principal</span><span class="chip-value">Clasificación + Explicabilidad</span></div><div class="caso-chip"><span class="chip-label">Dataset</span><span class="chip-value">~590 000 transacciones (multi-tabla)</span></div></div>
+<hr id="contexto"/>
+<h2>Contexto del problema</h2>
+<p>El fraude con tarjetas de crédito y pagos en línea genera pérdidas globales superiores a <strong>USD 30,000 millones anuales</strong>. Este caso utiliza el dataset de la competencia <strong>IEEE-CIS Fraud Detection</strong>, organizada por <strong>Vesta Corporation</strong>, con <strong>~590,000 transacciones reales</strong> de e-commerce y una tasa de fraude del <strong>~3.5 % (≈ 20 663 casos)</strong> — un desbalance significativo pero menos extremo que datasets totalmente anonimizados, lo que permite trabajar con métricas estables.</p>
+<p>Los datos están distribuidos en <strong>dos tablas relacionales</strong> que deben unirse por <code>TransactionID</code> con un <em>left join</em> para conservar todas las transacciones aunque no tengan información de identidad:</p>
+<ul>
+<li><code>train_transaction.csv</code> — información de la transacción: monto (<code>TransactionAmt</code>), tipo de producto (<code>ProductCD</code>), datos parciales de la tarjeta (<code>card1</code>–<code>card6</code>), dominios de correo del comprador y receptor (<code>P_emaildomain</code>, <code>R_emaildomain</code>) y distancia entre direcciones (<code>dist1</code>, <code>dist2</code>)</li>
+<li><code>train_identity.csv</code> — información del dispositivo y sesión: tipo de dispositivo (<code>DeviceType</code>), información del dispositivo (<code>DeviceInfo</code>) y atributos de identidad (<code>id_01</code>–<code>id_38</code>)</li>
+<li><code>isFraud</code> — etiqueta: 0 = legítima, 1 = fraude</li>
+</ul>
+<p>A diferencia de datasets totalmente anonimizados, aquí las features tienen <strong>nombres interpretables</strong> que pueden traducirse a lenguaje de negocio (marca de tarjeta, dominio de correo, tipo de dispositivo, categoría de producto). Esto permite construir un modelo cuyas decisiones se pueden explicar al área de operaciones. El reto técnico es triple:</p>
+<ol>
+<li><strong>Desbalance de clases</strong> — un modelo trivial que predice "legítima" para todo obtiene ~96.5 % de exactitud detectando cero fraudes</li>
+<li><strong>Valores faltantes a gran escala</strong> — varias columnas superan el 50 % de nulos y requieren una estrategia explícita de descarte e imputación</li>
+<li><strong>Variables categóricas de alta cardinalidad</strong> — dominios de correo y modelos de dispositivo necesitan codificación adecuada</li>
+</ol>
+<hr id="objetivo"/>
+<h2>Objetivo del proyecto</h2>
+<p>Construir un sistema de detección de fraude que combine el rigor estadístico del manejo de clases desbalanceadas con la <strong>explicabilidad de las features</strong>, de modo que cada alerta pueda justificarse al área de operaciones (ej. <em>"transacción marcada por dominio de correo poco común + dispositivo nuevo + monto fuera de patrón"</em>) y la gerencia pueda tomar la decisión de umbral con criterio de negocio.</p>
+<hr id="fases"/>
+<h2>Actividades del proyecto</h2>
+<div class="ra-box">🎓 <strong>Resultado de aprendizaje:</strong> el estudiante integra dos tablas relacionales con valores faltantes a gran escala, codifica variables categóricas de alta cardinalidad, maneja el desbalance de clases con múltiples estrategias, y construye un sistema de detección cuyas alertas son <strong>explicables</strong> al área de negocio.</div>
+<div class="phase-list">
+<div class="phase-card"><div class="phase-card-header"><div class="phase-num">1</div><span class="phase-title">🔍 Comprensión del dominio</span></div><div class="phase-body"><p>Investigar el impacto económico del fraude en e-commerce. Explicar por qué la exactitud (accuracy) es una métrica engañosa cuando hay desbalance de clases. Analizar el <strong>costo asimétrico de los dos tipos de error</strong>: no detectar un fraude (falso negativo) vs. bloquear una transacción legítima (falso positivo) — ambos tienen costos muy distintos para el negocio. Definir qué métrica(s) debería optimizar este sistema y por qué la <strong>explicabilidad de las alertas</strong> es tan importante como su precisión: el equipo de operaciones necesita entender por qué una transacción fue marcada para tomar la decisión final.</p></div></div>
+<div class="phase-card"><div class="phase-card-header"><div class="phase-num">2</div><span class="phase-title">🗂️ Preparación y exploración de datos</span></div><div class="phase-body"><p><strong>Integración multi-tabla:</strong></p>
+<pre><code class="language-python">df = pd.merge(transaction, identity, on='TransactionID', how='left')</code></pre>
+<p>El <em>left join</em> conserva todas las transacciones aunque no tengan registro de identidad — el hecho de que falte la identidad puede ser, en sí mismo, una señal informativa.</p>
+<p><strong>Manejo de valores faltantes:</strong></p>
+<ul>
+<li>Cuantificar el porcentaje de nulos por columna y graficarlo</li>
+<li>Definir un umbral explícito de descarte (sugerido: > 80 % de nulos)</li>
+<li>Imputar el resto con criterio: mediana para numéricas; categoría <code>"missing"</code> propia para categóricas (no inventar valores)</li>
+</ul>
+<p><strong>Codificación de variables categóricas:</strong></p>
+<table><thead><tr><th>Tipo de variable</th><th>Estrategia</th><th>Ejemplo</th></tr></thead><tbody><tr><td>Baja cardinalidad (≤ 10 valores)</td><td><code>pd.get_dummies()</code></td><td><code>ProductCD</code>, <code>card4</code>, <code>DeviceType</code></td></tr><tr><td>Alta cardinalidad (decenas o cientos)</td><td><code>LabelEncoder</code> o frequency encoding</td><td><code>P_emaildomain</code>, <code>DeviceInfo</code></td></tr></tbody></table>
+<p><strong>EDA explicable:</strong></p>
+<ul>
+<li>Tasa de fraude por <code>ProductCD</code>, marca de tarjeta (<code>card4</code>), dominio de correo (<code>P_emaildomain</code>) y tipo de dispositivo (<code>DeviceType</code>)</li>
+<li>Distribución de <code>TransactionAmt</code> entre fraudes y transacciones legítimas (boxplots y log-scale)</li>
+<li>Cuantificar y documentar el desbalance de clases con gráficos claros</li>
+<li>Diseñar el esquema de validación cruzada estratificada para preservar la proporción de fraudes en cada fold</li>
+</ul></div></div>
+<div class="phase-card"><div class="phase-card-header"><div class="phase-num">3</div><span class="phase-title">🧪 Modelado</span></div><div class="phase-body"><p>Comparar al menos <strong>4 combinaciones</strong>: 2 estrategias de manejo del desbalance × 2 clasificadores:</p>
+<table><thead><tr><th>Estrategia</th><th>Descripción</th></tr></thead><tbody><tr><td>A — Pesos de clase</td><td><code>class_weight=&#x27;balanced&#x27;</code> en el modelo — más simple, sin modificar los datos</td></tr><tr><td>B — SMOTE</td><td>Sobremuestreo sintético del training set — genera nuevos ejemplos de fraude (nunca aplicar sobre el test set)</td></tr></tbody></table>
+<p><strong>Clasificadores:</strong> Logistic Regression como baseline interpretable y <strong>LightGBM</strong> o Random Forest como modelo principal (LightGBM maneja categóricas y nulos nativamente, ideal para este dataset).</p>
+<p>Evaluar todas las combinaciones con Precisión, Recall, F1 y ROC-AUC usando <code>StratifiedKFold</code>. Seleccionar la mejor y analizar el efecto de mover el umbral de decisión sobre el equilibrio entre capturar fraudes y generar falsas alarmas.</p>
+<p><strong>Explicabilidad del modelo:</strong> extraer <code>feature_importances_</code> del modelo principal y/o calcular valores SHAP para identificar las features que más contribuyen a las decisiones globales y a cada predicción individual.</p></div></div>
+<div class="phase-card"><div class="phase-card-header"><div class="phase-num">4</div><span class="phase-title">🚀 Producto analítico</span></div><div class="phase-body"><p><strong>Pipeline técnico:</strong></p>
+<ul>
+<li>Join multi-tabla, descarte e imputación de nulos, codificación de categóricas — todo modularizado y reproducible</li>
+<li>Comparar <code>class_weight=&#x27;balanced&#x27;</code> vs. SMOTE sobre el training set únicamente (nunca sobre test)</li>
+<li>Evaluar con <code>StratifiedKFold</code> para preservar la proporción de fraudes en cada fold</li>
+<li>Analizar la curva Precision-Recall (más informativa que ROC con clases desbalanceadas)</li>
+<li>Guardar el mejor modelo y el explicador SHAP para el servicio de inferencia</li>
+</ul>
+<p><strong>API (FastAPI):</strong></p>
+<ul>
+<li><code>POST /transactions/evaluate</code> — recibe atributos de una transacción (monto, <code>ProductCD</code>, marca de tarjeta, dominio de correo, tipo de dispositivo, etc.); devuelve clasificación, probabilidad de fraude y los <strong>3 factores que más contribuyeron a la predicción</strong> (vía <code>feature_importances_</code> o SHAP)</li>
+<li><code>GET /transactions/threshold?value=0.3</code> — métricas proyectadas (Precisión, Recall estimados) para un umbral dado</li>
+</ul>
+<p><strong>Dashboard (Streamlit):</strong></p>
+<ol>
+<li>Simulación de flujo de transacciones recientes con indicadores verde/rojo. Al hacer clic en una alerta se despliega el <strong>desglose explicativo</strong>: <em>"dispositivo nuevo + dominio sospechoso + monto atípico"</em></li>
+<li>Matriz de confusión visual + curva Precisión-Recall del modelo seleccionado, junto con un gráfico de importancia de variables interpretable que responde <em>"¿qué señales delatan al fraude en este negocio?"</em></li>
+<li><strong>Slider interactivo de umbral de decisión</strong> que actualiza en tiempo real: Precisión, Recall y número proyectado de fraudes capturados y falsas alarmas por día — la vista más valiosa para la toma de decisión gerencial</li>
+</ol></div></div>
+<div class="phase-card"><div class="phase-card-header"><div class="phase-num">5</div><span class="phase-title">💬 Interpretación y comunicación</span></div><div class="phase-body"><p>¿Qué umbral recomendarían y por qué? ¿Cuál es el costo de equivocarse en cada dirección? ¿Qué patrones de comportamiento delata el modelo (combinaciones de dispositivo, dominio, monto y producto)? Presentar a la gerencia la decisión de umbral como una <strong>compensación explícita entre dos riesgos de negocio</strong>, no como un problema técnico, y demostrar con casos concretos cómo el sistema explica cada alerta al equipo de operaciones.</p></div></div>
+
+</div>
+<hr id="dataset"/>
+<h2>Dataset y recursos</h2>
+<div class="dataset-box">
+  <div class="ds-title">📦 Fuentes de datos</div>
+  <p>🔗 <a href="https://www.kaggle.com/competitions/ieee-fraud-detection/data" target="_blank"><strong>IEEE-CIS Fraud Detection — Vesta Corporation / Kaggle</strong></a></p>
+  <p style="margin-top:.4rem;font-size:.85rem">Archivos requeridos: <code>train_transaction.csv</code> y <code>train_identity.csv</code> (unidos por <code>TransactionID</code>).</p>
+  <p style="margin-top:.7rem;font-weight:700;font-size:.85rem;color:#1a5276">Lecturas recomendadas:</p><ul><li>Manejo de valores faltantes a gran escala con Pandas (descarte vs. imputación)</li><li>Codificación de variables categóricas: <code>get_dummies</code> vs. <code>LabelEncoder</code> vs. frequency encoding</li><li>Métricas para clasificación desbalanceada: Precision, Recall, F1 y ROC-AUC</li><li>Curvas ROC y Precision-Recall: lectura e interpretación comparada</li><li>Importancia de variables y SHAP para explicabilidad de modelos</li><li>SMOTE: sobremuestreo sintético con imbalanced-learn</li><li>Ajuste de umbral de decisión en clasificadores probabilísticos</li><li>LightGBM para datasets con muchas categóricas y nulos</li><li>Validación cruzada estratificada (<code>StratifiedKFold</code>) en datos desbalanceados</li></ul>
+</div>
+<hr id="rubrica"/>
+<h2>Rúbrica de evaluación</h2>
+<table><thead><tr><th>Entregable</th><th>Semana</th><th>Peso</th><th>Criterios clave</th></tr></thead><tbody><tr><td>Definición del problema</td><td>1</td><td>10 %</td><td>Claridad de la pregunta de negocio, historias de usuario, ficha del dataset</td></tr><tr><td>Pipeline de datos</td><td>2</td><td>20 %</td><td>Reproducibilidad, manejo del reto específico, validaciones documentadas</td></tr><tr><td>EDA + primer modelo</td><td>3</td><td>25 %</td><td>Profundidad del análisis, rigor estadístico, pertinencia del modelo y métricas</td></tr><tr><td>Producto analítico completo</td><td>4</td><td>30 %</td><td>Comparación de ≥ 2 modelos, API y dashboard funcionales, documentación</td></tr><tr><td>Defensa oral y trabajo en equipo</td><td>4</td><td>15 %</td><td>Dominio técnico, claridad, manejo de preguntas, colaboración</td></tr></tbody></table>
+</div>
+  </main>
+</div>
+<footer id="footer">
+  <span>Seminario de Análisis Exploratorio de Datos · Carrera de Software · Abril–Mayo 2026</span>
+  <span><a href="https://github.com/we-human-centric/CursoPythonDatos_2026" target="_blank">github.com/we-human-centric/CursoPythonDatos_2026</a></span>
+</footer>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('pre code').forEach(function(b){ hljs.highlightElement(b); });
+    document.getElementById('main').addEventListener('click', function(){
+      document.getElementById('sidebar').classList.remove('open');
+    });
+  });
+</script>
+</body>
+</html>

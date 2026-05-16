@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Entregable Intermedio — Mitad del Seminario · Seminario EDA 2026</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css">
+  <style>*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --sidebar-w: 270px; --topbar-h: 50px;
+  --blue: #2980b9; --blue-dark: #2472a4; --blue-light: #e7f2fa;
+  --navy: #232936; --text: #404040; --text-muted: #888;
+  --border: #ddd; --sidebar-bg: #f8f8f8; --bg: #ffffff;
+  --code-bg: #f8f8f8; --font: 'Lato','Helvetica Neue',Arial,sans-serif;
+  --mono: 'SFMono-Regular',Consolas,'Liberation Mono',Menlo,monospace;
+  --radius: 4px;
+}
+html { font-size: 15px; scroll-behavior: smooth; }
+body { font-family: var(--font); background: var(--bg); color: var(--text); line-height: 1.75; -webkit-font-smoothing: antialiased; }
+#topbar { position:fixed; top:0; left:0; right:0; height:var(--topbar-h); background:var(--navy); color:#fcfcfc; display:flex; align-items:center; padding:0 1rem; z-index:200; box-shadow:0 2px 4px rgba(0,0,0,.3); gap:.6rem; }
+.brand { color:#fff; text-decoration:none; font-size:.95rem; font-weight:700; display:flex; align-items:center; gap:.4rem; white-space:nowrap; }
+.brand span.sep { opacity:.3; font-weight:300; }
+.brand span.sub { font-weight:400; font-size:.8rem; opacity:.75; }
+#menu-toggle { display:none; background:none; border:none; color:#fff; font-size:1.15rem; cursor:pointer; padding:.3rem .4rem; line-height:1; }
+#layout { display:flex; margin-top:var(--topbar-h); }
+#sidebar { width:var(--sidebar-w); flex-shrink:0; background:var(--sidebar-bg); border-right:1px solid var(--border); position:fixed; top:var(--topbar-h); bottom:0; overflow-y:auto; overflow-x:hidden; padding-bottom:2rem; font-size:.875rem; }
+#sidebar::-webkit-scrollbar { width:4px; }
+#sidebar::-webkit-scrollbar-thumb { background:#ccc; border-radius:4px; }
+.sb-header { padding:.7rem 1rem .4rem; font-size:.65rem; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--text-muted); border-bottom:1px solid var(--border); margin-bottom:.4rem; }
+.sb-index-link { display:block; padding:.38rem 1rem; color:var(--text); text-decoration:none; font-size:.875rem; }
+.sb-index-link:hover, .sb-index-link.active { background:var(--blue-light); color:var(--blue-dark); }
+.sb-week { margin-top:.35rem; }
+.sb-week-hdr { display:flex; align-items:baseline; justify-content:space-between; padding:.5rem 1rem .25rem; }
+.sb-week-label { font-size:.7rem; font-weight:700; letter-spacing:.07em; text-transform:uppercase; color:var(--blue); }
+.sb-week ul { list-style:none; }
+.sb-item a { display:flex; align-items:baseline; gap:.4rem; padding:.32rem 1rem; color:#555; text-decoration:none; line-height:1.35; }
+.sb-item a:hover { background:var(--blue-light); color:var(--blue-dark); }
+.sb-item a.active { background:var(--blue-light); color:var(--blue-dark); font-weight:700; border-left:3px solid var(--blue); }
+.sb-item .dnum { font-size:.7rem; color:var(--text-muted); min-width:2.2rem; flex-shrink:0; font-family:var(--mono); }
+.sb-item .dtitle { font-size:.82rem; }
+#main { margin-left:var(--sidebar-w); flex:1; min-width:0; }
+.content-wrap { max-width:860px; padding:2rem 2.5rem 4rem; }
+.breadcrumb { font-size:.8rem; color:var(--text-muted); margin-bottom:1.2rem; }
+.breadcrumb a { color:var(--blue); text-decoration:none; }
+.breadcrumb a:hover { text-decoration:underline; }
+.breadcrumb .sep { margin:0 .4rem; }
+.content-wrap h1 { font-size:1.75rem; font-weight:700; color:#2c3e50; margin-bottom:.75rem; line-height:1.2; }
+.content-wrap h2 { font-size:1.2rem; font-weight:700; color:#2c3e50; margin:2rem 0 .75rem; padding-bottom:.4rem; border-bottom:1px solid #e8e8e8; }
+.content-wrap h3 { font-size:1rem; font-weight:700; color:#2c3e50; margin:1.25rem 0 .5rem; }
+.content-wrap p { margin-bottom:.9rem; }
+.content-wrap ul, .content-wrap ol { padding-left:1.6rem; margin-bottom:.9rem; }
+.content-wrap li { margin-bottom:.35rem; }
+.content-wrap a { color:var(--blue); text-decoration:none; }
+.content-wrap a:hover { text-decoration:underline; }
+.content-wrap hr { border:none; border-top:1px solid var(--border); margin:1.75rem 0; }
+.content-wrap code { font-family:var(--mono); font-size:.875em; background:var(--code-bg); color:#c0392b; padding:.1em .3em; border-radius:3px; border:1px solid #e1e4e5; }
+.content-wrap pre { background:var(--code-bg); border:1px solid var(--border); border-left:4px solid var(--blue); border-radius:var(--radius); padding:1rem 1.1rem; overflow-x:auto; margin:1rem 0; line-height:1.6; }
+.content-wrap pre code { background:none; color:inherit; padding:0; border:none; font-size:.875rem; }
+.content-wrap table { width:100%; border-collapse:collapse; margin:1rem 0; font-size:.9rem; border:1px solid var(--border); border-radius:var(--radius); overflow:hidden; }
+.content-wrap thead th { background:#f0f0f0; color:#404040; padding:.55rem .9rem; text-align:left; font-size:.8rem; font-weight:700; letter-spacing:.04em; text-transform:uppercase; border-bottom:2px solid var(--border); }
+.content-wrap tbody tr:nth-child(even) { background:#f9f9f9; }
+.content-wrap tbody tr:hover { background:#eaf5fb; }
+.content-wrap td { padding:.5rem .9rem; border-bottom:1px solid #eee; vertical-align:top; }
+.content-wrap blockquote { border-left:4px solid var(--blue); background:#f4f8fb; padding:.6rem 1rem; margin:1rem 0; border-radius:0 var(--radius) var(--radius) 0; color:#2c3e50; }
+.content-wrap blockquote p { margin-bottom:0; }
+.content-wrap blockquote.warn { border-left-color:#e6a817; background:#fff8e6; }
+.content-wrap blockquote.danger { border-left-color:#c0392b; background:#fdecea; }
+.content-wrap blockquote.ok { border-left-color:#27ae60; background:#f0faf4; }
+.checklist { list-style:none; padding-left:0; }
+.checklist li { position:relative; padding-left:1.7rem; margin-bottom:.45rem; }
+.checklist li::before { content:"☐"; position:absolute; left:0; top:0; color:var(--blue); font-weight:700; font-size:1.05rem; }
+.entregable-card { border:1px solid #dce6ef; border-radius:8px; border-left:5px solid var(--blue); overflow:hidden; margin:1rem 0; }
+.entregable-card-header { display:flex; align-items:center; gap:.75rem; background:#f7fafd; padding:.7rem 1.1rem; border-bottom:1px solid #dce6ef; }
+.entregable-num { width:1.8rem; height:1.8rem; border-radius:50%; background:var(--blue); color:#fff; font-size:.8rem; font-weight:700; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.entregable-title { font-weight:700; font-size:.95rem; color:#2c3e50; }
+.entregable-body { padding:.85rem 1.1rem; font-size:.9rem; line-height:1.7; }
+.entregable-body p { margin-bottom:.55rem; }
+.ra-box { background:#f0faf4; border:1px solid #a9dfbf; border-left:4px solid #27ae60; border-radius:0 6px 6px 0; padding:.7rem 1rem; margin:0 0 1.25rem; font-size:.9rem; color:#1a5e35; }
+.ra-box strong { color:#0e3d20; }
+#footer { margin-left:var(--sidebar-w); background:#f5f5f5; border-top:1px solid #ddd; padding:.75rem 2rem; font-size:.78rem; color:#888; display:flex; justify-content:space-between; gap:1rem; flex-wrap:wrap; }
+#footer a { color:var(--blue); text-decoration:none; }
+@media (max-width:768px) {
+  #sidebar { position:fixed; left:0; top:var(--topbar-h); height:calc(100vh - var(--topbar-h)); transform:translateX(-100%); transition:transform .2s ease; box-shadow:2px 0 8px rgba(0,0,0,.15); z-index:150; }
+  #sidebar.open { transform:translateX(0); }
+  #main, #footer { margin-left:0; }
+  #menu-toggle { display:block; }
+  .content-wrap { padding:1.5rem 1rem 3rem; }
+}
+</style>
+</head>
+<body>
+<header id="topbar">
+  <button id="menu-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')" aria-label="Menu">&#9776;</button>
+  <a href="../index.html" class="brand">
+    🐍 Seminario EDA <span class="sep">·</span> <span class="sub">Análisis Exploratorio de Datos 2026</span>
+  </a>
+</header>
+<div id="layout">
+  <nav id="sidebar"><div class="sb-header">Casos de Estudio</div><a href="../index.html" class="sb-index-link">← Inicio del curso</a><a href="index.html" class="sb-index-link">📋 Todos los casos</a><a href="entregable_intermedio.html" class="sb-index-link active">📦 Entregable intermedio</a><div class="sb-week" style="margin-top:.4rem"><div class="sb-week-hdr"><span class="sb-week-label">Proyectos</span></div><ul><li class="sb-item"><a href="caso_01.html" class=""><span class="dnum">C01</span><span class="dtitle">Segmentación de Clientes — Retail</span></a></li>
+<li class="sb-item"><a href="caso_02.html" class=""><span class="dnum">C02</span><span class="dtitle">Sistema Bancario Ecuatoriano</span></a></li>
+<li class="sb-item"><a href="caso_03.html" class=""><span class="dnum">C03</span><span class="dtitle">Scouting y Valoración FIFA 21</span></a></li>
+<li class="sb-item"><a href="caso_04.html" class=""><span class="dnum">C04</span><span class="dtitle">Movilidad Urbana Nueva York</span></a></li>
+<li class="sb-item"><a href="caso_05.html" class=""><span class="dnum">C05</span><span class="dtitle">Actividad Sísmica Ecuador</span></a></li>
+<li class="sb-item"><a href="caso_06.html" class=""><span class="dnum">C06</span><span class="dtitle">Reseñas Amazon — Predicción de Utilidad</span></a></li>
+<li class="sb-item"><a href="caso_07.html" class=""><span class="dnum">C07</span><span class="dtitle">Predicción de Hits de Spotify</span></a></li>
+<li class="sb-item"><a href="caso_08.html" class=""><span class="dnum">C08</span><span class="dtitle">Detección de Fraude en E-Commerce</span></a></li>
+<li class="sb-item"><a href="caso_09.html" class=""><span class="dnum">C09</span><span class="dtitle">E-Commerce OLIST Brasil</span></a></li>
+<li class="sb-item"><a href="caso_10.html" class=""><span class="dnum">C10</span><span class="dtitle">Tendencias Tecnológicas Stack Overflow</span></a></li></ul></div></nav>
+  <main id="main">
+    <div class="content-wrap">
+<div class="breadcrumb"><a href="../index.html">Inicio</a><span class="sep">›</span><a href="index.html">Casos de estudio</a><span class="sep">›</span><span class="cur">Entregable intermedio</span></div>
+
+<h1>📦 Entregable Intermedio — Lunes (Mitad del Seminario)</h1>
+<h3 style="margin-top:.3rem;color:#666;font-weight:400">Punto de control de medio camino · Transversal a todos los casos</h3>
+
+<div class="ra-box" style="margin-top:1.25rem">
+  <strong>Resultado de aprendizaje:</strong> el grupo llega a la segunda mitad del seminario con su proyecto estructurado, versionado y documentado, y con un primer EDA que produce <em>insights accionables</em>, no solo gráficas.
+</div>
+
+<h2>🎯 Propósito de este punto de control</h2>
+<p>Este entregable busca asegurar que cada grupo llegue a la segunda mitad del seminario con su proyecto <strong>estructurado, versionado y documentado</strong>, no solo con código suelto en cuadernos sin contexto. La idea es construir desde aquí, sin reorganizaciones traumáticas, hacia el modelado, la comparación y el producto analítico final.</p>
+<p>A diferencia de la entrega final, aquí no evaluamos sofisticación de algoritmos. Evaluamos <strong>higiene del proyecto</strong>, profundidad del entendimiento del negocio y calidad del análisis exploratorio inicial.</p>
+<blockquote class="ok"><p>🟢 Aprobar este punto de control = la base sólida está. 🔴 Reprobarlo = el grupo arrastra deuda técnica que crecerá la última semana.</p></blockquote>
+
+<hr/>
+
+<h2>🗂️ Estructura de repositorio obligatoria</h2>
+<p>Cada grupo crea un repositorio en GitHub con esta estructura. Está pensada para sostener todo el ciclo del caso, desde la primera carga de datos hasta el dashboard final.</p>
+<pre><code>GRUPO_X/
+├── 00_datos_crudos/             # Datos originales, intocables
+├── 01_datos_procesados/         # Datos limpios, listos para modelar
+├── 02_scripts/                  # Módulos .py reutilizables (utils, etl, viz)
+├── 03_cuadernos/                # Jupyter notebooks numerados
+├── 04_modelos/                  # Modelos entrenados, scalers, encoders (joblib)
+├── 05_referencias/              # Papers, datasheets, capturas, fuentes externas
+├── 06_archivo/                  # Experimentos antiguos que ya no se usan
+├── 07_CONTEXTO/                 # Entendimiento del dominio
+│   └── 01_RESUMEN_DEL_CASO.md
+├── 08_PLAN_Y_EJECUCION/         # Planes y bitácoras
+│   ├── readme.md                # Índice del plan general
+│   ├── preparacion_datos.md     # Plan de limpieza y transformación
+│   └── uso_de_ia.md             # Bitácora obligatoria de uso de IA
+├── README.md                    # Portada del repo
+├── requirements.txt             # Dependencias con versiones fijadas
+└── .gitignore                   # Ignorar datos pesados, checkpoints, venv
+</code></pre>
+<blockquote><p>💡 Es un esqueleto, no una camisa de fuerza. Si su caso requiere una carpeta extra (por ejemplo <code>09_geodata/</code> para Caso 4 o Caso 5, o <code>09_consultas_sql/</code> para casos con base de datos), agréguenla. Lo que <strong>no</strong> es negociable son las carpetas <code>07_CONTEXTO</code>, <code>08_PLAN_Y_EJECUCION</code> y los cuadernos numerados de <code>03_cuadernos/</code>.</p></blockquote>
+
+<hr/>
+
+<h2>⚠️ Antes de hacer push: el límite de tamaño de GitHub</h2>
+<p>GitHub bloquea archivos de más de <strong>100 MB</strong> y muestra advertencia para archivos &gt; 50 MB. La regla práctica para este seminario es: <strong>datos pesados nunca van al repo</strong>. Si su dataset crudo supera el límite (lo cual ocurre en varios casos):</p>
+<ol>
+  <li><strong>No lo suban.</strong> Añadan el patrón al <code>.gitignore</code> (<code>00_datos_crudos/*.csv</code>, <code>00_datos_crudos/*.parquet</code>, etc.)</li>
+  <li>Documenten en <code>00_datos_crudos/README.md</code> <strong>cómo descargar</strong> el dataset: link a la fuente, comando reproducible (<code>kaggle datasets download ...</code>, <code>wget ...</code>) y el tamaño esperado del archivo para verificar la descarga.</li>
+  <li>Si el dataset procesado también pesa demasiado, exporten una <strong>muestra representativa</strong> (ej. <code>muestra_5pct.parquet</code>, ~10–20 MB) que sí pueda versionarse, para que cualquiera pueda reproducir el EDA sin descargar el original completo.</li>
+</ol>
+<blockquote class="warn"><p>No vamos a usar Git LFS en este seminario. Añade fricción y no aporta para la entrega final.</p></blockquote>
+
+<hr/>
+
+<h2>✅ Checklist del entregable</h2>
+
+<div class="entregable-card">
+  <div class="entregable-card-header">
+    <div class="entregable-num">1</div>
+    <div class="entregable-title">Repositorio en GitHub funcional</div>
+  </div>
+  <div class="entregable-body">
+    <ul class="checklist">
+      <li>Repo creado, público (o privado con el docente como colaborador).</li>
+      <li>Estructura de carpetas según el esqueleto anterior.</li>
+      <li><code>README.md</code> raíz con: título del caso, integrantes, instrucciones para instalar dependencias y descargar los datos.</li>
+      <li><code>.gitignore</code> correcto (datos pesados, <code>__pycache__/</code>, <code>.ipynb_checkpoints/</code>, <code>venv/</code>, <code>.DS_Store</code>).</li>
+      <li><code>requirements.txt</code> con versiones fijadas (<code>pandas==2.2.2</code>, no <code>pandas</code> a secas).</li>
+      <li>Mínimo <strong>3 commits por integrante</strong> con mensajes descriptivos. Mensajes como <code>update</code>, <code>fix</code>, <code>final</code>, <code>final_v2</code> no cuentan.</li>
+    </ul>
+  </div>
+</div>
+
+<div class="entregable-card">
+  <div class="entregable-card-header">
+    <div class="entregable-num">2</div>
+    <div class="entregable-title">Datos crudos disponibles (<code>00_datos_crudos/</code>)</div>
+  </div>
+  <div class="entregable-body">
+    <ul class="checklist">
+      <li>Si pesan &lt; 100 MB: archivo en el repo.</li>
+      <li>Si pesan ≥ 100 MB: archivo <code>00_datos_crudos/README.md</code> con link, comando de descarga reproducible y tamaño/hash esperado del archivo.</li>
+    </ul>
+  </div>
+</div>
+
+<div class="entregable-card">
+  <div class="entregable-card-header">
+    <div class="entregable-num">3</div>
+    <div class="entregable-title">Datos procesados (<code>01_datos_procesados/</code>)</div>
+  </div>
+  <div class="entregable-body">
+    <ul class="checklist">
+      <li>Al menos un archivo <code>.parquet</code> (preferido) o <code>.csv</code> con los datos limpios.</li>
+      <li>Nombre claro: <code>transacciones_limpias.parquet</code>, no <code>df_v3_final_actualizado.csv</code>.</li>
+      <li>Schema documentado en el README de la carpeta o en el cuaderno de preparación.</li>
+    </ul>
+  </div>
+</div>
+
+<div class="entregable-card">
+  <div class="entregable-card-header">
+    <div class="entregable-num">4</div>
+    <div class="entregable-title">Contexto y entendimiento del negocio (<code>07_CONTEXTO/01_RESUMEN_DEL_CASO.md</code>)</div>
+  </div>
+  <div class="entregable-body">
+    <p>Aquí demuestran que entendieron <strong>el problema antes de tocar el código</strong>. Mínimo:</p>
+    <ul class="checklist">
+      <li><strong>Resumen del caso en sus propias palabras</strong> (no copiado del enunciado): 1–2 párrafos.</li>
+      <li><strong>Contexto del dominio / industria</strong>: ¿qué hace este negocio? ¿quién toma la decisión que ustedes apoyan? ¿qué incentivos tiene? Investigación con <strong>mínimo 3 fuentes externas citadas</strong> (no Wikipedia, no el enunciado).</li>
+      <li><strong>Pregunta de negocio principal</strong> y <strong>2–3 preguntas secundarias</strong> derivadas.</li>
+      <li><strong>Métrica de éxito</strong>: ¿cómo sabremos si la solución sirve? ¿qué KPI cambia y en qué dirección?</li>
+      <li><strong>Diccionario de variables</strong> del dataset crudo en formato tabla: nombre, tipo, descripción, rango/valores posibles, % de nulos, observaciones. Todas las columnas, no las "interesantes".</li>
+      <li><strong>Hipótesis iniciales</strong> (mínimo 5) que el EDA validará o rechazará. Ejemplo: <em>"Los clientes que compran en diciembre tienen un valor promedio mayor que el resto del año"</em>, no <em>"hay estacionalidad"</em>.</li>
+    </ul>
+  </div>
+</div>
+
+<div class="entregable-card">
+  <div class="entregable-card-header">
+    <div class="entregable-num">5</div>
+    <div class="entregable-title">Plan de preparación de datos (<code>08_PLAN_Y_EJECUCION/preparacion_datos.md</code>)</div>
+  </div>
+  <div class="entregable-body">
+    <ul class="checklist">
+      <li>Pasos de limpieza en orden, con justificación.</li>
+      <li>Decisiones explícitas sobre: nulos, duplicados, outliers, tipos de datos, encodings, parseo de fechas.</li>
+      <li>Variables nuevas que se construirán (feature engineering inicial) y por qué.</li>
+      <li><strong>Lo que se descarta y por qué se descarta.</strong> Esa es la parte difícil: no es trivial justificar qué columnas quedan fuera.</li>
+    </ul>
+  </div>
+</div>
+
+<div class="entregable-card">
+  <div class="entregable-card-header">
+    <div class="entregable-num">6</div>
+    <div class="entregable-title">Cuaderno de preparación de datos (<code>03_cuadernos/01_preparacion_datos.ipynb</code>)</div>
+  </div>
+  <div class="entregable-body">
+    <ul class="checklist">
+      <li>Ejecuta de principio a fin sin errores (Restart &amp; Run All antes de comitear).</li>
+      <li>Carga desde <code>00_datos_crudos/</code>, guarda en <code>01_datos_procesados/</code>.</li>
+      <li>Cada celda de código viene con celda de markdown explicativa: qué hace y por qué. No es un script disfrazado.</li>
+      <li><strong>Validaciones explícitas</strong> intercaladas: <code>assert df.shape[0] &gt; 0</code>, <code>assert df['cliente_id'].notna().all()</code>, <code>assert df['fecha'].dtype == 'datetime64[ns]'</code>.</li>
+      <li>Implementa el plan declarado en <code>preparacion_datos.md</code>. Si en el camino cambian algo, actualizan el plan.</li>
+    </ul>
+  </div>
+</div>
+
+<div class="entregable-card">
+  <div class="entregable-card-header">
+    <div class="entregable-num">7</div>
+    <div class="entregable-title">Cuaderno de Análisis Exploratorio (<code>03_cuadernos/02_eda.ipynb</code>)</div>
+  </div>
+  <div class="entregable-body">
+    <ul class="checklist">
+      <li>Ejecuta de principio a fin sin errores.</li>
+      <li><strong>Estadística univariada</strong>: distribución, medidas de tendencia central y dispersión de cada variable relevante.</li>
+      <li><strong>Estadística bivariada</strong>: relaciones entre variables, y de cada variable con la variable objetivo (si el caso es supervisado) o con las dimensiones clave del problema (si es no supervisado).</li>
+      <li>Mínimo <strong>8 visualizaciones</strong> con título, ejes etiquetados, leyenda cuando aplique, y un comentario interpretativo en markdown debajo. Gráficas mudas no cuentan.</li>
+      <li><strong>Sección final de Insights</strong>: mínimo <strong>5 hallazgos accionables</strong>, cada uno estructurado como:
+        <ul style="margin-top:.3rem">
+          <li><strong>Qué se observó</strong> (con evidencia gráfica o numérica)</li>
+          <li><strong>Por qué importa</strong> para el negocio</li>
+          <li><strong>Qué hipótesis</strong> confirma o rechaza</li>
+          <li><strong>Qué decisión cambia</strong> o qué pregunta nueva abre</li>
+        </ul>
+      </li>
+    </ul>
+  </div>
+</div>
+
+<div class="entregable-card">
+  <div class="entregable-card-header">
+    <div class="entregable-num">8</div>
+    <div class="entregable-title">Bitácora de uso de IA (<code>08_PLAN_Y_EJECUCION/uso_de_ia.md</code>)</div>
+  </div>
+  <div class="entregable-body">
+    <p>Sección <strong>no opcional</strong>. Detalle en el bloque siguiente.</p>
+  </div>
+</div>
+
+<hr/>
+
+<h2>🤖 Uso de IA: invitación con honestidad</h2>
+<p><strong>Sí, queremos que usen IA.</strong> Antigravity, Claude Code, Cursor, Copilot, ChatGPT, Gemini — lo que prefieran. La realidad profesional del 2026 es que un analista de datos que no usa IA está dejando productividad sobre la mesa, y este seminario los prepara para esa realidad, no para una versión nostálgica.</p>
+<p>Pero el trato es claro: <strong>toda interacción significativa con IA debe quedar registrada</strong> en <code>08_PLAN_Y_EJECUCION/uso_de_ia.md</code>. Esto cumple varios objetivos a la vez:</p>
+<ol>
+  <li>Ustedes mismos aprenden qué prompts funcionan y cuáles no.</li>
+  <li>Pueden volver atrás meses después y entender qué decisiones tomó la IA por ustedes.</li>
+  <li>La evaluación distingue entre <em>"le pasé el caso a la IA y di copy-paste a todo"</em> vs. <em>"usé IA como copiloto y entendí cada línea"</em>.</li>
+  <li>Es la práctica que se está estandarizando en la industria — anótenlo como una habilidad profesional.</li>
+</ol>
+
+<h3>Qué documentar en <code>uso_de_ia.md</code></h3>
+<p>Por cada uso significativo de IA (no por cada autocompletar trivial), registren una entrada con esta estructura:</p>
+<table>
+  <thead><tr><th>Campo</th><th>Ejemplo</th></tr></thead>
+  <tbody>
+    <tr><td>Fecha</td><td>2026-05-02</td></tr>
+    <tr><td>Integrante</td><td>María</td></tr>
+    <tr><td>Herramienta</td><td>Claude Code</td></tr>
+    <tr><td>Tarea</td><td>Entender por qué <code>pd.merge</code> duplicaba filas</td></tr>
+    <tr><td>Prompt resumido</td><td>"Tengo dos DataFrames con clave <code>cliente_id</code> y al hacer left join obtengo más filas que el izquierdo, ¿por qué?"</td></tr>
+    <tr><td>Salida que aceptamos</td><td>Aprendimos que había duplicados en la tabla derecha; agregamos <code>assert df_join.shape[0] == df_left.shape[0]</code>.</td></tr>
+    <tr><td>Salida que rechazamos / corregimos</td><td>Sugirió <code>drop_duplicates()</code> ciego sobre toda la tabla derecha, pero perdíamos transacciones legítimas. Lo aplicamos solo sobre la tabla de catálogo.</td></tr>
+    <tr><td>Quién verificó</td><td>Carlos validó ejecutando con muestra controlada.</td></tr>
+  </tbody>
+</table>
+<blockquote class="danger"><p>🚩 Si la bitácora no existe o es claramente <em>posthoc</em> (todas las entradas con la fecha del domingo, prompts genéricos), asumimos por defecto que <strong>toda</strong> la entrega fue generada por IA sin revisión humana y se evalúa en consecuencia.</p></blockquote>
+
+<h3>Buenas prácticas con Antigravity / Claude Code</h3>
+<ul>
+  <li>Usen los agentes para <strong>tareas acotadas</strong> (limpiar una columna, escribir una función de utilidad, sugerir un gráfico, explicar un error). No para <em>"haz todo el caso"</em>.</li>
+  <li><strong>Lean el diff antes de aceptarlo.</strong> Si no entienden una línea, pidan explicación a la IA o al docente; no la aceptan sin entenderla.</li>
+  <li>Cuando la IA proponga un método estadístico (test de hipótesis, distancia, escalador), <strong>verifiquen los supuestos</strong> sobre su data antes de aplicarlo. Las IAs confunden supuestos con frecuencia y aplican métodos que no corresponden.</li>
+  <li>Comiteen los cambios sustantivos generados por IA en commits separados con prefijo <code>[ia]:</code>. Ejemplo: <code>[ia]: limpieza inicial de columna InvoiceNo (revisada por Juan)</code>. Esto facilita la revisión y la trazabilidad.</li>
+  <li><strong>No le entreguen datos sensibles</strong> a herramientas externas. Si su caso involucra PII (nombres, cédulas, emails, geolocalización fina), anonimicen antes de pegar muestras en chats web. Para casos con datos públicos esto no aplica, pero acostúmbrense al reflejo.</li>
+</ul>
+
+<hr/>
+
+<h2>📋 Rúbrica del entregable intermedio</h2>
+<table>
+  <thead><tr><th>Criterio</th><th>Peso</th><th>Qué evaluamos</th></tr></thead>
+  <tbody>
+    <tr><td>Estructura del repositorio y disciplina de commits</td><td>15 %</td><td>Estructura limpia, <code>.gitignore</code> correcto, commits descriptivos repartidos entre integrantes.</td></tr>
+    <tr><td>Calidad del entendimiento del negocio (<code>07_CONTEXTO</code>)</td><td>20 %</td><td>Profundidad de la investigación, calidad del diccionario de variables, hipótesis bien formuladas.</td></tr>
+    <tr><td>Plan de preparación de datos</td><td>10 %</td><td>Decisiones justificadas, orden lógico, sin pasos "porque sí".</td></tr>
+    <tr><td>Cuaderno de preparación de datos</td><td>15 %</td><td>Reproducibilidad, validaciones, claridad de las celdas.</td></tr>
+    <tr><td>Cuaderno de EDA + insights finales</td><td>25 %</td><td>Profundidad del análisis, calidad de las visualizaciones, <strong>insights accionables</strong>.</td></tr>
+    <tr><td>Bitácora de uso de IA</td><td>10 %</td><td>Trazabilidad real, verificación humana visible, criticidad ante salidas.</td></tr>
+    <tr><td>Datos correctamente versionados o referenciados</td><td>5 %</td><td>Sin archivos pesados en el repo, instrucciones de descarga claras.</td></tr>
+  </tbody>
+</table>
+<blockquote class="warn"><p>Un grupo con código brillante pero sin <code>07_CONTEXTO</code> o sin bitácora de IA <strong>no aprueba este punto de control</strong>, aunque su EDA sea espectacular. Aprenden a entregar un proyecto, no solo a programar.</p></blockquote>
+
+<hr/>
+
+<h2>🚦 Errores comunes (vistos cada semestre)</h2>
+<ul>
+  <li><strong>Rutas absolutas</strong> dentro del notebook. <em>"El cuaderno solo me corre a mí porque tengo el dataset en mi <code>Downloads/</code>."</em> Usen rutas relativas a la raíz del repo (<code>../00_datos_crudos/...</code>) o <code>pathlib</code> con anclaje al repo.</li>
+  <li><strong>Diccionario de variables construido a ojo</strong> sobre las primeras filas. Verifiquen tipos, nulos y rangos con código antes de redactarlo.</li>
+  <li><strong>Investigación de contexto que es Wikipedia reescrita.</strong> Citen al menos una fuente del sector (informe institucional, paper, reporte de la industria) que no sea Wikipedia ni el enunciado del caso.</li>
+  <li><strong>"Insights" del EDA que son descripciones de gráficas.</strong> <em>"Vemos que la distribución de X es sesgada a la derecha"</em> no es un insight, es una observación. Un insight es: <em>"La distribución sesgada de X implica que la mediana, no la media, es el indicador reportable a la gerencia, y eso cambia la métrica del KPI Y que veníamos calculando."</em></li>
+  <li><strong>Bitácora de IA escrita el domingo en la noche</strong> con prompts inventados. Llévenla en vivo desde el lunes anterior, dos minutos por sesión de trabajo.</li>
+  <li><strong>Repos llamados <code>proyecto</code>, <code>final</code>, <code>tarea</code>.</strong> Usen <code>seminario-2026-grupo-X-caso-YY-segmentacion-retail</code> o equivalente.</li>
+  <li><strong>Datos de prueba subidos por error</strong>. Antes del primer push: <code>git status</code> y revisar que no haya CSVs gigantes en stage. Una vez en el historial, sacarlos es más complicado.</li>
+</ul>
+
+<hr/>
+
+<h2>📅 Fecha y forma de entrega</h2>
+<ul>
+  <li><strong>Fecha:</strong> lunes (medio del seminario), antes del inicio de la sesión presencial.</li>
+  <li><strong>Cómo entregar:</strong> subir el link del repositorio a la plataforma del curso. El último commit relevante debe ser anterior a la hora de inicio de la clase. Commits posteriores no se evalúan.</li>
+  <li><strong>Defensa breve en clase:</strong> los primeros 30–40 minutos de esa sesión son una revisión rápida en vivo. El docente puede pedirle a <strong>cualquier integrante</strong> del grupo (no solo al "líder") que ejecute un cuaderno o explique un insight. Si todos hicieron commits y entendieron lo entregado, este momento es trivial.</li>
+</ul>
+
+<hr/>
+
+<h2>🔁 Cómo continúa el caso después de este punto</h2>
+<p>Lo que entreguen este lunes no se vuelve a tocar como "tarea cerrada", sino que se vuelve la <strong>base viva</strong> del resto del seminario:</p>
+<ul>
+  <li>El cuaderno <code>02_eda.ipynb</code> se profundizará en la semana de hipótesis y pruebas estadísticas.</li>
+  <li>El plan de preparación se versiona y se ajusta cuando aparecen problemas en modelado.</li>
+  <li>El diccionario de variables se actualiza cada vez que se construya una variable nueva.</li>
+  <li>La bitácora de IA crece; no se reinicia.</li>
+</ul>
+<p>Por eso vale la pena entregar bien este punto: lo que dejen mal armado el lunes lo arrastran tres semanas.</p>
+
+</div>
+  </main>
+</div>
+<footer id="footer">
+  <span>Seminario de Análisis Exploratorio de Datos · Carrera de Software · Abril–Mayo 2026</span>
+  <span><a href="https://github.com/we-human-centric/CursoPythonDatos_2026" target="_blank">github.com/we-human-centric/CursoPythonDatos_2026</a></span>
+</footer>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('pre code').forEach(function(b){ hljs.highlightElement(b); });
+    document.getElementById('main').addEventListener('click', function(){
+      document.getElementById('sidebar').classList.remove('open');
+    });
+  });
+</script>
+</body>
+</html>

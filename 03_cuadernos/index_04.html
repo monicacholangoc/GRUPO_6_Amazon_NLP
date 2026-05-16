@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Día 04 · Planteamiento del proyecto - Seminario EDA 2026</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    :root { --blue: #2980b9; --navy: #232936; --text: #404040; --border: #ddd; --font: 'Lato', sans-serif; --mono: 'Courier New', monospace; }
+    html { font-size: 15px; }
+    body { font-family: var(--font); color: var(--text); line-height: 1.75; }
+    #topbar { position: fixed; top: 0; left: 0; right: 0; height: 50px; background: var(--navy); color: #fcfcfc; display: flex; align-items: center; padding: 0 1rem; z-index: 200; }
+    .brand { color: #fff; font-weight: 700; }
+    #layout { display: flex; margin-top: 50px; }
+    #main { flex: 1; margin-left: 270px; }
+    .content-wrap { max-width: 880px; margin: 0 auto; padding: 2rem 2.5rem 4rem; }
+    h1 { font-size: 2rem; font-weight: 700; color: var(--navy); border-bottom: 2px solid var(--navy); padding-bottom: .6rem; }
+    h2 { font-size: 1.35rem; color: var(--navy); border-bottom: 1px solid var(--border); margin: 2rem 0 .5rem; }
+    h3 { font-size: 1.1rem; font-weight: 700; }
+    p, li { margin-bottom: .85rem; }
+    ul { padding-left: 1.5rem; }
+    table { width: 100%; border-collapse: collapse; margin: 1rem 0; border: 1px solid var(--border); }
+    th, td { padding: .55rem .9rem; text-align: left; border-bottom: 1px solid var(--border); }
+    th { background: #f0f0f0; font-weight: 700; }
+    code { background: #f8f8f8; color: #c0392b; padding: .1em .3em; font-family: var(--mono); }
+    a { color: var(--blue); }
+    blockquote { border-left: 4px solid var(--blue); background: #f4f8fb; padding: .6rem 1rem; margin: 1rem 0; }
+  </style>
+</head>
+<body>
+  <header id="topbar">
+    <div class="brand">🐍 Seminario EDA 2026</div>
+  </header>
+  <div id="layout">
+    <main id="main">
+      <div class="content-wrap">
+        <h1>Día 4 · Planteamiento del proyecto analítico · ENTREGA S1</h1>
+        <p><strong>Fecha:</strong> Jueves 24 de abril de 2026 · <strong>Duración:</strong> 2 horas · <strong>Entregable final de la semana 1</strong></p>
+
+        <h2>Introducción</h2>
+        <p>Cerramos la primera semana montando la estructura profesional del proyecto. Un proyecto de datos bien planteado ahorra semanas de trabajo; uno mal planteado se descarrila en la fase de modelado. Hoy es el día para definirlo bien.</p>
+
+        <h2>Contenidos de la sesión</h2>
+        <h3>1. CRISP-DM: entendimiento de negocio a despliegue</h3>
+        <p>Flujo: Entendimiento del negocio → Datos → Preparación → Modelado → Evaluación → Despliegue. Veremos cómo se mapea a los 4 módulos del curso.</p>
+
+        <h3>2. La pregunta de negocio</h3>
+        <p>Tres familias: medir (KPIs, reportes), explicar (qué factores influyen), predecir (estimar valores o clasificar). Debe ser específica, respondible con los datos disponibles, y relevante.</p>
+
+        <h3>3. Estructura de carpetas profesional</h3>
+        <pre>seminario-eda/
+├─ data/raw/       # originales, nunca modificar
+├─ data/processed/ # limpios
+├─ notebooks/      # numerados 01_, 02_, ...
+├─ src/            # código reutilizable
+├─ reports/        # figuras y documentos
+├─ README.md
+└─ requirements.txt
+</pre>
+
+        <h3>4. README profesional</h3>
+        <p>Responde en 1 minuto: ¿qué hace?, ¿cómo se instala?, ¿cómo se ejecuta?, ¿quién lo mantiene? Usa badges, capturas, ejemplos.</p>
+
+        <h3>5. Entorno virtual y dependencias</h3>
+        <p><code>python -m venv .venv && source .venv/bin/activate && pip install -r requirements.txt</code></p>
+
+        <h3>6. Ficha del dataset</h3>
+        <p>Documento con: origen, licencia, tamaño, tipos por columna, % nulos, limitaciones conocidas.</p>
+
+        <h2>Actividad práctica</h2>
+        <ol>
+          <li>Creen entorno virtual y estructura de carpetas.</li>
+          <li>Escriban pregunta de negocio con justificación (1 párrafo).</li>
+          <li>Carguen dataset, ejecuten <code>df.head()</code>, <code>df.info()</code>, <code>df.shape</code>, <code>df.describe()</code>.</li>
+          <li>Escriban ficha en <code>docs/ficha_dataset.md</code>.</li>
+        </ol>
+
+        <h2>ENTREGABLE S1 (hoy, antes de las 18:00)</h2>
+        <p>Cada equipo entrega:</p>
+        <ul>
+          <li>Pregunta de negocio + justificación (½ página max).</li>
+          <li>10–15 historias de usuario escritas desde perspectiva de stakeholders.</li>
+          <li>Ficha del dataset: origen, tamaño, calidad, limitaciones.</li>
+          <li>Repositorio GitHub con estructura base y README completo.</li>
+        </ul>
+
+        <h2>Presentación</h2>
+        <p>5 minutos por equipo. Mostrar:</p>
+        <ul>
+          <li>El caso elegido y por qué.</li>
+          <li>La pregunta de negocio.</li>
+          <li>Primeras visualizaciones del dataset (shape, types, describe).</li>
+        </ul>
+
+        <h2>Retroalimentación</h2>
+        <p>El docente dará feedback. Tienen el fin de semana para ajustar. La semana 2 comienza con el EDA profundo basado en estos ajustes.</p>
+
+        <h2>Recursos recomendados</h2>
+        <ul>
+          <li><a href="https://cookiecutter-data-science.drivendata.org/">Cookiecutter Data Science</a></li>
+          <li><a href="https://www.makeareadme.com/">Escribir buenos README</a></li>
+          <li><a href="https://www.datascience-pm.com/crisp-dm-2/">CRISP-DM en 1 página</a></li>
+        </ul>
+
+        <blockquote>
+          <p><em>La base del proyecto define el éxito de las 3 semanas siguientes. Dedícale el tiempo que merece.</em></p>
+        </blockquote>
+      </div>
+    </main>
+  </div>
+</body>
+</html>

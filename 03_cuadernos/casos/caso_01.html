@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Caso 01 · Segmentación de Clientes — Retail — Seminario EDA 2026</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css">
+  <style>*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --sidebar-w: 270px; --topbar-h: 50px;
+  --blue: #2980b9; --blue-dark: #2472a4; --blue-light: #e7f2fa;
+  --navy: #232936; --text: #404040; --text-muted: #888;
+  --border: #ddd; --sidebar-bg: #f8f8f8; --bg: #ffffff;
+  --code-bg: #f8f8f8; --font: 'Lato','Helvetica Neue',Arial,sans-serif;
+  --mono: 'SFMono-Regular',Consolas,'Liberation Mono',Menlo,monospace;
+  --radius: 4px;
+}
+html { font-size: 15px; scroll-behavior: smooth; }
+body { font-family: var(--font); background: var(--bg); color: var(--text); line-height: 1.75; -webkit-font-smoothing: antialiased; }
+#topbar { position:fixed; top:0; left:0; right:0; height:var(--topbar-h); background:var(--navy); color:#fcfcfc; display:flex; align-items:center; padding:0 1rem; z-index:200; box-shadow:0 2px 4px rgba(0,0,0,.3); gap:.6rem; }
+.brand { color:#fff; text-decoration:none; font-size:.95rem; font-weight:700; display:flex; align-items:center; gap:.4rem; white-space:nowrap; }
+.brand span.sep { opacity:.3; font-weight:300; }
+.brand span.sub { font-weight:400; font-size:.8rem; opacity:.75; }
+#menu-toggle { display:none; background:none; border:none; color:#fff; font-size:1.15rem; cursor:pointer; padding:.3rem .4rem; line-height:1; }
+#layout { display:flex; margin-top:var(--topbar-h); }
+#sidebar { width:var(--sidebar-w); flex-shrink:0; background:var(--sidebar-bg); border-right:1px solid var(--border); position:fixed; top:var(--topbar-h); bottom:0; overflow-y:auto; overflow-x:hidden; padding-bottom:2rem; font-size:.875rem; }
+#sidebar::-webkit-scrollbar { width:4px; }
+#sidebar::-webkit-scrollbar-thumb { background:#ccc; border-radius:4px; }
+.sb-header { padding:.7rem 1rem .4rem; font-size:.65rem; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--text-muted); border-bottom:1px solid var(--border); margin-bottom:.4rem; }
+.sb-index-link { display:block; padding:.38rem 1rem; color:var(--text); text-decoration:none; font-size:.875rem; }
+.sb-index-link:hover, .sb-index-link.active { background:var(--blue-light); color:var(--blue-dark); }
+.sb-week { margin-top:.35rem; }
+.sb-week-hdr { display:flex; align-items:baseline; justify-content:space-between; padding:.5rem 1rem .25rem; }
+.sb-week-label { font-size:.7rem; font-weight:700; letter-spacing:.07em; text-transform:uppercase; color:var(--blue); }
+.sb-week ul { list-style:none; }
+.sb-item a { display:flex; align-items:baseline; gap:.4rem; padding:.32rem 1rem; color:#555; text-decoration:none; line-height:1.35; }
+.sb-item a:hover { background:var(--blue-light); color:var(--blue-dark); }
+.sb-item a.active { background:var(--blue-light); color:var(--blue-dark); font-weight:700; border-left:3px solid var(--blue); }
+.sb-item .dnum { font-size:.7rem; color:var(--text-muted); min-width:2.2rem; flex-shrink:0; font-family:var(--mono); }
+.sb-item .dtitle { font-size:.82rem; }
+#main { margin-left:var(--sidebar-w); flex:1; min-width:0; }
+.content-wrap { max-width:860px; padding:2rem 2.5rem 4rem; }
+.breadcrumb { font-size:.8rem; color:var(--text-muted); margin-bottom:1.2rem; }
+.breadcrumb a { color:var(--blue); text-decoration:none; }
+.breadcrumb a:hover { text-decoration:underline; }
+.breadcrumb .sep { margin:0 .4rem; }
+.content-wrap h1 { font-size:1.75rem; font-weight:700; color:#2c3e50; margin-bottom:.75rem; line-height:1.2; }
+.content-wrap h2 { font-size:1.2rem; font-weight:700; color:#2c3e50; margin:2rem 0 .75rem; padding-bottom:.4rem; border-bottom:1px solid #e8e8e8; }
+.content-wrap h3 { font-size:1rem; font-weight:700; color:#2c3e50; margin:1.25rem 0 .5rem; }
+.content-wrap p { margin-bottom:.9rem; }
+.content-wrap ul, .content-wrap ol { padding-left:1.6rem; margin-bottom:.9rem; }
+.content-wrap li { margin-bottom:.35rem; }
+.content-wrap a { color:var(--blue); text-decoration:none; }
+.content-wrap a:hover { text-decoration:underline; }
+.content-wrap hr { border:none; border-top:1px solid var(--border); margin:1.75rem 0; }
+.content-wrap code { font-family:var(--mono); font-size:.875em; background:var(--code-bg); color:#c0392b; padding:.1em .3em; border-radius:3px; border:1px solid #e1e4e5; }
+.content-wrap pre { background:var(--code-bg); border:1px solid var(--border); border-left:4px solid var(--blue); border-radius:var(--radius); padding:1rem 1.1rem; overflow-x:auto; margin:1rem 0; line-height:1.6; }
+.content-wrap pre code { background:none; color:inherit; padding:0; border:none; font-size:.875rem; }
+.content-wrap table { width:100%; border-collapse:collapse; margin:1rem 0; font-size:.9rem; border:1px solid var(--border); border-radius:var(--radius); overflow:hidden; }
+.content-wrap thead th { background:#f0f0f0; color:#404040; padding:.55rem .9rem; text-align:left; font-size:.8rem; font-weight:700; letter-spacing:.04em; text-transform:uppercase; border-bottom:2px solid var(--border); }
+.content-wrap tbody tr:nth-child(even) { background:#f9f9f9; }
+.content-wrap tbody tr:hover { background:#eaf5fb; }
+.content-wrap td { padding:.5rem .9rem; border-bottom:1px solid #eee; vertical-align:top; }
+.content-wrap blockquote { border-left:4px solid var(--blue); background:#f4f8fb; padding:.6rem 1rem; margin:1rem 0; border-radius:0 var(--radius) var(--radius) 0; color:#2c3e50; }
+.content-wrap blockquote p { margin-bottom:0; }
+.caso-ficha { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:.75rem; margin:1rem 0 1.75rem; }
+.caso-chip { background:#f0f4f8; border:1px solid #dce6ef; border-radius:6px; padding:.6rem .9rem; display:flex; flex-direction:column; gap:.2rem; }
+.caso-chip .chip-label { font-size:.65rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:#7a8fa6; }
+.caso-chip .chip-value { font-size:.85rem; font-weight:700; color:#2c3e50; }
+.phase-list { display:flex; flex-direction:column; gap:1.1rem; margin:1rem 0; }
+.phase-card { border:1px solid #dce6ef; border-radius:8px; border-left:5px solid var(--blue); overflow:hidden; }
+.phase-card-header { display:flex; align-items:center; gap:.75rem; background:#f7fafd; padding:.7rem 1.1rem; border-bottom:1px solid #dce6ef; }
+.phase-num { width:1.8rem; height:1.8rem; border-radius:50%; background:var(--blue); color:#fff; font-size:.8rem; font-weight:700; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.phase-title { font-weight:700; font-size:.95rem; color:#2c3e50; }
+.phase-body { padding:.85rem 1.1rem; font-size:.9rem; line-height:1.7; }
+.phase-body p { margin-bottom:.6rem; }
+.phase-body ul { padding-left:1.4rem; margin-bottom:.5rem; }
+.phase-body ol { padding-left:1.4rem; margin-bottom:.5rem; }
+.phase-body li { margin-bottom:.3rem; }
+.phase-body h3 { font-size:.9rem; font-weight:700; color:#2c3e50; margin:.75rem 0 .25rem; }
+.phase-body strong { color:#2c3e50; }
+.phase-body table { width:100%; border-collapse:collapse; margin:.5rem 0; font-size:.85rem; border:1px solid #dce6ef; border-radius:4px; overflow:hidden; }
+.phase-body thead th { background:#e8f0f8; padding:.4rem .7rem; text-align:left; font-size:.75rem; font-weight:700; text-transform:uppercase; border-bottom:1px solid #dce6ef; }
+.phase-body td { padding:.4rem .7rem; border-bottom:1px solid #eee; vertical-align:top; }
+.phase-body tbody tr:nth-child(even) { background:#f7fafd; }
+.phase-body code { font-family:var(--mono); font-size:.82em; background:#f8f8f8; color:#c0392b; padding:.1em .3em; border-radius:3px; border:1px solid #e1e4e5; }
+.phase-body pre { background:#f8f8f8; border:1px solid #ddd; border-left:4px solid var(--blue); border-radius:4px; padding:.8rem 1rem; overflow-x:auto; margin:.6rem 0; line-height:1.6; }
+.phase-body pre code { background:none; color:inherit; padding:0; border:none; font-size:.82rem; }
+.phase-body blockquote { border-left:4px solid #e6a817; background:#fff8e6; padding:.5rem .9rem; margin:.5rem 0; border-radius:0 4px 4px 0; font-size:.88rem; }
+.phase-body blockquote p { margin-bottom:0; }
+.ra-box { background:#f0faf4; border:1px solid #a9dfbf; border-left:4px solid #27ae60; border-radius:0 6px 6px 0; padding:.7rem 1rem; margin:0 0 1.25rem; font-size:.9rem; font-style:italic; color:#1a5e35; }
+.dataset-box { background:#f0f7ff; border:1px solid #b6d7f5; border-radius:8px; padding:1rem 1.2rem; margin:1rem 0; }
+.dataset-box .ds-title { font-weight:700; font-size:.9rem; color:#1a5276; margin-bottom:.5rem; }
+#footer { margin-left:var(--sidebar-w); background:#f5f5f5; border-top:1px solid #ddd; padding:.75rem 2rem; font-size:.78rem; color:#888; display:flex; justify-content:space-between; gap:1rem; flex-wrap:wrap; }
+#footer a { color:var(--blue); text-decoration:none; }
+@media (max-width:768px) {
+  #sidebar { position:fixed; left:0; top:var(--topbar-h); height:calc(100vh - var(--topbar-h)); transform:translateX(-100%); transition:transform .2s ease; box-shadow:2px 0 8px rgba(0,0,0,.15); z-index:150; }
+  #sidebar.open { transform:translateX(0); }
+  #main, #footer { margin-left:0; }
+  #menu-toggle { display:block; }
+  .content-wrap { padding:1.5rem 1rem 3rem; }
+}
+</style>
+</head>
+<body>
+<header id="topbar">
+  <button id="menu-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')" aria-label="Menu">&#9776;</button>
+  <a href="../index.html" class="brand">
+    🐍 Seminario EDA <span class="sep">·</span> <span class="sub">Análisis Exploratorio de Datos 2026</span>
+  </a>
+</header>
+<div id="layout">
+  <nav id="sidebar"><div class="sb-header">Casos de Estudio</div><a href="../index.html" class="sb-index-link">← Inicio del curso</a><a href="index.html" class="sb-index-link ">📋 Todos los casos</a><a href="entregable_intermedio.html" class="sb-index-link">📦 Entregable intermedio</a><div class="sb-week" style="margin-top:.4rem"><div class="sb-week-hdr"><span class="sb-week-label">Proyectos</span></div><ul><li class="sb-item"><a href="caso_01.html" class="active"><span class="dnum">C01</span><span class="dtitle">Segmentación de Clientes — Retail</span></a></li>
+<li class="sb-item"><a href="caso_02.html" class=""><span class="dnum">C02</span><span class="dtitle">Sistema Bancario Ecuatoriano</span></a></li>
+<li class="sb-item"><a href="caso_03.html" class=""><span class="dnum">C03</span><span class="dtitle">Scouting y Valoración FIFA 21</span></a></li>
+<li class="sb-item"><a href="caso_04.html" class=""><span class="dnum">C04</span><span class="dtitle">Movilidad Urbana Nueva York</span></a></li>
+<li class="sb-item"><a href="caso_05.html" class=""><span class="dnum">C05</span><span class="dtitle">Actividad Sísmica Ecuador</span></a></li>
+<li class="sb-item"><a href="caso_06.html" class=""><span class="dnum">C06</span><span class="dtitle">Reseñas Amazon — Predicción de Utilidad</span></a></li>
+<li class="sb-item"><a href="caso_07.html" class=""><span class="dnum">C07</span><span class="dtitle">Predicción de Hits de Spotify</span></a></li>
+<li class="sb-item"><a href="caso_08.html" class=""><span class="dnum">C08</span><span class="dtitle">Detección de Fraude en E-Commerce</span></a></li>
+<li class="sb-item"><a href="caso_09.html" class=""><span class="dnum">C09</span><span class="dtitle">E-Commerce OLIST Brasil</span></a></li>
+<li class="sb-item"><a href="caso_10.html" class=""><span class="dnum">C10</span><span class="dtitle">Tendencias Tecnológicas Stack Overflow</span></a></li></ul></div></nav>
+  <main id="main">
+    <div class="content-wrap"><div class="breadcrumb"><a href="../index.html">Inicio</a><span class="sep">›</span><a href="index.html">Casos de estudio</a><span class="sep">›</span><span class="cur">Caso 01</span></div>
+<h1>Caso 01 · Segmentación de Clientes — Retail</h1>
+<div class="caso-ficha"><div class="caso-chip"><span class="chip-label">Dominio</span><span class="chip-value">Retail</span></div><div class="caso-chip"><span class="chip-label">Técnica principal</span><span class="chip-value">Clustering K-Means / RFM</span></div><div class="caso-chip"><span class="chip-label">Dataset</span><span class="chip-value">~1 M transacciones · ~4 000 clientes</span></div></div>
+<hr id="contexto"/>
+<h2>Contexto del problema</h2>
+<p>Una cadena de comercio electrónico con sede en el Reino Unido posee el historial completo de transacciones entre 2009 y 2011, distribuido en dos períodos que deben consolidarse. La empresa vende principalmente artículos para el hogar y regalos a clientes mayoristas. La gerencia no dispone de un criterio basado en datos para distinguir a sus clientes más valiosos de aquellos en riesgo de abandono, lo que impide personalizar sus acciones de marketing y retención.</p>
+<p>El dataset <strong>Online Retail II</strong> contiene más de 1,000,000 de transacciones organizadas en dos hojas de Excel. Cada fila es una línea de factura con el código del cliente, el producto, la cantidad, el precio y la fecha. Las facturas que comienzan con <code>&#x27;C&#x27;</code> son devoluciones y deben tratarse correctamente antes de calcular el valor por cliente.</p>
+<p>---</p>
+<hr id="objetivo"/>
+<h2>Objetivo del proyecto</h2>
+<p>Construir un sistema de segmentación que agrupe a los clientes en perfiles coherentes —<strong>Clientes VIP, Leales, En Riesgo y Perdidos</strong>— a partir de su comportamiento de compra usando el modelo <strong>RFM</strong> (Recencia, Frecuencia, Valor Monetario), y exponerlo como un servicio analítico interactivo para la gerencia.</p>
+<p>---</p>
+<hr id="fases"/>
+<h2>Actividades del proyecto</h2>
+<div class="ra-box">🎓 <strong>Resultado de aprendizaje:</strong> el estudiante diseña un sistema de segmentación no supervisada, interpreta los grupos resultantes en clave de negocio y lo expone como producto analítico.</div>
+<div class="phase-list">
+<div class="phase-card"><div class="phase-card-header"><div class="phase-num">1</div><span class="phase-title">🔍 Comprensión del dominio</span></div><div class="phase-body"><p>Investigar qué es el análisis RFM y por qué es el estándar de segmentación en retail. Formular hipótesis sobre cuántos tipos de clientes existen y cómo se diferencian. Identificar qué decisiones de negocio cambian según el segmento (campañas de email, descuentos, programas de fidelización).</p></div></div>
+<div class="phase-card"><div class="phase-card-header"><div class="phase-num">2</div><span class="phase-title">🗂️ Preparación y exploración de datos</span></div><div class="phase-body"><p>Consolidar ambos períodos del dataset en una sola tabla. Identificar y resolver tres desafíos de calidad:</p>
+<ul>
+<li>Facturas de devolución (InvoiceNo que comienza con <code>&#x27;C&#x27;</code>) — netearlas contra sus facturas originales</li>
+<li>Transacciones sin cliente identificado (<code>Customer ID</code> nulo)</li>
+<li>Registros con cantidades negativas no asociadas a devoluciones</li>
+</ul>
+<p>Justificar por escrito cada decisión de limpieza. Construir las métricas RFM por cliente y analizar su distribución estadística.</p></div></div>
+<div class="phase-card"><div class="phase-card-header"><div class="phase-num">3</div><span class="phase-title">🧪 Modelado</span></div><div class="phase-body"><p>Determinar el número óptimo de segmentos utilizando dos criterios complementarios: el <strong>método del codo</strong> (inercia vs. número de clusters) y el <strong>coeficiente de Silhouette</strong>. Documentar el análisis y justificar la elección final. Entrenar el modelo de agrupamiento. Asignar etiquetas de negocio descriptivas a cada segmento. Reducir dimensiones a 3 componentes principales para producir una visualización tridimensional de los grupos.</p></div></div>
+<div class="phase-card"><div class="phase-card-header"><div class="phase-num">4</div><span class="phase-title">🚀 Producto analítico</span></div><div class="phase-body"><p><strong>Pipeline técnico:</strong></p>
+<ul>
+<li>Concatenar las dos hojas del Excel con una sola operación</li>
+<li>Calcular Recencia (días desde la última compra), Frecuencia (número de facturas únicas) y Valor Monetario (suma de <code>Quantity × UnitPrice</code>) por cliente</li>
+<li>Normalizar las métricas RFM con un escalador robusto a outliers</li>
+<li>Entrenar K-Means con el K seleccionado; guardar modelo, escalador y transformador PCA</li>
+</ul>
+<p><strong>API (FastAPI):</strong></p>
+<ul>
+<li><code>GET /segments/summary</code> — estadísticas descriptivas (media y mediana de R, F, M) por segmento</li>
+<li><code>POST /segments/classify</code> — recibe última compra, número de facturas y monto total; devuelve el segmento asignado con descripción del perfil</li>
+</ul>
+<p><strong>Dashboard (Streamlit):</strong></p>
+<ol>
+<li>Gráfico de dispersión 3D interactivo en espacio PCA con los clusters coloreados</li>
+<li>Gráfico de barras comparando las medias de R, F y M por segmento</li>
+<li>Formulario donde el gerente ingresa los datos de un cliente y obtiene en tiempo real su segmento con perfil descriptivo (ej. &quot;Cliente VIP: alta frecuencia y alto valor monetario&quot;)</li>
+</ol></div></div>
+<div class="phase-card"><div class="phase-card-header"><div class="phase-num">5</div><span class="phase-title">💬 Interpretación y comunicación</span></div><div class="phase-body"><p>Responder con datos: ¿qué estrategia de marketing corresponde a cada segmento? ¿Cuál representa el mayor riesgo de pérdida de ingresos? ¿Qué acción concreta recomendaría la gerencia para el segmento más crítico identificado?</p>
+<p>---</p></div></div>
+
+</div>
+<hr id="dataset"/>
+<h2>Dataset y recursos</h2>
+<div class="dataset-box">
+  <div class="ds-title">📦 Fuentes de datos</div>
+  <p>🔗 <a href="https://www.kaggle.com/datasets/mashlyn/online-retail-ii-uci" target="_blank"><strong>Online Retail II — UCI / Kaggle</strong></a></p>
+  <p style="margin-top:.7rem;font-weight:700;font-size:.85rem;color:#1a5276">Lecturas recomendadas:</p><ul><li>Análisis RFM: fundamentos y aplicaciones en retail</li><li>Algoritmo K-Means: parámetros, inicialización y convergencia</li><li>Selección del número de clusters: método del codo y Silhouette Score</li><li>Reducción de dimensionalidad con PCA para visualización</li><li>RobustScaler en scikit-learn: cuándo y por qué usarlo</li></ul>
+</div>
+<hr id="rubrica"/>
+<h2>Rúbrica de evaluación</h2>
+<table><thead><tr><th>Entregable</th><th>Semana</th><th>Peso</th><th>Criterios clave</th></tr></thead><tbody><tr><td>Definición del problema</td><td>1</td><td>10 %</td><td>Claridad de la pregunta de negocio, historias de usuario, ficha del dataset</td></tr><tr><td>Pipeline de datos</td><td>2</td><td>20 %</td><td>Reproducibilidad, manejo del reto específico, validaciones documentadas</td></tr><tr><td>EDA + primer modelo</td><td>3</td><td>25 %</td><td>Profundidad del análisis, rigor estadístico, pertinencia del modelo y métricas</td></tr><tr><td>Producto analítico completo</td><td>4</td><td>30 %</td><td>Comparación de ≥ 2 modelos, API y dashboard funcionales, documentación</td></tr><tr><td>Defensa oral y trabajo en equipo</td><td>4</td><td>15 %</td><td>Dominio técnico, claridad, manejo de preguntas, colaboración</td></tr></tbody></table>
+</div>
+  </main>
+</div>
+<footer id="footer">
+  <span>Seminario de Análisis Exploratorio de Datos · Carrera de Software · Abril–Mayo 2026</span>
+  <span><a href="https://github.com/we-human-centric/CursoPythonDatos_2026" target="_blank">github.com/we-human-centric/CursoPythonDatos_2026</a></span>
+</footer>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('pre code').forEach(function(b){ hljs.highlightElement(b); });
+    document.getElementById('main').addEventListener('click', function(){
+      document.getElementById('sidebar').classList.remove('open');
+    });
+  });
+</script>
+</body>
+</html>

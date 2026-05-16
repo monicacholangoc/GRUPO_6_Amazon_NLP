@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Día 02 · Fundamentos de Python I - Seminario EDA 2026</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    :root { --blue: #2980b9; --navy: #232936; --text: #404040; --border: #ddd; --font: 'Lato', sans-serif; --mono: 'Courier New', monospace; }
+    html { font-size: 15px; }
+    body { font-family: var(--font); color: var(--text); line-height: 1.75; }
+    #topbar { position: fixed; top: 0; left: 0; right: 0; height: 50px; background: var(--navy); color: #fcfcfc; display: flex; align-items: center; padding: 0 1rem; z-index: 200; }
+    .topbar-left { display: flex; align-items: center; gap: .6rem; }
+    .brand { color: #fff; text-decoration: none; font-size: .95rem; font-weight: 700; }
+    #layout { display: flex; margin-top: 50px; }
+    #main { flex: 1; margin-left: 270px; }
+    .content-wrap { max-width: 880px; margin: 0 auto; padding: 2rem 2.5rem 4rem; }
+    h1 { font-size: 2rem; font-weight: 700; color: var(--navy); border-bottom: 2px solid var(--navy); margin: 0 0 1rem; padding-bottom: .6rem; }
+    h2 { font-size: 1.35rem; font-weight: 700; color: var(--navy); margin: 2rem 0 .5rem; border-bottom: 1px solid var(--border); padding-bottom: .35rem; }
+    h3 { font-size: 1.1rem; font-weight: 700; margin: 1.5rem 0 .4rem; }
+    p { margin-bottom: .85rem; }
+    a { color: var(--blue); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    ul, ol { padding-left: 1.5rem; margin-bottom: .9rem; }
+    li { margin-bottom: .25rem; }
+    code { font-family: var(--mono); font-size: .875em; background: #f8f8f8; color: #c0392b; padding: .1em .3em; border-radius: 3px; }
+    pre { background: #f8f8f8; border: 1px solid var(--border); border-left: 4px solid var(--blue); padding: 1rem; overflow-x: auto; margin: 1rem 0; }
+    blockquote { border-left: 4px solid var(--blue); background: #f4f8fb; padding: .6rem 1rem; margin: 1rem 0; }
+    @media (max-width: 880px) { #main { margin-left: 0; } }
+  </style>
+</head>
+<body>
+  <header id="topbar">
+    <div class="topbar-left">
+      <a href="index.html" class="brand">🐍 Seminario EDA 2026</a>
+    </div>
+  </header>
+  <div id="layout">
+    <main id="main">
+      <div class="content-wrap">
+        <h1>Día 2 · Fundamentos de Python I – Sintaxis, tipos y operadores</h1>
+        <p><strong>Fecha:</strong> Martes 22 de abril de 2026 · <strong>Duración:</strong> 2 horas</p>
+
+        <h2>Introducción</h2>
+        <p>Hoy escribimos código que hace algo real. Vamos a trabajar con variables, tipos de datos (int, float, str, bool), operadores aritméticos y lógicos, y strings con format. La forma en que escribas esto hoy va a estar en cada cuaderno del resto del curso.</p>
+
+        <h2>Contenidos de la sesión</h2>
+        <h3>1. Tipos primitivos</h3>
+        <p>Cada dato en Python tiene un tipo: entero (int), decimal (float), texto (str) o booleano (bool). Python infiere el tipo automáticamente, pero es bueno saberlo. Usamos <code>type()</code> para verificar.</p>
+
+        <h3>2. Operadores aritméticos</h3>
+        <p><code>+</code> suma, <code>-</code> resta, <code>*</code> multiplica, <code>/</code> divide (devuelve float), <code>//</code> divide entero, <code>%</code> módulo (residuo), <code>**</code> potencia.</p>
+
+        <h3>3. Operadores de comparación</h3>
+        <p><code>==</code> igualdad (¿son iguales?), <code>!=</code> desigualdad, <code>&lt;</code> menor, <code>&gt;</code> mayor, <code>&lt;=</code> menor o igual, <code>&gt;=</code> mayor o igual. Devuelven True o False.</p>
+
+        <h3>4. Operadores lógicos</h3>
+        <p><code>and</code> (ambas condiciones verdaderas), <code>or</code> (al menos una verdadera), <code>not</code> (niega). Útiles para combinar comparaciones.</p>
+
+        <h3>5. Strings y slicing</h3>
+        <p>Indexación (acceso a caracteres), slicing (extraer partes), métodos (<code>.upper()</code>, <code>.lower()</code>, <code>.replace()</code>, etc.). Format con f-strings: <code>f"Hola {nombre}"</code>.</p>
+
+        <h3>6. Conversión de tipos</h3>
+        <p><code>int()</code>, <code>float()</code>, <code>str()</code> convierten entre tipos. Importante: <code>input()</code> devuelve texto, hay que convertir si quieres un número.</p>
+
+        <h2>Actividad práctica</h2>
+        <ol>
+          <li>Conversor de temperatura: lee °C y muestra °F (fórmula: (C * 9/5) + 32)</li>
+          <li>Calculadora de propina: dada una factura y porcentaje, calcula propina y total</li>
+          <li>Validador simple de email: verifica que tenga exactamente un @ y al menos un . después</li>
+        </ol>
+
+        <h2>Trabajo en equipo</h2>
+        <p>Redacten las primeras 3 historias de usuario del caso elegido. Formato:</p>
+        <p><em>"Como [rol], quiero [acción] para [beneficio]."</em></p>
+        <p>Guárdenlas en <code>docs/historias_usuario.md</code> del repositorio.</p>
+
+        <h2>Entregable del día</h2>
+        <p>Notebook con las 3 katas resueltas + commit en el repo del grupo.</p>
+
+        <h2>Recursos recomendados</h2>
+        <ul>
+          <li><a href="https://peps.python.org/pep-0008/">PEP 8: Guía de estilo de Python</a></li>
+          <li><a href="https://docs.python.org/3/library/stdtypes.html#text-sequence-type-str">Strings en Python (oficial)</a></li>
+        </ul>
+
+        <blockquote>
+          <p><em>Lo que aprendes hoy es la base de todo lo que viene. Si algo no quedó claro, pregunta ahora, no en la sesión de pandas cuando ya hay 5 temas nuevos.</em></p>
+        </blockquote>
+      </div>
+    </main>
+  </div>
+</body>
+</html>
