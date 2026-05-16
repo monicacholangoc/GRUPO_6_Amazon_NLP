@@ -1,0 +1,17 @@
+# Datos pesados
+*.csv
+*.parquet
+*.zip
+*.db
+*.sqlite
+
+# Python
+__pycache__/
+.ipynb_checkpoints/
+venv/
+*.pyc
+.env
+
+# Sistema
+.DS_Store
+Thumbs.db
