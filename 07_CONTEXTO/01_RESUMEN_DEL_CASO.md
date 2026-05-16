@@ -1,25 +1,26 @@
 # Resumen del Caso — Amazon Fine Food Reviews
 
-## Descripción
+## Descripción del caso
 Amazon cuenta con millones de reseñas de productos alimenticios escritas
 por usuarios reales entre 1999 y 2012. El objetivo es extraer insights
 accionables sobre qué factores determinan la satisfacción del cliente
 y construir un modelo que clasifique automáticamente el sentimiento.
 
 ## Contexto del dominio
-Amazon opera el marketplace de alimentos más grande del mundo.
-Los category managers toman decisiones de listing/deslisting basándose
+Amazon opera el marketplace de alimentos más grande del mundo. Los
+category managers toman decisiones de listing y deslisting basándose
 en ratings. Una reseña negativa viral puede hundir un producto.
-Las reseñas "útiles" tienen mayor peso en el algoritmo de visibilidad.
+Las reseñas marcadas como útiles tienen mayor peso en el algoritmo
+de visibilidad de Amazon.
 
 ## Fuentes externas
-1. Stanford SNAP Dataset - https://snap.stanford.edu/data/web-FineFoods.html
+1. Stanford SNAP - https://snap.stanford.edu/data/web-FineFoods.html
 2. Pang & Lee (2008) - Opinion Mining and Sentiment Analysis
-3. Amazon Seller Central - Políticas de reseñas 2024
+3. Amazon Seller Central - https://sellercentral.amazon.com
 
 ## Pregunta de negocio principal
 ¿Qué características del texto y del usuario predicen si una reseña
-será positiva (≥4 estrellas) o negativa (≤2 estrellas)?
+será positiva (4-5 estrellas) o negativa (1-2 estrellas)?
 
 ## Preguntas secundarias
 1. ¿Los productos con más reseñas tienen mejor o peor rating promedio?
@@ -27,21 +28,21 @@ será positiva (≥4 estrellas) o negativa (≤2 estrellas)?
 3. ¿Hay patrones temporales en la cantidad o calidad de reseñas?
 
 ## Métrica de éxito
-F1-Score ≥ 0.80 en clasificación positivo/negativo
+F1-Score mayor o igual a 0.80 en clasificación positivo/negativo.
 
 ## Diccionario de variables
-| Variable | Tipo | Descripción | % Nulos |
-|----------|------|-------------|---------|
-| Id | int | Identificador único | 0% |
-| ProductId | str | ID del producto | 0% |
-| UserId | str | ID del usuario | 0% |
-| ProfileName | str | Nombre del perfil | ~0.1% |
-| HelpfulnessNumerator | int | Votos útiles recibidos | 0% |
-| HelpfulnessDenominator | int | Total votos recibidos | 0% |
-| Score | int | Rating 1-5 estrellas | 0% |
-| Time | int | Unix timestamp | 0% |
-| Summary | str | Resumen corto | ~0% |
-| Text | str | Texto completo reseña | ~0% |
+| Variable | Tipo | Descripción | Rango | % Nulos |
+|----------|------|-------------|-------|---------|
+| Id | int | Identificador único | 1-568454 | 0% |
+| ProductId | str | ID del producto | - | 0% |
+| UserId | str | ID del usuario | - | 0% |
+| ProfileName | str | Nombre del perfil | - | ~0.1% |
+| HelpfulnessNumerator | int | Votos útiles recibidos | 0-866 | 0% |
+| HelpfulnessDenominator | int | Total votos recibidos | 0-866 | 0% |
+| Score | int | Rating en estrellas | 1-5 | 0% |
+| Time | int | Unix timestamp | - | 0% |
+| Summary | str | Resumen corto | - | ~0% |
+| Text | str | Texto completo | - | ~0% |
 
 ## Hipótesis iniciales
 1. Las reseñas con Score=1 contienen palabras negativas con mayor frecuencia.
