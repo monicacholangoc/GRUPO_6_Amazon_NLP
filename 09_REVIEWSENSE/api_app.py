@@ -6,7 +6,7 @@ import pickle, os
 app = FastAPI(title="ReviewSense API", version="1.0")
 
 BASE = os.path.dirname(os.path.abspath(__file__))
-MODELO_PATH = os.path.join(BASE, "modelo_rf.pkl")
+MODELO_PATH = os.path.join(BASE, "models", "modelo_rf.pkl")
 
 with open(MODELO_PATH, "rb") as f:
     modelo = pickle.load(f)
