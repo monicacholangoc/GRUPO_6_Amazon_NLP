@@ -22,3 +22,4 @@ Ver 00_datos_crudos/README.md
 - 03_cuadernos/ — Notebooks de análisis
 - 07_CONTEXTO/ — Contexto del negocio
 - 08_PLAN_Y_EJECUCION/ — Plan y bitácora de IA
+- 09_REVIEWSENSE
