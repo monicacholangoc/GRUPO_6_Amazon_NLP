@@ -5,3 +5,7 @@ plotly
 scikit-learn
 nltk
 joblib
+fastapi
+uvicorn
+requests
+pydantic
