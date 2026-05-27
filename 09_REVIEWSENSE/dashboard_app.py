@@ -542,11 +542,10 @@ with tab3:
     # ── Explorador ──
     st.markdown("<hr>", unsafe_allow_html=True)
     st.markdown('<div class="chart-card"><div class="chart-title">Explorador de Resenas</div>', unsafe_allow_html=True)
-    st.markdown("Busca resenas por palabra clave combinando con los filtros del panel izquierdo.")
 
     col_b1, col_b2, col_b3 = st.columns([3, 1, 1])
     with col_b1:
-        busqueda = st.text_input("Buscar en el texto", placeholder="Ej: delicious, terrible, packaging...")
+        busqueda = st.text_input("Busca resenas por palabra clave", placeholder="Ej: delicious, terrible, packaging...")
     with col_b2:
         score_filtro = st.selectbox("Score", options=["Todos", 1, 2, 3, 4, 5])
     with col_b3:
