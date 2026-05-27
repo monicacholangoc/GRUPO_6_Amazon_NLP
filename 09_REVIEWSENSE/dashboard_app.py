@@ -1,4 +1,3 @@
-import os
 import streamlit as st
 import pandas as pd
 import plotly.express as px
@@ -26,12 +25,9 @@ st.set_page_config(
 
 apply_styles()
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-
 @st.cache_data
 def cargar_datos():
-    ruta = os.path.join(BASE_DIR, "data", "processed", "reviews_limpias.parquet")
-    return pd.read_parquet(ruta)
+    return pd.read_parquet("data/processed/reviews_limpias.parquet")
 
 df = cargar_datos()
 df['Time'] = pd.to_datetime(df['Time'])
@@ -481,10 +477,18 @@ with tab3:
     }], index=[''])
     tabla_con_total = pd.concat([tabla_cat, fila_total])
 
+    def color_score(val):
+        try:
+            v = float(val)
+            if v >= 4.0:   return 'background-color: #c6efce; color: #276221'
+            elif v >= 3.0: return 'background-color: #ffeb9c; color: #9c5700'
+            else:          return 'background-color: #ffc7ce; color: #9c0006'
+        except: return ''
+
     st.dataframe(
         tabla_con_total.style
             .format({'Score Prom.': '{:.2f}', '% Util': '{:.1f}%', 'VADER Prom.': '{:.3f}', 'Resenas': '{:,.0f}'})
-            .background_gradient(subset=pd.IndexSlice[tabla_cat.index, ['Score Prom.']], cmap='RdYlGn')
+            .map(color_score, subset=pd.IndexSlice[tabla_cat.index, ['Score Prom.']])
             .apply(lambda x: ['background-color: #232f3e; color: #ff9900; font-weight: bold'
                               if x.name == '' else '' for _ in x], axis=1),
         use_container_width=True
@@ -526,7 +530,7 @@ with tab3:
     st.dataframe(
         resumen_tabla_cat.style.format({
             'Score Prom.': '{:.2f}', '% Util': '{:.1f}%', 'VADER Prom.': '{:.3f}'
-        }).background_gradient(subset=['Score Prom.'], cmap='RdYlGn'),
+        }).map(color_score, subset=['Score Prom.']),
         use_container_width=True, height=400
     )
     st.markdown('</div>', unsafe_allow_html=True)
