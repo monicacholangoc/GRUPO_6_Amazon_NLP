@@ -1,4 +1,5 @@
 import os
+import json
 import streamlit as st
 import pandas as pd
 import plotly.express as px
@@ -17,6 +18,53 @@ except LookupError:
     nltk.download('vader_lexicon', quiet=True)
 
 API_URL = "http://localhost:8000"
+
+# ── Google Sheets — guardar predicciones ─────────────────────────────
+SHEET_ID = "1PXAvDhPzpEAwCvGxvLhfakE3h2VeCEpEWck-LMKn2_I"
+
+@st.cache_resource
+def get_sheet():
+    try:
+        import gspread
+        from google.oauth2.service_account import Credentials
+        scopes = ["https://www.googleapis.com/auth/spreadsheets"]
+        # En Streamlit Cloud las credenciales van en st.secrets
+        if "gcp_service_account" in st.secrets:
+            creds_dict = dict(st.secrets["gcp_service_account"])
+        else:
+            # Local: leer el JSON directamente
+            creds_path = os.path.join(BASE_DIR, "reviewsense-credentials.json")
+            with open(creds_path) as f:
+                creds_dict = json.load(f)
+        creds = Credentials.from_service_account_info(creds_dict, scopes=scopes)
+        gc = gspread.authorize(creds)
+        sh = gc.open_by_key(SHEET_ID)
+        ws = sh.sheet1
+        # Crear encabezados si la hoja está vacía
+        if ws.row_count == 0 or ws.acell('A1').value is None:
+            ws.append_row(["Fecha","Resumen","Texto","Score","VADER",
+                           "Palabras","Oraciones","Coherencia","Helpfulness",
+                           "Prediccion","Probabilidad"])
+        return ws
+    except Exception as e:
+        return None
+
+def guardar_en_sheets(ws, resumen, texto, score, vader, palabras,
+                      oraciones, coherencia, helpfulness, etiqueta, prob):
+    if ws is None:
+        return False
+    try:
+        from datetime import datetime
+        ws.append_row([
+            datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            resumen[:100], texto[:200], score,
+            round(vader, 3), palabras, oraciones,
+            "Si" if coherencia else "No", round(helpfulness, 2),
+            etiqueta, round(prob, 3)
+        ])
+        return True
+    except Exception:
+        return False
 
 st.set_page_config(
     page_title="ReviewSense — Amazon Fine Food",
@@ -639,6 +687,23 @@ with tab4:
                     </div>""", unsafe_allow_html=True)
                     st.markdown(f"**Confianza del modelo:** {prob*100:.1f}%")
                     st.progress(prob)
+
+                    # ── Guardar en Google Sheets ──
+                    ws = get_sheet()
+                    guardado = guardar_en_sheets(
+                        ws, resena_summary, resena_texto, score_input,
+                        vader_compound, word_count, sentence_count,
+                        coherencia, helpfulness_ratio, etiqueta, prob
+                    )
+                    if guardado:
+                        st.markdown(
+                            f"<div class='info-box'>Prediccion guardada en "
+                            f"<a href='https://docs.google.com/spreadsheets/d/{SHEET_ID}' "
+                            f"target='_blank'>Google Sheets</a></div>",
+                            unsafe_allow_html=True
+                        )
+                    else:
+                        st.caption("Nota: no se pudo guardar en Google Sheets.")
 
                 except requests.exceptions.ConnectionError:
                     st.error("API no disponible. Ejecuta: `uvicorn api_app:app --reload --port 8000`")
