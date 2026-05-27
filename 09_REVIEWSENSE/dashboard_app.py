@@ -649,7 +649,6 @@ with tab4:
                 "Text": ["This product is absolutely amazing...", "Nothing special..."],
                 "helpfulness_ratio": [0.8, 0.5]
             }), use_container_width=True)
-            st.markdown("`word_count`, `sentence_count`, `vader_compound` y `coherencia_sentimiento` se calculan automaticamente.")
 
         archivo_csv = st.file_uploader("Selecciona tu archivo CSV", type=["csv"])
 
