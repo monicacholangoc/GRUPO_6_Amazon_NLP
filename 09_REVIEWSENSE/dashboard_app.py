@@ -82,7 +82,6 @@ df = agregar_categoria(df)
 # ── Sidebar ──────────────────────────────────────────────────────────
 with st.sidebar:
     st.markdown("## ReviewSense")
-    st.markdown("*Grupo 6 — UniAndes 2026*")
     st.markdown("---")
 
     # Rango de años con slider
@@ -114,32 +113,26 @@ with st.sidebar:
         value=(0, max_words)
     )
 
-    st.markdown("#### Categoria")
-    cats_disponibles = sorted(df['categoria'].dropna().unique().tolist())
-    cats_sel = st.multiselect(
-        "Tipo de producto", options=cats_disponibles,
-        default=cats_disponibles,
-        help="Categorias inferidas del texto de las resenas"
-    )
-
-    st.markdown("#### Producto")
-    usar_filtro_producto = st.checkbox("Filtrar por producto", value=False)
-    productos_sel = []
+    st.markdown("#### Tipo de Producto")
+    usar_filtro_producto = st.checkbox("Filtrar por tipo", value=False)
+    cats_sel_sidebar = []
     if usar_filtro_producto:
-        top_ids = df['ProductId'].value_counts().head(50).index.tolist()
-        opciones_prod = {pid: id_a_nombre.get(pid, pid)[:45] for pid in top_ids}
-        nombres_sel = st.multiselect(
-            "Productos (Top 50)", options=list(opciones_prod.values()),
-            default=list(opciones_prod.values())[:3]
+        cats_disponibles = sorted(df['categoria'].dropna().unique().tolist())
+        cats_sel_sidebar = st.multiselect(
+            "Categoria", options=cats_disponibles,
+            default=cats_disponibles[:3]
         )
-        nombre_a_id = {v: k for k, v in opciones_prod.items()}
-        productos_sel = [nombre_a_id[n] for n in nombres_sel if n in nombre_a_id]
 
     st.markdown("---")
-    st.markdown(
-        "<small>Jose Arevalo · Monica Cholango · Byron Torres</small>",
-        unsafe_allow_html=True
-    )
+    st.markdown("""
+        <div style='color:#febd69; font-size:0.85rem; font-weight:700; margin-bottom:0.3rem'>Grupo 06</div>
+        <div style='color:white; font-size:0.78rem; line-height:1.8'>
+            Byron Torres<br>
+            Jose Arevalo<br>
+            Monica Cholango
+        </div>
+        <div style='color:#666; font-size:0.72rem; margin-top:0.5rem'>UniAndes 2026</div>
+    """, unsafe_allow_html=True)
 
 # ── Aplicar filtros ──────────────────────────────────────────────────
 fecha_inicio = pd.Timestamp(f"{rango_anios[0]}-01-01")
@@ -150,8 +143,7 @@ df_f = df[
     (df['Time'] <= fecha_fin) &
     (df['Score'].isin(scores)) &
     (df['word_count'] >= rango_palabras[0]) &
-    (df['word_count'] <= rango_palabras[1]) &
-    (df['categoria'].isin(cats_sel))
+    (df['word_count'] <= rango_palabras[1])
 ]
 
 if utilidad == "Utiles":
@@ -159,8 +151,8 @@ if utilidad == "Utiles":
 elif utilidad == "No utiles":
     df_f = df_f[df_f['es_util'] == 0]
 
-if usar_filtro_producto and productos_sel:
-    df_f = df_f[df_f['ProductId'].isin(productos_sel)]
+if usar_filtro_producto and cats_sel_sidebar:
+    df_f = df_f[df_f['categoria'].isin(cats_sel_sidebar)]
 
 if df_f.empty:
     st.warning("Los filtros no arrojan resultados. Ajusta los filtros en el panel lateral.")
@@ -188,9 +180,9 @@ st.markdown("""
     </div>
 """, unsafe_allow_html=True)
 
-if usar_filtro_producto and productos_sel:
-    badges = " ".join([f"<span class='product-badge'>{id_a_nombre.get(p, p)[:30]}</span>" for p in productos_sel])
-    st.markdown(f"<div style='margin-bottom:1rem'>Productos: {badges}</div>", unsafe_allow_html=True)
+if usar_filtro_producto and cats_sel_sidebar:
+    badges = " ".join([f"<span class='product-badge'>{c}</span>" for c in cats_sel_sidebar])
+    st.markdown(f"<div style='margin-bottom:1rem'>Tipos: {badges}</div>", unsafe_allow_html=True)
 
 # ── KPIs — reaccionan al filtro interactivo ──────────────────────────
 if kpi_label:
@@ -474,21 +466,36 @@ with tab3:
     tabla_cat = cat_resumen.sort_values('Resenas', ascending=False).copy()
     tabla_cat.columns = ['Categoria', 'Resenas', 'Score Prom.', '% Util', 'VADER Prom.']
     tabla_cat.index = range(1, len(tabla_cat)+1)
+
+    # Fila de totales
+    fila_total = pd.DataFrame([{
+        'Categoria': 'TOTAL',
+        'Resenas': tabla_cat['Resenas'].sum(),
+        'Score Prom.': (df_f['Score'].mean()).round(2),
+        '% Util': (df_f['es_util'].mean() * 100).round(1),
+        'VADER Prom.': (df_f['vader_compound'].mean()).round(3),
+    }], index=[''])
+    tabla_con_total = pd.concat([tabla_cat, fila_total])
+
     st.dataframe(
-        tabla_cat.style.format({'Score Prom.': '{:.2f}', '% Util': '{:.1f}%', 'VADER Prom.': '{:.3f}'})
-                       .background_gradient(subset=['Score Prom.'], cmap='RdYlGn'),
+        tabla_con_total.style
+            .format({'Score Prom.': '{:.2f}', '% Util': '{:.1f}%', 'VADER Prom.': '{:.3f}', 'Resenas': '{:,.0f}'})
+            .background_gradient(subset=pd.IndexSlice[tabla_cat.index, ['Score Prom.']], cmap='RdYlGn')
+            .apply(lambda x: ['background-color: #232f3e; color: #ff9900; font-weight: bold'
+                              if x.name == '' else '' for _ in x], axis=1),
         use_container_width=True
     )
     st.markdown('</div>', unsafe_allow_html=True)
 
     st.markdown("<hr>", unsafe_allow_html=True)
 
-    # ── Top 20 por categoria seleccionada ──
+    # ── Detalle por categoria ──
     cats_unicas = sorted(df_f['categoria'].dropna().unique().tolist())
-    cat_elegida = st.selectbox("Selecciona una categoria para ver sus productos:", options=cats_unicas, key="cat_prod")
+
+    st.markdown('<div class="chart-card"><div class="chart-title">Detalle de Categoria</div>', unsafe_allow_html=True)
+    cat_elegida = st.selectbox("Tipo de categoria:", options=cats_unicas, key="cat_detalle")
 
     df_cat_prod = df_f[df_f['categoria'] == cat_elegida]
-
     resumen_productos = (
         df_cat_prod.groupby('ProductId').agg(
             Resenas=('Score', 'count'),
@@ -496,47 +503,19 @@ with tab3:
             VADER_Prom=('vader_compound', 'mean'),
             Pct_Util=('es_util', 'mean')
         )
-        .sort_values('Resenas', ascending=False).head(20).reset_index()
+        .sort_values('Resenas', ascending=False).reset_index()
     )
-    resumen_productos['Nombre']    = resumen_productos['ProductId'].map(lambda pid: id_a_nombre.get(pid, pid)[:50])
+    resumen_productos['Nombre']     = resumen_productos['ProductId'].map(lambda pid: id_a_nombre.get(pid, pid)[:50])
     resumen_productos['Score_Prom'] = resumen_productos['Score_Prom'].round(2)
     resumen_productos['VADER_Prom'] = resumen_productos['VADER_Prom'].round(3)
     resumen_productos['Pct_Util']   = (resumen_productos['Pct_Util'] * 100).round(1)
 
-    col_p1, col_p2 = st.columns(2)
-    with col_p1:
-        st.markdown(f'<div class="chart-card"><div class="chart-title">Top 20 Productos mas Resenados — {cat_elegida}</div>', unsafe_allow_html=True)
-        fig_prod = px.bar(resumen_productos.sort_values('Resenas'),
-                          x='Resenas', y='Nombre', orientation='h',
-                          color='Score_Prom', color_continuous_scale=COLOR_SCALE, text='Resenas',
-                          hover_data={'ProductId': True})
-        fig_prod.update_traces(textposition='outside')
-        fig_prod.update_layout(**plotly_layout_base(), yaxis_title="", xaxis_title="Numero de resenas",
-                               yaxis=dict(tickfont=dict(size=10)))
-        st.plotly_chart(fig_prod, use_container_width=True)
-        st.markdown('</div>', unsafe_allow_html=True)
-
-    with col_p2:
-        st.markdown(f'<div class="chart-card"><div class="chart-title">Score Promedio por Producto — {cat_elegida}</div>', unsafe_allow_html=True)
-        fig_score_prod = px.bar(resumen_productos.sort_values('Score_Prom'),
-                                x='Score_Prom', y='Nombre', orientation='h',
-                                color='Score_Prom', color_continuous_scale=COLOR_SCALE, text='Score_Prom',
-                                hover_data={'ProductId': True})
-        fig_score_prod.update_traces(textposition='outside')
-        fig_score_prod.update_layout(**plotly_layout_base(), yaxis_title="", xaxis_title="Score promedio",
-                                     yaxis=dict(tickfont=dict(size=10)))
-        st.plotly_chart(fig_score_prod, use_container_width=True)
-        st.markdown('</div>', unsafe_allow_html=True)
-
-    # ── Detalle por categoria ──
-    st.markdown(f'<div class="chart-card"><div class="chart-title">Detalle de Categoria — {cat_elegida}</div>', unsafe_allow_html=True)
     d1, d2, d3, d4 = st.columns(4)
     d1.metric("Resenas", f"{len(df_cat_prod):,}")
     d2.metric("Score promedio", f"{df_cat_prod['Score'].mean():.2f}")
     d3.metric("% Utiles", f"{df_cat_prod['es_util'].mean()*100:.1f}%")
     d4.metric("Sentimiento VADER", f"{df_cat_prod['vader_compound'].mean():.2f}")
 
-    # Tabla top productos de la categoria
     resumen_tabla_cat = resumen_productos[['Nombre', 'Resenas', 'Score_Prom', 'Pct_Util', 'VADER_Prom']].copy()
     resumen_tabla_cat.columns = ['Producto', 'Resenas', 'Score Prom.', '% Util', 'VADER Prom.']
     resumen_tabla_cat.index = range(1, len(resumen_tabla_cat) + 1)
@@ -544,7 +523,7 @@ with tab3:
         resumen_tabla_cat.style.format({
             'Score Prom.': '{:.2f}', '% Util': '{:.1f}%', 'VADER Prom.': '{:.3f}'
         }).background_gradient(subset=['Score Prom.'], cmap='RdYlGn'),
-        use_container_width=True, height=320
+        use_container_width=True, height=400
     )
     st.markdown('</div>', unsafe_allow_html=True)
 
