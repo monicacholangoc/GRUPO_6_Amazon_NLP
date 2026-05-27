@@ -1,3 +1,4 @@
+import os
 import streamlit as st
 import pandas as pd
 import plotly.express as px
@@ -25,9 +26,12 @@ st.set_page_config(
 
 apply_styles()
 
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
 @st.cache_data
 def cargar_datos():
-    return pd.read_parquet("data/processed/reviews_limpias.parquet")
+    ruta = os.path.join(BASE_DIR, "data", "processed", "reviews_limpias.parquet")
+    return pd.read_parquet(ruta)
 
 df = cargar_datos()
 df['Time'] = pd.to_datetime(df['Time'])
