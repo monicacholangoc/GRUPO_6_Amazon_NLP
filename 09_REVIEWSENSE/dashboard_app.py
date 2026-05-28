@@ -66,6 +66,32 @@ def guardar_en_sheets(ws, resumen, texto, score, vader, palabras,
     except Exception:
         return False
 
+def cargar_predicciones_sheets():
+    """Carga las predicciones guardadas en Google Sheets como DataFrame."""
+    try:
+        ws = get_sheet()
+        if ws is None:
+            return pd.DataFrame()
+        registros = ws.get_all_records()
+        if not registros:
+            return pd.DataFrame()
+        df_pred = pd.DataFrame(registros)
+        # Normalizar columnas al mismo esquema del dataset principal
+        df_pred = df_pred.rename(columns={
+            'Score': 'Score',
+            'VADER': 'vader_compound',
+            'Palabras': 'word_count',
+            'Probabilidad': 'probabilidad_util',
+        })
+        df_pred['Score']           = pd.to_numeric(df_pred['Score'], errors='coerce').fillna(3).astype(int)
+        df_pred['vader_compound']  = pd.to_numeric(df_pred['vader_compound'], errors='coerce').fillna(0)
+        df_pred['probabilidad_util'] = pd.to_numeric(df_pred['probabilidad_util'], errors='coerce').fillna(0)
+        df_pred['es_util']         = (df_pred['Prediccion'].str.strip() == 'Util').astype(int)
+        df_pred['word_count']      = pd.to_numeric(df_pred.get('word_count', 0), errors='coerce').fillna(0)
+        return df_pred
+    except Exception:
+        return pd.DataFrame()
+
 st.set_page_config(
     page_title="ReviewSense — Amazon Fine Food",
     layout="wide",
@@ -236,6 +262,11 @@ if usar_filtro_producto and cats_sel_sidebar:
     badges = " ".join([f"<span class='product-badge'>{c}</span>" for c in cats_sel_sidebar])
     st.markdown(f"<div style='margin-bottom:1rem'>Tipos: {badges}</div>", unsafe_allow_html=True)
 
+# ── Cargar predicciones de Google Sheets y sumar al total ────────────
+df_sheets = cargar_predicciones_sheets()
+total_nuevas  = len(df_sheets)
+sheets_vacío  = df_sheets.empty
+
 # ── KPIs — reaccionan al filtro interactivo ──────────────────────────
 if kpi_label:
     st.markdown(
@@ -243,31 +274,42 @@ if kpi_label:
         f"&nbsp;·&nbsp; <a href='?reset=1' style='color:{AMAZON_ORANGE}'>Ver todo</a></div>",
         unsafe_allow_html=True
     )
-    # Boton para limpiar seleccion
     if st.button("Limpiar seleccion", key="clear_kpi"):
         st.session_state["kpi_filter"] = None
         st.rerun()
+
+# Calcular KPIs combinando dataset + predicciones del Sheet
+total_resenas  = len(df_kpi) + total_nuevas
+if sheets_vacío:
+    score_prom = df_kpi['Score'].mean()
+    pct_util   = df_kpi['es_util'].mean() * 100
+    vader_prom = df_kpi['vader_compound'].mean()
+else:
+    score_prom = (df_kpi['Score'].sum() + df_sheets['Score'].sum()) / total_resenas
+    pct_util   = ((df_kpi['es_util'].sum() + df_sheets['es_util'].sum()) / total_resenas) * 100
+    vader_prom = (df_kpi['vader_compound'].sum() + df_sheets['vader_compound'].sum()) / total_resenas
 
 col1, col2, col3, col4 = st.columns(4)
 with col1:
     st.markdown(f"""<div class="kpi-card">
         <div class="kpi-label">Total Resenas</div>
-        <div class="kpi-value">{len(df_kpi):,}</div>
+        <div class="kpi-value">{total_resenas:,}</div>
+        {'<div style="font-size:0.75rem;color:#ff9900">+ ' + str(total_nuevas) + ' nuevas predicciones</div>' if total_nuevas > 0 else ''}
     </div>""", unsafe_allow_html=True)
 with col2:
     st.markdown(f"""<div class="kpi-card">
         <div class="kpi-label">Score Promedio</div>
-        <div class="kpi-value">{df_kpi['Score'].mean():.2f} / 5</div>
+        <div class="kpi-value">{score_prom:.2f} / 5</div>
     </div>""", unsafe_allow_html=True)
 with col3:
     st.markdown(f"""<div class="kpi-card">
         <div class="kpi-label">Resenas Utiles</div>
-        <div class="kpi-value">{df_kpi['es_util'].mean()*100:.1f}%</div>
+        <div class="kpi-value">{pct_util:.1f}%</div>
     </div>""", unsafe_allow_html=True)
 with col4:
     st.markdown(f"""<div class="kpi-card">
         <div class="kpi-label">Sentimiento VADER</div>
-        <div class="kpi-value">{df_kpi['vader_compound'].mean():.2f}</div>
+        <div class="kpi-value">{vader_prom:.2f}</div>
     </div>""", unsafe_allow_html=True)
 
 st.markdown("<hr>", unsafe_allow_html=True)
