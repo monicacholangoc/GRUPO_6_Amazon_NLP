@@ -17,7 +17,7 @@ try:
 except LookupError:
     nltk.download('vader_lexicon', quiet=True)
 
-API_URL = "http://localhost:8000"
+API_URL = "https://reviewsense-api-u3o9.onrender.com"
 
 # ── Google Sheets — guardar predicciones ─────────────────────────────
 SHEET_ID = "1PXAvDhPzpEAwCvGxvLhfakE3h2VeCEpEWck-LMKn2_I"
